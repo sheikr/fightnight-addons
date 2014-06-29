@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<strings>
+    <!-- Meta Data -->
+	<string id="40000">Novos & Notaveis</string>
+	<string id="40001">Top Transferencias</string>
+	<string id="40002">Novidades</string>
+	<string id="40003">Pesquisar</string>
+	<string id="40004">Ultima Versao</string>
+	<string id="40005">Instalada: </string>
+	<string id="40006"> | Actualizacao: </string>
+	<string id="40007">Todos os Albuns</string>
+	<string id="40008">Reproduzir Todas</string>
+	<string id="40009">A criar playlist.</string>
+	<string id="40010">A adicionar a playlist.</string>
+	<string id="40011">Pagina </string>
+	<string id="40012">Actualizacoes automaticas. Caso nao ocorra, va ao</string>
+	<string id="40013">repositorio fightnight e pressione c ou durante 2seg</string>
+	<string id="40014">e force actualizacao. Depois disso, reinicie o XBMC.</string>
+</strings>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+   <category label="Geral">
+      <setting label="Configuracoes Gerais" type="lsep" />
+      <setting id="docspt-username" type="text" label="Username docsPT" default=""/>
+      <setting id="docspt-password" type="text" label="Password docsPT" default="" option="hidden" enable="!eq(-1,false)"/>
+      <setting id="aviso-extensao" type="bool" label="30000" default="true"/>
+      <setting id="mensagemfb2" type="bool" label="Mensagem FB" default="true" visible="false"/>
+      <setting id="debug-mode2" type="bool" label="30015" default="false" visible="false"/>
+      <setting id="marcadorultimaseccao" type="text" label="Ultima Seccao" default="" visible="false"/>
+      <setting id="ga_time2" type="text" label="GA Called" default="2000-01-01 00:00:00" visible="false"/>
+      <setting id="ultima-pesquisa" type="text" label="Ultima pesquisa" default="" visible="false"/>
+   </category>
+</settings>

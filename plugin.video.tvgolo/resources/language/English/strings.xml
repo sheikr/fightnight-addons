@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<strings>
+    <string id="40000">TVGolo</string>
+    <string id="40001">Service provided by TVGolo.com</string>
+    <string id="40002">Visit the official website.</string>
+    <string id="40003">Lastest Goals</string>
+    <string id="40004">Lastest Goals by League</string>
+    <string id="40005">Previous Weeks</string>
+    <string id="40006">Goal of the Week</string>
+    <string id="40007">Previous Seasons</string>
+    <string id="40008">"Comedy Football"</string>
+    <string id="40009">Broadcast TV (Portugal Only)</string>
+    <string id="40010">Search Matches</string>
+    <string id="40011">Last version installed (</string>
+    <string id="40012">Installed v</string>
+    <string id="40013">Update v</string>
+    <string id="40014">Page</string>
+    <string id="40015">unavailable</string>
+    <string id="40016">No compatible server available.</string>
+    <string id="40017">The videos are different between servers.</string>
+    <string id="40018">Choose video server</string>
+    <string id="40019">Video unavailable or removed.</string>
+    <string id="40020">Search Match</string>
+    <string id="40021">The search only includes matches from this month.</string>
+    <string id="40022">The update is automatic. If dont work, go to</string>
+    <string id="40023">fightnight repo and press c or during 2seg</string>
+    <string id="40024">and force update. After, restart the XBMC.</string>
+    <string id="40025">Local Time: </string>
+    <string id="40026">Addon failed to connect to the update</string>
+    <string id="40027">server. Check that.</string>
+    <string id="40028">Error. Check error origin.</string>
+</strings>

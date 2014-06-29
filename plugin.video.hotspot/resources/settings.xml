@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+   <category label="Geral">
+      <setting id="ptwifiactivo" type="bool" label="[B][COLOR blue]MEO WiFi[/COLOR][/B]" default="false"/>
+      <setting id="ptwifi-username" type="text" enable="eq(-1,true)" label="Username" default=""/>
+      <setting id="ptwifi-password" type="text" enable="eq(-2,true)" label="Password" option="hidden" default=""/>
+      <setting type="sep" />
+      <setting id="noswifiactivo" type="bool" label="[B][COLOR blue]NOS Wifi by Fon[/COLOR][/B]" default="false"/>
+      <setting id="noswifi-username" type="text" enable="eq(-1,true)" label="Username" default=""/>
+      <setting id="noswifi-password" type="text" enable="eq(-2,true)" label="Password" option="hidden" default=""/>
+   </category>
+</settings>

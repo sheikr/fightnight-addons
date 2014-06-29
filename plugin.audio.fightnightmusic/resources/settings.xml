@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+   <category label="Geral">
+      <setting id="download-folder" type="folder" label="Pasta para Download" default=""/>
+      <setting id="mensagemfb" type="bool" label="Mensagem FB" default="true" visible="false"/>
+      <setting id="ga_time" type="text" label="GA Called" default="2000-01-01 00:00:00" visible="false"/>
+      <setting id="ga_visitor" type="text" label="GA visitor" default="" visible="false"/>
+   </category>
+</settings>
