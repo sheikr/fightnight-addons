@@ -9,7 +9,7 @@ net=Net()
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.0.09'
+versao = '0.0.10'
 addon_id = 'plugin.video.abelhas'
 MainURL = 'http://abelhas.pt/'
 art = '/resources/art/'
@@ -83,18 +83,18 @@ def menu_principal(ligacao):
             addDir(traducao(40037),MainURL,9,wtpath + art + 'series.png',2,True)
             addDir(traducao(40011),'pesquisa',7,wtpath + art + 'pesquisa.png',3,True)
             addLink("",'',wtpath + art + 'nothingx.png')
-            addLink("[COLOR blue][B]"+traducao(40012)+ ":[/B][/COLOR] " + mensagens,'',wtpath + art + 'nothingx.png')
-            addLink("[COLOR blue][B]"+traducao(40013)+ ":[/B][/COLOR] " + transf,'',wtpath + art + 'nothingx.png')
-            addLink("[COLOR blue][B]"+traducao(40014)+ ":[/B][/COLOR] " + pontos,'',wtpath + art + 'nothingx.png')
+            #addLink("[COLOR blue][B]"+traducao(40012)+ ":[/B][/COLOR] " + mensagens,'',wtpath + art + 'nothingx.png')
+            #addLink("[COLOR blue][B]"+traducao(40013)+ ":[/B][/COLOR] " + transf,'',wtpath + art + 'nothingx.png')            
       elif ligacao==0:
             addDir(traducao(40015),MainURL,6,wtpath + art + 'refresh.png',1,True)
             addLink("",'',wtpath + art + 'nothingx.png')
-      if ligacao==1:
-            disponivel=versao_disponivel()
-            if disponivel==versao: addLink(traducao(40017) + versao+ ')','',wtpath + art + 'versao_disp.png')
-            else: addDir(traducao(40016) + versao + ' | ' + traducao(40019) + disponivel,MainURL,13,wtpath + art + 'versao_disp.png',1,False)
-      else: addLink(traducao(40016) + versao,'',wtpath + art + 'versao_disp.png')
-      addDir(traducao(40018) + " | [COLOR gold][B]abelhas.pt[/B][/COLOR]",MainURL,8,wtpath + art + 'defs.png',6,True)
+      #if ligacao==1:
+      #      disponivel=versao_disponivel()
+      #      if disponivel==versao: addLink(traducao(40017) + versao+ ')','',wtpath + art + 'versao_disp.png')
+      #      else: addDir(traducao(40016) + versao + ' | ' + traducao(40019) + disponivel,MainURL,13,wtpath + art + 'versao_disp.png',1,False)
+      #else: addLink("[COLOR blue][B]%s[/B][/COLOR] %s" % (traducao(40016),versao),'',wtpath + art + 'versao_disp.png')
+      if ligacao==1: addLink("[COLOR blue][B]%s:[/B][/COLOR] %s  [COLOR blue][B]%s:[/B][/COLOR] %s" % (traducao(40012),mensagens,traducao(40014),pontos),'',wtpath + art + 'nothingx.png')
+      addDir("[COLOR blue][B]%s[/B][/COLOR] | abelhas.pt" % (traducao(40018)),MainURL,8,wtpath + art + 'defs.png',6,True)
       xbmc.executebuiltin("Container.SetViewMode(50)")
 
 def entrarnovamente(opcoes):
@@ -148,31 +148,50 @@ def favoritos():
       xbmcplugin.setContent(int(sys.argv[1]), 'livetv')
 
 
+def proxpesquisa():
+    from t0mm0.common.addon import Addon
+    addon=Addon('plugin.video.abelhas')
+    form_d=addon.load_data('temp.txt')
+    ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':'abelhas.pt','Origin':'http://abelhas.pt','Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
+    form_d['Page']= form_d['Page'] + 1
+    endlogin=MainURL + 'action/SearchFiles/Results'
+    net.set_cookies(cookies)
+    conteudo= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
+    addon.save_data('temp.txt',form_d)
+    pastas(MainURL + 'action/nada','coco',conteudo=conteudo)
 
-def pastas(url,name,formcont={}):
-      print url
+def pastas(url,name,formcont={},conteudo=''):
+      
       if re.search('action/SearchFiles',url):
             ref_data = {'Host': 'abelhas.pt', 'Connection': 'keep-alive', 'Referer': 'http://abelhas.pt/','Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8','User-Agent':user_agent,'Referer': 'http://abelhas.pt/'}
             endlogin=MainURL + 'action/SearchFiles'
             conteudo= net.http_POST(endlogin,form_data=formcont,headers=ref_data).content.encode('latin-1','ignore')
-            filename=re.compile('<input name="FileName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-            try:ftype=re.compile('<input name="FileType" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-            except: ftype='All'
-            #pagina=re.compile('<input name="Page" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-            pagina=1
-            token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)"').findall(conteudo)[0]
+            if re.search('O ficheiro n&#227;o foi encontrado',conteudo):
+                  mensagemok('Abelhas.pt','Sem resultados.')
+                  sys.exit(0)
+            try:
+                  filename=re.compile('<input name="FileName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+                  try:ftype=re.compile('<input name="FileType" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+                  except: ftype='All'
+                  #pagina=re.compile('<input name="Page" type="hidden" value="(.+?)" />').findall(conteudo)[0]
 
-            form_d = {'IsGallery':'True','FileName':filename,'FileType':ftype,'ShowAdultContent':'True','Page':pagina,'__RequestVerificationToken':token}
-            #ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':'abelhas.pt','Origin':'http://abelhas.pt','Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
-            endlogin=MainURL + 'action/SearchFiles/Results'
-            conteudo= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
-            #teste=urllib.unquote(teste)
-            
-            #<input name="ShowAdultContent" type="hidden" value="True" /><input name="Page" type="hidden" value="2" />
+                  pagina=1
+                  token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)"').findall(conteudo)[0]
+
+                  form_d = {'IsGallery':'True','FileName':filename,'FileType':ftype,'ShowAdultContent':'True','Page':pagina,'__RequestVerificationToken':token}
+                  from t0mm0.common.addon import Addon
+                  addon=Addon('plugin.video.abelhas')
+                  addon.save_data('temp.txt',form_d)
+                  ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':'abelhas.pt','Origin':'http://abelhas.pt','Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
+                  endlogin=MainURL + 'action/SearchFiles/Results'
+                  conteudo= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
+            except: pass
             
       else:
-            extra='?requestedFolderMode=filesList&fileListSortType=Name&fileListAscending=True'
-            conteudo=clean(abrir_url_cookie(url + extra))
+            if conteudo=='':
+                  extra='?requestedFolderMode=filesList&fileListSortType=Name&fileListAscending=True'
+                  conteudo=clean(abrir_url_cookie(url + extra))
+
       if re.search('ProtectedFolderChomikLogin',conteudo):
             chomikid=re.compile('<input id="ChomikId" name="ChomikId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
             folderid=re.compile('<input id="FolderId" name="FolderId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
@@ -271,7 +290,6 @@ def pastas_ref(url):
       pastas(url,name)
 
 def paginas(link):
-      print link
       try:
             idmode=3
       
@@ -289,8 +307,9 @@ def paginas(link):
                   urlpag=urlpag.replace(' ','+')
                   addDir('[COLOR blue]Página ' + pagina[1] + ' >>>[/COLOR]',MainURL + urlpag,idmode,wtpath + art + 'seta.png',1,True)
             except:
-                  #re.compile('type="hidden" value="2" /><input type="submit" value="p�gina seguinte �" /></form>
-                  pass
+                  nrpagina=re.compile('type="hidden" value="([^"]+?)" /><input type="submit" value="p.+?gina seguinte.+?" /></form>').findall(link)[0]
+                  addDir('[COLOR blue]Página ' + nrpagina + ' >>>[/COLOR]',MainURL,12,wtpath + art + 'seta.png',1,True)
+                  #pass
                   
       
             
@@ -383,8 +402,10 @@ def comecarvideo(name,url,playterm,legendas=None):
         if not playterm or playeractivo==0: playlist.clear()
         listitem = xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=thumbnail)
         #listitem.setInfo("Video", {"Title":"Balas & Bolinhos","year":2001})
-        listitem.setInfo("Video", {"Title":name})
-        listitem.setInfo("Music", {"Title":name})
+        title='%s' % (name.split('[/B]')[0].replace('[B]',''))
+
+        listitem.setInfo("Video", {"Title":title})
+        listitem.setInfo("Music", {"Title":title})
         listitem.setProperty('mimetype', 'video/x-msvideo')
         listitem.setProperty('IsPlayable', 'true')
         dialogWait = xbmcgui.DialogProgress()
@@ -512,6 +533,26 @@ def abrir_url(url):
       response.close()
       return link
 
+def savefile(filename, contents,pastafinal=pastaperfil):
+    try:
+        destination = os.path.join(pastafinal,filename)
+        fh = open(destination, 'wb')
+        fh.write(contents)  
+        fh.close()
+    except: print "Nao gravou os temporarios de: %s" % filename
+
+def openfile(filename,pastafinal=pastaperfil):
+    try:
+        destination = os.path.join(pastafinal, filename)
+        fh = open(destination, 'rb')
+        contents=fh.read()
+        fh.close()
+        return contents
+    except:
+        print "Nao abriu os temporarios de: %s" % filename
+        return None
+
+
 def abrir_url_cookie(url,erro=True):
       
       
@@ -599,4 +640,5 @@ elif mode==8: selfAddon.openSettings()#sacarficheiros()
 elif mode==9: favoritos()
 elif mode==10: analyzer(url,subtitles='',playterm='playlist')
 elif mode==11: analyzer(url,subtitles='',playterm='download')
+elif mode==12: proxpesquisa()
 xbmcplugin.endOfDirectory(int(sys.argv[1]))
