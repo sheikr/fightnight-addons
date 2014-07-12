@@ -399,7 +399,7 @@ def comecarvideo(name,url,playterm,legendas=None):
               return
         thumbnail=''
         playlist = xbmc.PlayList(1)
-        if not playterm or playeractivo==0: playlist.clear()
+        if not playterm and playeractivo==0: playlist.clear()
         listitem = xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=thumbnail)
         #listitem.setInfo("Video", {"Title":"Balas & Bolinhos","year":2001})
         title='%s' % (name.split('[/B]')[0].replace('[B]',''))
@@ -413,11 +413,22 @@ def comecarvideo(name,url,playterm,legendas=None):
         playlist.add(url, listitem)
         dialogWait.close()
         del dialogWait
-        if not playterm or playeractivo==0:
+        if not playterm and playeractivo==0:
               xbmcPlayer = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
               xbmcPlayer.play(playlist)
         if legendas!=None: xbmcPlayer.setSubtitles(legendas)
         if playterm=='playlist': xbmc.executebuiltin("XBMC.Notification(abelhas.pt,"+traducao(40039)+",'500000',"+iconpequeno.encode('utf-8')+")")
+
+def limparplaylist():
+        playlist = xbmc.PlayList(1)
+        playlist.clear()
+        xbmc.executebuiltin("XBMC.Notification(abelhas.pt,"+traducao(40048)+",'500000',"+iconpequeno.encode('utf-8')+")")
+
+def comecarplaylist():
+        playlist = xbmc.PlayList(1)
+        if playlist:
+              xbmcPlayer = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
+              xbmcPlayer.play(playlist)
 
 ################################################## PASTAS ################################################################
 
@@ -439,6 +450,8 @@ def addCont(name,url,mode,tamanho,iconimage,total,pasta):
       u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&tamanhof="+urllib.quote_plus(tamanho)
       liz=xbmcgui.ListItem(name,iconImage="DefaultFolder.png", thumbnailImage=iconimage)
       contexto.append((traducao(40038), 'XBMC.RunPlugin(%s?mode=10&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
+      contexto.append((traducao(40046), 'XBMC.RunPlugin(%s?mode=13&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
+      contexto.append((traducao(40047), 'XBMC.RunPlugin(%s?mode=14&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
       contexto.append((traducao(40040), 'XBMC.RunPlugin(%s?mode=11&url=%s&name=%s&tamanhof=%s)' % (sys.argv[0], urllib.quote_plus(url),name,tamanho)))
       liz.setInfo( type="Video", infoLabels={ "Title": name} )
       liz.setProperty('fanart_image', "%s/fanart.jpg"%selfAddon.getAddonInfo("path"))
@@ -641,4 +654,6 @@ elif mode==9: favoritos()
 elif mode==10: analyzer(url,subtitles='',playterm='playlist')
 elif mode==11: analyzer(url,subtitles='',playterm='download')
 elif mode==12: proxpesquisa()
+elif mode==13: comecarplaylist()
+elif mode==14: limparplaylist()
 xbmcplugin.endOfDirectory(int(sys.argv[1]))
