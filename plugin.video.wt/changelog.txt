@@ -1,3 +1,8 @@
+[B]v0.3.05 (12 de Julho de 2014):[/B]
+- Correccao servidor firedrive.
+- Limpeza de codigo (ty mafarricos).
+- Outras correccoes.
+
 [B]v0.3.04 (20 de Junho de 2014):[/B]
 - Adicionada opcao nas definicoes do addon para melhorar o reconhecimento de scrobble (trakt.tv).
 - Outras correccoes.

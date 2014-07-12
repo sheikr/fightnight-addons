@@ -9,7 +9,7 @@ addon_id = 'plugin.video.wt'
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.3.04'
+versao = '0.3.05'
 MainURL = 'http://www.wareztuga.tv/'
 art = '/resources/art/'
 ListMovieURL = 'movies.php'; SingleMovieURL = 'movie.php'
@@ -56,7 +56,6 @@ def login_wareztuga():
                   net.save_cookies(cookie_wt)
                   #menu_principal_new()
                   menu_principal(1)
-                  
             elif re.search('1',logintest): ok = mensagemok(traducao(40005),traducao(40011)); entrarnovamente(1)
             elif re.search('2',logintest): ok = mensagemok(traducao(40005),traducao(40010)); entrarnovamente(1)
             elif re.search('Oops',logintest):
@@ -130,8 +129,6 @@ def menu_extra():
       addDir(traducao(40020),MainURL + "requestsList.ajax.php?p=1&type=series&order=requests",34,wtpath + art + 'todas_as_series.png',1,True)
       #addDir(traducao(40021),MainURL + "",34,wtpath + art + 'todas_as_series.png',1,True)
       addDir(traducao(40153),MainURL + 'newepisodes',16,wtpath + art + 'pesquisa.png',1,False)
-      
-      
       vista_menus()
 
 def menu_filmes():
@@ -153,39 +150,30 @@ def instrucoeslibrary():
 
 def glib(name):
       mensagemprogresso.create('wareztuga.tv', 'Aguarde...')
-      if selfAddon.getSetting('lib-firstrun2') == 'true':     
-            selfAddon.setSetting('lib-firstrun2',value='false')
+      if selfAddon.getSetting('lib-firstrun2') == 'true': selfAddon.setSetting('lib-firstrun2',value='false')
       import xbmcvfs
       biblioteca=xbmc.translatePath(selfAddon.getSetting('lib-basefolder')).decode('utf-8')
-      if not os.path.exists(biblioteca):
-            os.makedirs(biblioteca)
-
+      if not os.path.exists(biblioteca): os.makedirs(biblioteca)
       filmespath=os.path.join(os.path.join(biblioteca,'Filmes'))
-      if not os.path.exists(filmespath):
-            os.makedirs(filmespath)
+      if not os.path.exists(filmespath): os.makedirs(filmespath)
       else:
             yei=xbmcvfs.rmdir(filmespath)
             if yei:
                   print "APAGOU"
                   os.makedirs(filmespath)
             else: print "NAO APAGOU"
-
       seriespath=os.path.join(biblioteca,'Series')
-      if not os.path.exists(seriespath):
-            os.makedirs(seriespath)
-            
+      if not os.path.exists(seriespath): os.makedirs(seriespath)
       else:
             yei=xbmcvfs.rmdir(seriespath)
             if yei:
                   print "APAGOU"
                   os.makedirs(seriespath)
             else: print "NAO APAGOU"
-            
       if name=='filmes':
             url=MainURL + 'pagination.ajax.php?p=1&order=date&mediaType=movies'
             link=abrir_url(url)
             ultimapagina=re.compile('...</span><a href="javascript: moviesList.+?pagination.ajax.php.+?p=(.+?)&').findall(link)[0]
-            
             mensagemprogresso.update(0, 'A criar lista')
             for i in xrange(1,int(ultimapagina)+1):
             #for i in xrange(1,3):
@@ -202,7 +190,6 @@ def glib(name):
                         conteudo=sys.argv[0]+"?url="+urllib.quote_plus(MainURL + SingleMovieURL + urlfilme)+"&mode=5&name="+urllib.quote_plus(nomeingles)
                         nomeficheiro=nomeingles + ' _' + str(ano) + '_.strm'
                         savefile(filmespath,nomeficheiro,conteudo)
-
       elif name=='series':
             url=MainURL + 'pagination.ajax.php?p=1&order=date&mediaType=series'
             link=abrir_url(url)
@@ -219,12 +206,10 @@ def glib(name):
                         nomeingles=nomeingles.replace('[B]','').replace('[/B]','').replace('\\','').replace('</div><div class="officialSubs">','')
                         nomeingles = re.sub('[^-a-zA-Z0-9_.()\\\/ ]+', '',  nomeingles)
                         pastaserie=os.path.join(seriespath,nomeingles)
-                        if not os.path.exists(pastaserie):
-                              os.makedirs(pastaserie)
+                        if not os.path.exists(pastaserie): os.makedirs(pastaserie)
                         urlbase=MainURL + SingleSerieURL + urlserie
                         link=abrir_url_cookie(urlbase)
                         match=re.compile('<div id="season.+?" class="season"><a href=".+?">(.+?)</a></div>').findall(link)
-                        
                         for seasonnum in match:
                               link=clean(abrir_url_cookie(urlbase + '&season=' + seasonnum))
                               #print link
@@ -235,14 +220,11 @@ def glib(name):
                                     conteudo=sys.argv[0]+"?url="+urllib.quote_plus(MainURL + SingleSerieURL + urlep)+"&mode=5&name="+urllib.quote_plus(nomeingles)
                                     nomeficheiro='%s S%sE%s.strm' % (nomeingles, seasonnum,epnumber)
                                     savefile(pastaserie,nomeficheiro,conteudo)
-      
       elif name=='subs':
             url=MainURL + 'accountMedia.ajax.php?p=1&action=subscribed&cat=series&order=date'
             link=clean(abrir_url_cookie(url))
-            
             try:ultimapagina=re.compile("""><a href="javascript: myAccount\('accountMedia.ajax.php\?p=(.+?)&""").findall(link)[-1:][0]
             except:ultimapagina=1
-
             mensagemprogresso.update(0, 'A criar lista','A espera varia consoante o número de séries subscritas.')
             for i in xrange(1,int(ultimapagina)+1):
                   url=MainURL + 'accountMedia.ajax.php?p=%s&action=subscribed&cat=series&order=date' % (i)
@@ -253,12 +235,10 @@ def glib(name):
                         nomeingles=nomeingles.replace('[B]','').replace('[/B]','').replace('\\','').replace('</div><div class="officialSubs">','')
                         nomeingles = re.sub('[^-a-zA-Z0-9_.()\\\/ ]+', '',  nomeingles)
                         pastaserie=os.path.join(seriespath,nomeingles)
-                        if not os.path.exists(pastaserie):
-                              os.makedirs(pastaserie)
+                        if not os.path.exists(pastaserie): os.makedirs(pastaserie)
                         urlbase=MainURL + SingleSerieURL + urlserie
                         link=abrir_url_cookie(urlbase)
                         match=re.compile('<div id="season.+?" class="season"><a href=".+?">(.+?)</a></div>').findall(link)
-                        
                         for seasonnum in match:
                               link=clean(abrir_url_cookie(urlbase + '&season=' + seasonnum))
                              #print link
@@ -269,11 +249,9 @@ def glib(name):
                                     conteudo=sys.argv[0]+"?url="+urllib.quote_plus(MainURL + SingleSerieURL + urlep)+"&mode=5&name="+urllib.quote_plus(nomeingles)
                                     nomeficheiro='%s S%sE%s.strm' % (nomeingles, seasonnum,epnumber)
                                     savefile(pastaserie,nomeficheiro,conteudo)
-
       xbmc.executebuiltin("CleanLibrary(video)")
       xbmc.executebuiltin("UpdateLibrary(video)")
       mensagemprogresso.close()
-                        
       
 def menu_series(url):
       addDir(traducao(40081),MainURL + 'pagination.ajax.php?p=1&order=name&mediaType=' + url,4,wtpath + art + 'todas_as_series.png',1,True)
@@ -344,8 +322,7 @@ def listas(url):
       addLista("[B][COLOR red]O que são as listas? Como ajudar?[/COLOR][/B]",'lol',31,wtpath + art + 'agendados.png',1,False,'Breve explicação do que são as listas e como funcionam.[CR][CR]Todos podem participar!')
       listas=abrir_url(baselist)
       conteudos=re.compile('"titulo":"(.+?)","author":"(.+?)","descricao":"(.+?)","url":"(.+?)"').findall(listas)
-      for titulo,author,descricao,listurl in conteudos:
-            addLista('[B]%s[/B] (%s)' % (titulo,author),listurl,29,wtpath + art + 'agendados.png',len(conteudos),True,descricao)
+      for titulo,author,descricao,listurl in conteudos: addLista('[B]%s[/B] (%s)' % (titulo,author),listurl,29,wtpath + art + 'agendados.png',len(conteudos),True,descricao)
       xbmcplugin.setContent(int(sys.argv[1]), 'livetv')
       xbmc.executebuiltin("Container.SetViewMode(560)")
             
@@ -357,7 +334,6 @@ def conteudolistas(url):
             addLista('[B]%s[/B]' % (titulo),wturl,5,MainURL + 'images/movies_thumbs/thumb' + wtid + '.png',len(conteudos),False,opiniao)
       xbmcplugin.setContent(int(sys.argv[1]), 'livetv')
       xbmc.executebuiltin("Container.SetViewMode(560)")
-      
 
 ## thx silen
 
@@ -368,22 +344,18 @@ def unrestrict_login():
         net=Net()
         if selfAddon.getSetting('unrestrict-enable') == 'true':
                 urlsignin='https://unrestrict.li/sign_in'
-
                 data = net.http_POST(urlsignin,{'return':'registered','username':usernameunli,'password':passwordunli,'signin':'Sign+in'}).content
                 success=re.compile('href=".+?unrestrict.li/profile">(.+?)</a>.+?href=".+?unrestrict.li/sign_out">(.+?)</a>',re.DOTALL).findall(data)
-                
                 if success:
                         net.save_cookies(cookie_un)
                         print 'Unrestrict Registered Account: login efectuado'
                 if not success:
-                        if re.search('adcopy_challenge',data):
-                              unrestrict_captcha(urlsignin,'login')
+                        if re.search('adcopy_challenge',data): unrestrict_captcha(urlsignin,'login')
                         else:
                               print 'Unrestrict Registered Account: login failed'
                               xbmc.executebuiltin("XBMC.Notification(wareztuga.tv,"+traducao(40224)+",'500000',"+iconpequeno.encode('utf-8')+")")
                               xbmc.sleep(2)
                               sys.exit(0)
-                              
 
 def unrestrict_link(linkescolha,thumbnail,name,fic,simounao,wturl):
         from t0mm0.common.net import Net
@@ -402,11 +374,8 @@ def unrestrict_link(linkescolha,thumbnail,name,fic,simounao,wturl):
         else:
                 if 'https://unrestrict.li' in download_link:
                     print 'UN.li Registado nao VIP'
-                    try:
-                        download_link=unrestrict_captcha(download_link,'download')
-                                  
-                    except:
-                        raise   
+                    try: download_link=unrestrict_captcha(download_link,'download')
+                    except: raise
                 mensagemprogresso.update(66)
                 req = urllib2.Request(download_link)
                 req.add_header('User-Agent', user_agent)
@@ -425,14 +394,12 @@ def unrestrict_link(linkescolha,thumbnail,name,fic,simounao,wturl):
                                   if selfAddon.getSetting('download-subs') == 'true': fazerdownload(moviename,fic)
                                   else: pass
                             encerrarsistema()
-
                 if simounao=='agora':
                       GA('None','tuga_plays_un')
                       comecarvideo(fic,streamlink,name,thumbnail,wturl,True)
 
 def unrestrict_captcha(url,referido):
         mensagemprogresso.update(33)
-
         from t0mm0.common.net import Net
         net=Net()
         import json
@@ -440,15 +407,12 @@ def unrestrict_captcha(url,referido):
         try:
             captcha_img = os.path.join(pastaperfil, 'unrestrict_li_puzzle.png')
             os.remove(captcha_img)
-        except: 
-            pass
-        
+        except: pass
         try:
             response = net.http_GET(url)
             html =  response.content                    
             try:media_id=re.compile('id="link" type="hidden" value="(.+?)" />').findall(html)[0]
             except: pass
-            
             noscript=re.compile('<iframe src="(.+?)"').findall(html)[0]
             check = net.http_GET(noscript).content
             hugekey=re.compile('id="adcopy_challenge" value="(.+?)">').findall(check)[0]
@@ -458,7 +422,6 @@ def unrestrict_captcha(url,referido):
             try:os.remove(captcha_img)
             except: pass
             puzzle = solver.get()
-
             if puzzle and referido=='download':
                   data={'response':urllib.quote_plus(puzzle),'challenge':hugekey,'link':media_id}
                   html = net.http_POST('https://unrestrict.li/download.php',data).content
@@ -468,7 +431,6 @@ def unrestrict_captcha(url,referido):
                         sys.exit(0)
                         raise
                   else: return download_link
-
             if puzzle and referido=='login':
                         data = net.http_POST(urlsignin,{'return':'registered','username':usernameunli,'password':passwordunli,'adcopy_response':urllib.quote_plus(puzzle),'adcopy_challenge':hugekey,'signin':'Sign+in'}).content
                         success=re.compile('href=".+?unrestrict.li/profile">(.+?)</a>.+?href=".+?unrestrict.li/sign_out">(.+?)</a>',re.DOTALL).findall(data)
@@ -480,8 +442,6 @@ def unrestrict_captcha(url,referido):
                               xbmc.executebuiltin("XBMC.Notification(wareztuga.tv,"+traducao(40224)+",'500000',"+iconpequeno.encode('utf-8')+")")
                               xbmc.sleep(2)
                               sys.exit(0)
-
-                  
             #return puzzle,hugekey
         except: raise
 
@@ -614,18 +574,15 @@ def itens_conta(url):
       tipo=re.compile('&action=(.+?)&').findall(url)[0]
       if re.search('cat=movies',url):
             conteudo=re.compile("""<div id=".+?" class=".+?"><a href="movie.php(.+?)" title="(.+?)"><img src="(.+?)" alt=".+?" /><div class="thumb-effect"></div></a><a href=".+?" class=".+?" onclick="removeMediaContent.+?'(.+?)', (.+?), .+?"></a></div>""").findall(link2)
-            for url,name,thumbnail,categoria,warezid in conteudo:
-                  addPessoal('[B]' + name + '[/B]',MainURL + SingleMovieURL + url,5,MainURL + thumbnail,warezid,tipo,categoria,True)
+            for url,name,thumbnail,categoria,warezid in conteudo: addPessoal('[B]' + name + '[/B]',MainURL + SingleMovieURL + url,5,MainURL + thumbnail,warezid,tipo,categoria,True)
       elif re.search('cat=series',url):
             conteudo=re.compile("""<div id=".+?" class=".+?"><a href="serie.php(.+?)" title="(.+?)"><img src="(.+?)" alt=".+?" /><div class="thumb-effect"></div></a><a href=".+?" class=".+?" onclick="removeMediaContent.+?'(.+?)', (.+?), .+?"></a></div>""").findall(link2)
-            for url,name,thumbnail,categoria,warezid in conteudo:
-                  addPessoal('[B]' + name + '[/B]',MainURL + SingleSerieURL + url,6,MainURL + thumbnail,warezid,tipo,categoria,True)
+            for url,name,thumbnail,categoria,warezid in conteudo: addPessoal('[B]' + name + '[/B]',MainURL + SingleSerieURL + url,6,MainURL + thumbnail,warezid,tipo,categoria,True)
             xbmcplugin.setContent(int(sys.argv[1]), 'movies')
             vista_series()
       else:
             episodios=re.compile("""<div id=".+?" class=".+?"><a href="serie.php(.+?)" title="(.+?) - (.+?)"><img src="(.+?)" alt=".+?" /><div class="thumb-effect"></div></a><a href=".+?" class=".+?" onclick="removeMediaContent.+?'(.+?)', (.+?), .+?"></a>""").findall(link2)
-            for url,nomeserie,nomeepisodio,thumbnail,categoria,warezid in episodios:
-                  addPessoal('[B]' + nomeserie + '[/B] (' + nomeepisodio + ')',MainURL + SingleSerieURL + url,5,MainURL + thumbnail,warezid,tipo,categoria,True)
+            for url,nomeserie,nomeepisodio,thumbnail,categoria,warezid in episodios: addPessoal('[B]' + nomeserie + '[/B] (' + nomeepisodio + ')',MainURL + SingleSerieURL + url,5,MainURL + thumbnail,warezid,tipo,categoria,True)
       try:
             pagina=re.compile("""<a .+?actual.+?>.+?<a href="javascript: myAccount.+?\'accountMedia.ajax.php.+?=(.+?)&(.+?)'""").findall(link)
             addDir('[COLOR blue]' + traducao(40042) + pagina[0][0] + ' >>>[/COLOR]',MainURL + "accountMedia.ajax.php?p=" + pagina[0][0] + '&' + pagina[0][1],30,wtpath + art + 'seta.png',1,True)
@@ -641,10 +598,8 @@ def notificacoes_request(url):
                   texto = texto.replace('&nbsp;</span><span class="bold">',' ').replace('</span><span>&nbsp;',' ').replace('</span><span class="green-bold">&nbsp;',' ').replace('&nbsp;',' ').replace('</span>',' ').replace('<span class="green-bold">','')
                   try:
                         videoname=re.compile('<span>(.+?)<a href="(.+?)".+?>(.+?)</a><span>').findall(texto)
-                        for parte1,urlnotific,parte2 in videoname:
-                              texadd= '[B]' + data + '[/B] - ' + parte1 + parte2
-                  except:
-                        texadd=texto.replace('<span>','')
+                        for parte1,urlnotific,parte2 in videoname: texadd= '[B]' + data + '[/B] - ' + parte1 + parte2
+                  except: texadd=texto.replace('<span>','')
                   if lido == ' unchecked': texadd='[COLOR yellow]' + texadd + '[/COLOR]'
                   addDir(texadd,MainURL + urlnotific + '/////' + MainURL + 'checkNotification.ajax.php?notificationID=' + notid + '/////',8,MainURL,1,False)
             except: pass
@@ -688,8 +643,7 @@ def filmes_request(url,pesquisa):
       link=abrir_url_cookie(url)
       link2=clean(link)
       info=re.compile("""<a href="movie.php(.+?)"><img src="(.+?)" alt="(.+?)" /><div class="thumb-effect" title=".+?"></div></a></div></div><div class="movie-info"><a href=".+?" class="movie-name">.+?</a><div class="clear"></div><div class="movie-detailed-info"><div class="detailed-aux" style=".+?"><span class="genre">(.+?)</span>.+?year.+?</span>(.+?)<span>.+?</span></span><span class="original-name"> - "(.+?)"</span></div><div class="detailed-aux"><span class="director-caption">Realizador: </span><span class="director"(.+?)</span></div><div class="detailed-aux"><span class="director-caption">Elenco:</span><span class="director"(.+?)</span></div></div><div class="movie-actions.+?><a id="watched" href="javascript: movieUserAction.+?'movies.+?watched.+?;.+?>(.+?)<span class=".+?"></span></a><br /><a id="cliped" href="javascript: movieUserAction.+?'movies.+?cliped.+?;".+?>(.+?)<span class=".+?"></span></a><br /><a id="faved" href="javascript: movieUserAction.+?'movies.+?faved.+?;".+?>(.+?)<span class=".+?"></span></a></div><div class="clear"></div><div class="wtv-rating"><s.+?></span><s.+?></span><s.+?></span><s.+?></span><s.+?></span><s.+?></span><s.+?></span><s.+?></span><s.+?></span><s.+?></span></div><div class="clear"></div><span id="movie-synopsis" class="movie-synopsis">.+?</span><span id="movie-synopsis-aux" class="movie-synopsis-aux">(.+?)</span>""").findall(link2)
-      if len(info)>0 and pesquisa==True:
-            addLink("[B][COLOR blue]" + traducao(40012) + ":[/COLOR][/B]",'',wtpath + art + 'nothingx.png')
+      if len(info)>0 and pesquisa==True: addLink("[B][COLOR blue]" + traducao(40012) + ":[/COLOR][/B]",'',wtpath + art + 'nothingx.png')
       for url,thumbnail,name,genre,year,originalname,director,cast,visto,agendar,faved,synowt in info:                      
             if faved=='Favorito': faved=1
             else: faved=0
@@ -704,7 +658,6 @@ def filmes_request(url,pesquisa):
             warezid=str(re.compile('images/movies_thumbs/thumb(.+?).png').findall(thumbnail)[0])
             if visto=="Filme visto": overlay=7
             if selfAddon.getSetting("metadata-movies10") == "true":
-                  
                   #variaveis=["rating","fanart","votes","moviedb"]
                   #emcache=cache.get('m'+warezid)
                   #print emcache
@@ -731,9 +684,7 @@ def filmes_request(url,pesquisa):
                         #print emcache
                         pass
                         #print cache.get('m'+warezid)
-                        
-                  if selfAddon.getSetting("englishmetadata10") == "false":
-                        addFilme('[B]' + name + '[/B] (' + year + ')',MainURL + SingleMovieURL + url,5,MainURL + thumbnail,originalname,genre,int(year),cast,director,synowt,fanart,rating,cert,cast,votes,moviedbid,imdbid,overlay,warezid,faved,agendar,len(info))
+                  if selfAddon.getSetting("englishmetadata10") == "false": addFilme('[B]' + name + '[/B] (' + year + ')',MainURL + SingleMovieURL + url,5,MainURL + thumbnail,originalname,genre,int(year),cast,director,synowt,fanart,rating,cert,cast,votes,moviedbid,imdbid,overlay,warezid,faved,agendar,len(info))
                   else:
                         genre=genre.replace('Acção','Action').replace('Animação','Animation').replace('Aventura','Adventure').replace('Biografia','Biography').replace('Comédia','Comedy').replace('Desporto','Sports').replace('Documentário','Documentary').replace('Familiar','Family').replace('Fantasia','Fantasy').replace('Ficção Científica','Science Fiction').replace('Guerra','War').replace('História','History').replace('Mistério','Mistery').replace('Romance','Novel').replace('Terror','Horror')
                         try: desc=re.compile('<overview>(.+?)</overview>').findall(response)[0]
@@ -742,8 +693,7 @@ def filmes_request(url,pesquisa):
                         except: englishposter=MainURL + thumbnail
                         addFilme('[B]' + originalname + '[/B] (' + year + ')',MainURL + SingleMovieURL + url,5,englishposter,originalname,genre,int(year),cast,director,desc,fanart,rating,cert,cast,votes,moviedbid,imdbid,overlay,warezid,faved,agendar,len(info))
             else:
-                  if selfAddon.getSetting("englishmetadata10") == "false":
-                        addFilme('[B]' + name + '[/B] (' + year + ')',MainURL + SingleMovieURL + url,5,MainURL + thumbnail,originalname,genre,int(year),cast,director,synowt,'','','','','',0,'',overlay,warezid,faved,agendar,len(info))
+                  if selfAddon.getSetting("englishmetadata10") == "false": addFilme('[B]' + name + '[/B] (' + year + ')',MainURL + SingleMovieURL + url,5,MainURL + thumbnail,originalname,genre,int(year),cast,director,synowt,'','','','','',0,'',overlay,warezid,faved,agendar,len(info))
                   else:
                         genre=genre.replace('Acção','Action').replace('Animação','Animation').replace('Aventura','Adventure').replace('Biografia','Biography').replace('Comédia','Comedy').replace('Desporto','Sports').replace('Documentário','Documentary').replace('Familiar','Family').replace('Fantasia','Fantasy').replace('Ficção Científica','Science Fiction').replace('Guerra','War').replace('História','History').replace('Mistério','Mistery').replace('Romance','Novel').replace('Terror','Horror')
                         desc='Metadata search disabled. Portuguese: ' + synowt
@@ -765,8 +715,7 @@ def series_request(url,pesquisa):
       link=abrir_url_cookie(url)
       link2=clean(link)
       match=re.compile("""<a href="serie.php(.+?)"><img src="(.+?)" alt="(.+?)" /><div class="thumb-effect2" title=".+?"></div></a></div><div class="episodes-number"><span>(.+?)</span> .+?</div></div><div class="movie-info"><a href=".+?" class="movie-name">.+?</a><div class="clear"></div><div class="movie-detailed-info"><span class="genre">(.+?)</span>.+?year.+?</span>(.+?)<span>.+?</span></span><span class="original-name">- (.+?)</span><br /><span class="director">(.+?)</span><span class="director-caption">.+?</span></div><div class="movie-actions.+?><a id="subscribed" href="javascript: movieUserAction.+?series.+?,.+?,.+?subscribed.+?>(.+?)<span class=".+?"></span>.+?<a id="watched" href="javascript: movieUserAction.+?series.+?, .+?, .+?watched.+?".+?>(.+?)<span class=".+?"></span>.+?<a id="faved" href="javascript: movieUserAction.+?series.+?, (.+?), .+?faved.+?".+?>(.+?)<span class=".+?"></span>.+?<div class="wtv-rating"><s.+?></span><s.+?></span><s.+?></span><s.+?></span><s.+?></span><s.+?></span><s.+?></span><s.+?></span><s.+?></span><s.+?></span>.+?<span id="movie-synopsis" class="movie-synopsis">.+?<span id="movie-synopsis-aux" class="movie-synopsis-aux">(.+?)</span></div>""").findall(link2)
-      if len(match)>0 and pesquisa==True:
-            addLink("[B][COLOR blue]" + titulo + ":[/COLOR][/B]",'',wtpath + art + 'nothingx.png')
+      if len(match)>0 and pesquisa==True: addLink("[B][COLOR blue]" + titulo + ":[/COLOR][/B]",'',wtpath + art + 'nothingx.png')
       for url,thumbnail,name,nrepisodios,genre,year,estado,temporadas,subsc,visto,warezid,faved,sinopse in match:
             if faved=='Favorita': faved=1
             else: faved=0
@@ -803,13 +752,11 @@ def series_request(url,pesquisa):
                         #try: estreia=re.compile('<FirstAired>(.+?)</FirstAired>').findall(response3)[0]
                         #except: estreia=''
                         #try: fanart="http://thetvdb.com/banners/" + re.compile('<fanart>(.+?)</fanart>').findall(response3)[0]
-                        try:
-                              fanart="http://thetvdb.com/banners/fanart/original/" + serieid + "-1.jpg"
+                        try: fanart="http://thetvdb.com/banners/fanart/original/" + serieid + "-1.jpg"
                         except: fanart=''
                   except: serieid=cert=cadeia=rating=votes=duration=estreia=fanart=''
                   addSerie('[B]' + name + '[/B] (' + year + ')',MainURL + SingleSerieURL + url,6,MainURL + thumbnail,genre,int(year),[],cadeia,sinopse,fanart,rating,cert,int(nrepisodios),estreia,votes,estado,serieid,duration,subsc,overlay,faved,warezid,len(match))
-            else:
-                  addSerie('[B]' + name + '[/B] (' + year + ')',MainURL + SingleSerieURL + url,6,MainURL + thumbnail,genre,int(year),[],'',sinopse,'',0,'',int(nrepisodios),'','',estado,'','',subsc,overlay,faved,warezid,len(match))
+            else: addSerie('[B]' + name + '[/B] (' + year + ')',MainURL + SingleSerieURL + url,6,MainURL + thumbnail,genre,int(year),[],'',sinopse,'',0,'',int(nrepisodios),'','',estado,'','',subsc,overlay,faved,warezid,len(match))
       paginas(MainURL + SingleSerieURL + url,link,tipo)
       xbmcplugin.setContent(int(sys.argv[1]), 'movies')
       if pesquisa==True: vista_filmes()
@@ -820,15 +767,13 @@ def seriestemp_request(name,url):
       nomeserie=re.compile('<div class="thumb serie" title="(.+?)">').findall(link)[0]
       match=re.compile('<div id="season.+?" class="season"><a href=".+?">(.+?)</a></div>').findall(link)
       for numero in match:
-            if len(match)==1:
-                  seriesepis_request(url + "&season=" + numero,traducao(40045) + numero)            
+            if len(match)==1: seriesepis_request(url + "&season=" + numero,traducao(40045) + numero)            
             else: addTemp(traducao(40045) + numero,url + "&season=" + numero,7,wtpath + art + numero + '.png',len(match),True)
       xbmcplugin.setContent(int(sys.argv[1]), 'seasons')
       vista_temporadas()
               
 def seriesepis_request(url,name):
       link=clean(abrir_url_cookie(url))
-      
       textosubs='</div><div class="officialSubs">'
       episodelist=re.compile('<div class="slide-content-bg">(.+?)<input type="hidden" id="raterDefault"').findall(link)[0]
       match=re.compile('<a href="serie.php(.+?)"><img src="(.+?)" alt="(.+?)" /><div class="thumb-shadow"></div><div class="thumb-effect"></div><div class="episode-number">(.+?)</div></a>').findall(episodelist)
@@ -889,7 +834,6 @@ def series_exib_escolha(url,name):
       opcao= xbmcgui.Dialog().yesno("wareztuga.tv", traducao(40130), traducao(40131), traducao(40143) + ': ' + name, traducao(40144), traducao(40145))
       if opcao == 1: seriestemp_request(name,url)
       else: resolver_servidores(url,name)
-      
 
 ################################################### SERVIDORES ######################################################
                       
@@ -921,36 +865,30 @@ def resolver_servidores(url,name,download=False):
             titles.append("[B][COLOR white]Sockshare[/COLOR][/B]")
             ligacao.append('http://www.sockshare.com/file/' + socks[0])
             ligacaopref.append('http://www.sockshare.com/file/' + socks[0])
-
       bayf=re.compile('http://bayfiles.net/file/(.+?)" class="bayfiles"').findall(infoservers)
       if bayf:
             titles.append("[B][COLOR orange]Bay[/COLOR][COLOR white]Files[/COLOR][/B]" + tempobf)
             ligacao.append('http://bayfiles.net/file/' + bayf[0])
             ligacaopref.append('http://bayfiles.net/file/' + bayf[0])
-
       putl=re.compile('http://www.putlocker.com/file/(.+?)" class="putlocker"').findall(infoservers)
       putl+=re.compile('http://www.firedrive.com/file/(.+?)" class="putlocker"').findall(infoservers)
       if putl:
             titles.append("[B][COLOR blue]Firedrive[/B]")
             ligacao.append('http://www.firedrive.com/file/' + putl[0])
             ligacaopref.append('http://www.firedrive.com/file/' + putl[0])
-            
       upz=re.compile('http://www.upzin.com/(.+?)" class="upzin"').findall(infoservers)
       if upz:
             titles.append("[B][COLOR white]Upzin[/COLOR][/B]")
             ligacao.append('http://www.upzin.com/' + upz[0])
             ligacaopref.append('http://www.upzin.com/' + upz[0])
-
       if download==False: simounao='agora'
       else:simounao='download'
-      
       try:imdbrate='[COLOR orange][B]IMDb:[/B] ' + re.compile('<div class="imdb-rate"><span>(.+?)</span></div>').findall(link)[0] + '[/COLOR] '
       except:imdbrate=''
       try:wtrate='| [COLOR blue][B]Site:[/B] ' + re.compile('<span class="average">(.+?)</span>').findall(link)[0]+ '/10[/COLOR] ' 
       except:wtrate=''
       try:info='| ' + traducao(40142) + '[B][COLOR white] ' + re.compile('<span class="posted-by">inserido por <span>(.+?)</span></span>').findall(link)[0]+ '[/COLOR][/B]'
       except:info=''
-      
       titles.append(imdbrate + wtrate + info)
       ligacao.append('informacaodovideo')
       if selfAddon.getSetting('server-preferido') !="0":
@@ -967,12 +905,9 @@ def resolver_servidores(url,name,download=False):
                         for link in ligacaopref:
                               if re.search('sockshare',link):
                                     premon=premiumautomatico(link,thumbnail,name,fic,simounao,wturl)
-                                    if premon=='desactivado':
-                                          sockshare(link,fic,name,thumbnail,simounao,wturl)
+                                    if premon=='desactivado': sockshare(link,fic,name,thumbnail,simounao,wturl)
                                     parametro='sim'
                   else: parametro='cancelou'
-                  
-                              
             elif selfAddon.getSetting('server-preferido') =="2": #bayfiles
                   print "Preferencial: Bayfiles" + extra
                   resultado = handle_wait(2,"wareztuga.tv",traducao(40216) + "Bayfiles"+extra+").",segunda=traducao(40219))
@@ -980,12 +915,9 @@ def resolver_servidores(url,name,download=False):
                         for link in ligacaopref:
                               if re.search('bayfiles',link):
                                     premon=premiumautomatico(link,thumbnail,name,fic,simounao,wturl)
-                                    if premon=='desactivado':
-                                          bayfiles(link,fic,name,thumbnail,simounao,wturl)
+                                    if premon=='desactivado': bayfiles(link,fic,name,thumbnail,simounao,wturl)
                                     parametro='sim'
                   else: parametro='cancelou'
-                                    
-                                    
             elif selfAddon.getSetting('server-preferido') =="3": #firedrive
                   print "Preferencial: Firedrive" + extra
                   resultado = handle_wait(2,"wareztuga.tv",traducao(40216) + "Firedrive"+extra+").",segunda=traducao(40219))
@@ -993,17 +925,13 @@ def resolver_servidores(url,name,download=False):
                         for link in ligacaopref:
                               if re.search('firedrive',link):
                                     premon=premiumautomatico(link,thumbnail,name,fic,simounao,wturl)
-                                    if premon=='desactivado':
-                                          firedrive(link,fic,name,thumbnail,simounao,wturl)
+                                    if premon=='desactivado': firedrive(link,fic,name,thumbnail,simounao,wturl)
                                     parametro='sim'
                   else: parametro='cancelou'
-                                    
             if parametro=='nada' or parametro=='cancelou':
                   if parametro=='nada': mensagemok('wareztuga.tv',traducao(40217),traducao(40218))
                   mensagemprogresso.close()
                   menu_servidores(titles,ligacao,name,thumbnail,simounao,wturl,listadecomentarios) 
-                  
-
       else:
            print "Preferencial: desligado"
            menu_servidores(titles,ligacao,name,thumbnail,simounao,wturl,listadecomentarios) 
@@ -1011,8 +939,7 @@ def resolver_servidores(url,name,download=False):
 def premiumautomatico(linkescolha,thumbnail,name,fic,simounao,wturl):
       automatico=selfAddon.getSetting('server-preferido-premium')
       if automatico == "0": return 'desactivado'
-      elif automatico == "1":
-            realdebrid(linkescolha,thumbnail,name,fic,simounao,wturl)
+      elif automatico == "1": realdebrid(linkescolha,thumbnail,name,fic,simounao,wturl)
       elif automatico == "2":
             unrestrict_login()
             unrestrict_link(linkescolha,thumbnail,name,fic,simounao,wturl)
@@ -1029,8 +956,6 @@ def listarcomentarios(link):
     texto='\n\n'.join(texto)
     return texto
 
-
-
 def menu_servidores(titles,ligacao,name,thumbnail,simounao,wturl,listadecomentarios):
       #xbmc.executebuiltin("Dialog.Close(all,true)")
       #listitem = xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage='')
@@ -1040,8 +965,6 @@ def menu_servidores(titles,ligacao,name,thumbnail,simounao,wturl,listadecomentar
       #listitem.setProperty('IsPlayable', 'true')
       #xbmcplugin.setResolvedUrl(int(sys.argv[1]),False,listitem)
       #xbmc.executebuiltin('Dialog.Close(all)')
-      
-      
       #time.sleep(2)
       d = janelaservidores("serverswt.xml" , wtpath, "Default",titles=titles,ligacao=ligacao,name=name,thumbnail=thumbnail,simounao=simounao,wturl=wturl,listadecomentarios=listadecomentarios)
       d.doModal()
@@ -1053,7 +976,6 @@ def entrarnoserver(linkescolha,name,thumbnail,simounao,wturl):
             titulos=['Normal']
             if selfAddon.getSetting('realdebrid-enable2') == 'true': titulos.append('Real-Debrid')
             if selfAddon.getSetting('unrestrict-enable') == 'true': titulos.append('Unrestrict.li')
-                   
             if len(titulos)==1:
                   index=0
                   vaiparaoserver(linkescolha,thumbnail,name,fic,simounao,wturl,index,titulos)
@@ -1067,9 +989,7 @@ def entrarnoserver(linkescolha,name,thumbnail,simounao,wturl):
                   if index > -1: vaiparaoserver(linkescolha,thumbnail,name,fic,simounao,wturl,index,titulos)
 
 def vaiparaoserver(linkescolha,thumbnail,name,fic,simounao,wturl,index,titulos):
-
-      if titulos[index]=='Real-Debrid':
-            realdebrid(linkescolha,thumbnail,name,fic,simounao,wturl)
+      if titulos[index]=='Real-Debrid': realdebrid(linkescolha,thumbnail,name,fic,simounao,wturl)
       elif titulos[index]=='Unrestrict.li':
             unrestrict_login()
             unrestrict_link(linkescolha,thumbnail,name,fic,simounao,wturl)
@@ -1098,20 +1018,16 @@ class sorte(xbmcgui.WindowXMLDialog):
           self.contaleatorio()
           
     def onClick(self,controlId):
-        if controlId == 2000:
-            self.close()
+        if controlId == 2000: self.close()
         elif controlId == 2001:
             self.close()
             resolver_servidores(MainURL + SingleMovieURL +self.urlcont,'nada')
-        elif controlId == 2002:
-            self.contaleatorio()
+        elif controlId == 2002: self.contaleatorio()
 
     def contaleatorio(self):
-          
           frase=['A carregar o bixo!','Vamos lá ver o que sai daqui','És esquisito?','Deixa cá ver o que se arranja','Acho que este é perfeito para ti','Milhares de coisas e andas armado em esquisito','Agora é que vai ser!','Desafio-te a ver este :)','Já estou cansado de dar sugestões','Dizem que este é bom','Eu não confiava nos meus gostos','A minha inteligência para escolher é altamente','#YOLO','É AGORA!']
           self.getControl(3000).setLabel('[B][COLOR yellow]%s[/COLOR][/B]' %(frase[randint(0,len(frase)-1)]))
           self.getControl(9999).setVisible(True)
-
           url=MainURL + 'pagination.ajax.php?p=1&genres=%s' % (self.catnumb)
           link=abrir_url_cookie(url)
           ultimapagina=re.compile('...</span><a href="javascript: moviesList.+?pagination.ajax.php.+?p=(.+?)&').findall(link)[0]
@@ -1119,7 +1035,6 @@ class sorte(xbmcgui.WindowXMLDialog):
           link=clean(abrir_url_cookie(urlpagina))
           info=re.compile("""<a href="movie.php(.+?)"><img src="(.+?)" alt="(.+?)" /><div class="thumb-effect" title=".+?"></div></a></div></div><div class="movie-info"><a href=".+?" class="movie-name">.+?</a><div class="clear"></div><div class="movie-detailed-info"><div class="detailed-aux" style=".+?"><span class="genre">(.+?)</span>.+?year.+?</span>(.+?)<span>.+?</span></span><span class="original-name"> - "(.+?)"</span></div><div class="detailed-aux"><span class="director-caption">Realizador: </span><span class="director"(.+?)</span></div><div class="detailed-aux"><span class="director-caption">Elenco:</span><span class="director"(.+?)</span></div></div><div class="movie-actions.+?><a id="watched" href="javascript: movieUserAction.+?'movies.+?watched.+?;.+?>.+?<span class=".+?"></span></a><br /><a id="cliped" href="javascript: movieUserAction.+?'movies.+?cliped.+?;".+?>.+?<span class=".+?"></span></a><br /><a id="faved" href="javascript: movieUserAction.+?'movies.+?faved.+?;".+?>.+?<span class=".+?"></span></a></div><div class="clear"></div><div class="wtv-rating"><s.+?></span><s.+?></span><s.+?></span><s.+?></span><s.+?></span><s.+?></span><s.+?></span><s.+?></span><s.+?></span><s.+?></span></div><div class="clear"></div><span id="movie-synopsis" class="movie-synopsis">.+?</span><span id="movie-synopsis-aux" class="movie-synopsis-aux">(.+?)</span>""").findall(link)
           filmeqq=randint(0,len(info)-1)
-
           self.urlcont=info[filmeqq][0]
           cont_imagem=MainURL + info[filmeqq][1]
           cont_genero=info[filmeqq][3]
@@ -1131,14 +1046,12 @@ class sorte(xbmcgui.WindowXMLDialog):
           cont_director=info[filmeqq][6].replace('>','')
           cont_elenco=info[filmeqq][7].replace('>','')
           cont_sinopse=info[filmeqq][8]
-
           self.getControl(1002).setImage(cont_imagem)
           self.getControl(1001).setLabel(cont_titulo)
           self.getControl(1003).setLabel(cont_genero)
           self.getControl(1004).setLabel('[B]%s[/B]: %s' %(traducao(40332),cont_director))
           self.getControl(1005).setLabel('[B]%s[/B]: %s' %(traducao(40333),cont_elenco))
           self.getControl(1006).setText(cont_sinopse)
-
           self.getControl(9999).setVisible(False)
           
 class janelaservidores(xbmcgui.WindowXMLDialog):
@@ -1157,8 +1070,7 @@ class janelaservidores(xbmcgui.WindowXMLDialog):
           listControl = self.getControl(500)
           listControl.reset()
           i=0
-          if len(self.ligacao)==1:
-                self.getControl(802).setVisible(True)
+          if len(self.ligacao)==1: self.getControl(802).setVisible(True)
           else: self.getControl(802).setVisible(False)
           for nomesservers in self.titles:
                 if re.search('informacaodovideo',self.ligacao[i]): self.getControl(800).setLabel(nomesservers)
@@ -1174,8 +1086,7 @@ class janelaservidores(xbmcgui.WindowXMLDialog):
             linkescolha=seleccionado.getProperty('ligacao')
             self.close()
             entrarnoserver(linkescolha,self.name,self.thumbnail,self.simounao,self.wturl)
-        elif controlId == 801:
-            self.close()
+        elif controlId == 801: self.close()
 
     def addListagem(self,nome,i):
           if nome=='[B][COLOR blue]Firedrive[/B]':
@@ -1264,15 +1175,12 @@ def firedrive(url,srt,name,thumbnail,simounao,wturl):
             except: pass
             if (kb.isConfirmed()):
                userInput = kb.getText()
-               if userInput != '':
-                   solution = kb.getText()
+               if userInput != '': solution = kb.getText()
                elif userInput == '':
                    mensagemok("wareztuga.tv","Nenhum texto inserido.")
                    return False
-            else:
-               return False  
+            else: return False  
             wdlg.close()
-            
             values = {'captcha_code':capcode, 'hash': hash, 'confirm':'Continue as Free User'}
       else: values = {'confirm':hash}
       headers = { 'User-Agent' : user_agent}
@@ -1294,10 +1202,9 @@ def firedrive(url,srt,name,thumbnail,simounao,wturl):
             sys.exit(0)
       try:put1 = re.compile('<a class="ad_button" href="(.+?)">Download file</a>').findall(link)[0]
       except:
-            try:put1 = re.compile("href='(.+?)'><i></i> Direct Download</a>").findall(link)[0]
+            try:put1 = re.compile("href='(.+?)'><i></i> <span trans='dd'>Direct Download</span></a>").findall(link)[0]
             except: ok = mensagemok("wareztuga.tv",traducao(40168),traducao(40169)); return
-      if re.search('<h1>Server is Overloaded</h1>',link):
-            ok = mensagemok("wareztuga.tv","Servidor sobrecarregado.","Tente novamente daqui a minutos."); return
+      if re.search('<h1>Server is Overloaded</h1>',link): ok = mensagemok("wareztuga.tv","Servidor sobrecarregado.","Tente novamente daqui a minutos."); return
       mensagemprogresso.update(66)      
       try: put2 = redirect(put1)
       except:
@@ -1305,6 +1212,7 @@ def firedrive(url,srt,name,thumbnail,simounao,wturl):
             put2=put1
       mensagemprogresso.update(100)
       mensagemprogresso.close()
+      print put2
       if simounao=='download':
             GA('None','tuga_down_put')
             fezdown=fazerdownload(name,put2)
@@ -1315,7 +1223,6 @@ def firedrive(url,srt,name,thumbnail,simounao,wturl):
       elif simounao=='agora':
             GA('None','tuga_plays_put')
             comecarvideo(srt,put2,name,thumbnail,wturl,False)
-
 
 def sockshare(url,srt,name,thumbnail,simounao,wturl):
       if simounao=='download' and downloadPath=='':
@@ -1348,15 +1255,12 @@ def sockshare(url,srt,name,thumbnail,simounao,wturl):
             except: pass
             if (kb.isConfirmed()):
                userInput = kb.getText()
-               if userInput != '':
-                   solution = kb.getText()
+               if userInput != '': solution = kb.getText()
                elif userInput == '':
                    mensagemok("wareztuga.tv","Nenhum texto inserido.")
                    return False
-            else:
-               return False  
+            else: return False  
             wdlg.close()
-            
             values = {'captcha_code':capcode, 'hash': hash, 'confirm':'Continue as Free User'}
       else: values = {'hash': hash, 'confirm':'Continue as Free User'}
       headers = { 'User-Agent' : user_agent}
@@ -1378,12 +1282,10 @@ def sockshare(url,srt,name,thumbnail,simounao,wturl):
             sys.exit(0)
       link=link.replace(' onclick="ntad()"','')
       code = re.compile('<a href="/(.+?)">Download File</a>').findall(link)
-      if re.search('<h1>Server is Overloaded</h1>',link):
-            ok = mensagemok("wareztuga.tv","Servidor sobrecarregado.","Tente novamente daqui a minutos."); return
+      if re.search('<h1>Server is Overloaded</h1>',link): ok = mensagemok("wareztuga.tv","Servidor sobrecarregado.","Tente novamente daqui a minutos."); return
       mensagemprogresso.update(66)
       try:put1 = 'http://www.' + url[11:20] + '.com/' + code[0]
       except: ok = mensagemok("wareztuga.tv",traducao(40168),traducao(40169)); return
-      
       try: put2 = redirect(put1)
       except:
             print "Nao conseguiu obter link final. Link final e o inicial"
@@ -1515,7 +1417,6 @@ def comecarvideo(srt,finalurl,name,thumbnail,wturl,proteccaobay):
                               temp=abrir_url('http://api.trakt.tv/movie/summaries.json/b6135e0f7510a44021fac8c03c36c81a17be35d9/%s' % (imdbcode))
                               nomeingles=re.compile('"title":"(.+?)"').findall(temp)[0]
                         except: pass
-                  
             print "Estou a ver o filme " + str(nomeingles) + " (" + str(year) + "/" + str(imdbcode) + ")" 
             listitem.setInfo("Video", {"title":nomeingles,"imdbnumber":imdbcode,"code":imdbcode,"imdb_id":imdbcode,"year":int(year),"type":"movie"})
             warezid=thumbnail.replace('http://www.wareztuga.tv/images/movies_thumbs/thumb','').replace('.png','')            
@@ -1567,7 +1468,6 @@ class Player(xbmc.Player):
             ##      xbmcJsonRequest({"jsonrpc": "2.0", "id": 1, "method": "VideoLibrary.SetTVShowDetails", "params": {"imdbnumber": self.imdbcode}})
             #elif self.tipo=='movies':
             #      xbmcJsonRequest({"jsonrpc": "2.0", "id": 1, "method": "VideoLibrary.SetMovieDetails", "params": {"imdbnumber": self.imdbcode}})
-
             if selfAddon.getSetting('marcadores') == 'true':
                   if self.proteccaobay == False:                  
                         if os.path.exists(self.caminhoficheiro):
@@ -1606,10 +1506,8 @@ class Player(xbmc.Player):
                                           xbmc.executebuiltin("XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('votar'),'movies',self.warezid,str(self.wturl),'')]) + ")")
                               elif self.tipo=='episodes':
                                     opcao= xbmcgui.Dialog().yesno("wareztuga.tv", traducao(40195))
-                                    if opcao:
-                                          xbmc.executebuiltin("XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('comentar'),'episodes',self.warezid,str(self.wturl),'')]) + ")")
-            else:
-                  print 'Nao atingiu a marca das definicoes. Nao marcou como visto.'
+                                    if opcao: xbmc.executebuiltin("XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('comentar'),'episodes',self.warezid,str(self.wturl),'')]) + ")")
+            else: print 'Nao atingiu a marca das definicoes. Nao marcou como visto.'
 
       def onPlayBackEnded(self):              
             self.onPlayBackStopped()
@@ -1648,7 +1546,6 @@ def atalhos():
 def guardaratalhos(name,url):
       if not os.path.exists(pastafavoritos):
           os.makedirs(pastafavoritos)
-
       from random import randint
       nomeficheiro=str(randint(0, 9999999))
       savefile(pastafavoritos,nomeficheiro + '.txt',url)
@@ -1660,7 +1557,6 @@ def apagaratalhos(name,url):
       os.remove(favorito)
       xbmc.executebuiltin("XBMC.Notification(wareztuga.tv,Removido dos atalhos,'500000',"+iconpequeno.encode('utf-8')+")")
       xbmc.executebuiltin("Container.Refresh")
-
 
 ################################################## PASTAS ################################################################
 
@@ -1710,7 +1606,6 @@ def addLista(name,url,mode,iconimage,total,pasta,descricao):
       #cm.append(('Adicionar Atalho',"XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('interrompido'),'interrompido','',str(url),'')]) + ")"))
       liz.addContextMenuItems(cm, replaceItems=True)
       return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=pasta,totalItems=total)
-
 
 def addTemp(name,url,mode,iconimage,total,pasta):      
       liz=xbmcgui.ListItem(name,iconImage="DefaultFolder.png", thumbnailImage=iconimage)
@@ -1768,7 +1663,6 @@ def addSerie(name,url,mode,iconimage,genre,year,cast,cadeia,plot,fanart,rating,c
       try:liz.addStreamInfo( 'video', { 'Codec': 'h264', 'width': 600, 'height': 300 } )
       except: pass
       return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True,totalItems=total)
-      
 
 def addEpisodio(name,url,mode,iconimage,overlay,warezid,agendar,total):
       u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)
@@ -1779,16 +1673,13 @@ def addEpisodio(name,url,mode,iconimage,overlay,warezid,agendar,total):
                                               "overlay":overlay,
                                               "playcount":playcount} )
       #liz.setProperty('fanart_image', "%s/fanart.jpg"%selfAddon.getAddonInfo("path"))
-      if seriefanart:
-            fanart=seriefanart
-      else:
-            fanart="%s/fanart.jpg"%selfAddon.getAddonInfo("path")
+      if seriefanart: fanart=seriefanart
+      else: fanart="%s/fanart.jpg"%selfAddon.getAddonInfo("path")
       liz.setProperty('fanart_image', fanart)
       cm = []
       if overlay==6: cm.append((traducao(40066),"XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('visto'),'episodes',warezid,str(url),overlay)]) + ")"))
       else: cm.append((traducao(40067),"XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('visto'),'episodes',warezid,str(url),overlay)]) + ")"))
       cm.append((traducao(40228), 'XBMC.RunPlugin(%s?mode=21&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
-
       #cm.append((traducao(40068), 'XBMC.Action(Info)'))
       if agendar==0: cm.append((traducao(40069), "XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('cliped'),'episodes',warezid,str(url),overlay)]) + ")"))
       else: cm.append((traducao(40070), "XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('cliped'),'episodes',warezid,str(url),overlay)]) + ")"))
@@ -2027,7 +1918,6 @@ def openfile(filename):
         print "Nao abriu o marcador de: %s" % filename
         return None
 
-
 def interrompidos():
       ref=0
       lista=os.listdir(pastaperfil)
@@ -2043,14 +1933,12 @@ def interrompidos():
       if (ref==0): addLink('[B][COLOR white]' + traducao(40176) + '[/COLOR][/B]','','')
       
 def xbmcJsonRequest(params):
-        import json
+	import json
 	data = json.dumps(params)
 	request = xbmc.executeJSONRPC(data)
 	response = json.loads(request)
-
 	try:
-		if 'result' in response:
-			return response['result']
+		if 'result' in response: return response['result']
 		return None
 	except KeyError:
 		Debug("[%s] %s" % (params['method'], response['error']['message']), True)
@@ -2063,16 +1951,14 @@ def paginas(url,link,tipo):
             elif tipo=='animes': modo=4
             pagina=re.compile("""<a .+?actual.+?>.+?<a href="javascript: moviesList.+?pagination.ajax.php.+?p=(.+?)&(.+?)&mediaType.+?'.+?onclick.+?>""").findall(link)[0]
             addDir('[COLOR blue]' + traducao(40042) + pagina[0] + ' >>>[/COLOR]',MainURL + "pagination.ajax.php?p=" + pagina[0] + '&' + pagina[1] + '&mediaType=' + tipo,modo,wtpath + art + 'seta.png',1,True)
-      except:
-            pass
+      except: pass
 
 def format_time(seconds):
 	minutes,seconds = divmod(seconds, 60)
 	if minutes > 60:
 		hours,minutes = divmod(minutes, 60)
 		return "%02d:%02d:%02d" % (hours, minutes, seconds)
-	else:
-		return "%02d:%02d" % (minutes, seconds)
+	else: return "%02d:%02d" % (minutes, seconds)
 
 def pesquisa(url):
       if re.search('newepisodes',url): pass            
@@ -2098,8 +1984,7 @@ def novosepisodios(serie,tipo):
       try:
             link=abrir_url('http://services.tvrage.com/tools/quickinfo.php?show=' + serie)
             link=link.replace('@',' - ').replace('^',' - ')
-            if re.search('No Show Results Were Found For ',link):
-                  ok= mensagemok('wareztuga.tv',traducao(40156) + serie + '.')
+            if re.search('No Show Results Were Found For ',link): ok= mensagemok('wareztuga.tv',traducao(40156) + serie + '.')
             else:
                   ano=re.compile('Premiered - (.+?)\n').findall(link)[0]
                   nomeserie=re.compile("Show Name - (.+?)\n").findall(link)[0]
@@ -2209,10 +2094,8 @@ def handle_wait(time_to_wait,title,text,segunda=''):
             if (mensagemprogresso.iscanceled()):
                   cancelled = True
                   break
-      if cancelled == True:
-            return False
-      else:
-            return True
+      if cancelled == True: return False
+      else: return True
 
 def legendas(url):
       url=url.replace(' ','')
@@ -2234,7 +2117,6 @@ def redirect(url):
       except urllib2.URLError, e:
             mensagemok('wareztuga.tv',traducao(40199) + ' ' + traducao(40200))
             sys.exit(0)
-            
 
 def millis():
       import time as time_
@@ -2244,10 +2126,8 @@ def load_json(data):
       def to_utf8(dct):
             rdct = {}
             for k, v in dct.items() :
-                  if isinstance(v, (str, unicode)) :
-                        rdct[k] = v.encode('utf8', 'ignore')
-                  else :
-                        rdct[k] = v
+                  if isinstance(v, (str, unicode)): rdct[k] = v.encode('utf8', 'ignore')
+                  else: rdct[k] = v
             return rdct
       try :        
             from lib import simplejson
@@ -2260,8 +2140,7 @@ def load_json(data):
                   return json_data
             except:
                   import sys
-                  for line in sys.exc_info():
-                        print "%s" % line
+                  for line in sys.exc_info(): print "%s" % line
       return None
 
 def get_params():
@@ -2270,15 +2149,13 @@ def get_params():
       if len(paramstring)>=2:
             params=sys.argv[2]
             cleanedparams=params.replace('?','')
-            if (params[len(params)-1]=='/'):
-                  params=params[0:len(params)-2]
+            if (params[len(params)-1]=='/'): params=params[0:len(params)-2]
             pairsofparams=cleanedparams.split('&')
             param={}
             for i in range(len(pairsofparams)):
                   splitparams={}
                   splitparams=pairsofparams[i].split('=')
-                  if (len(splitparams))==2:
-                        param[splitparams[0]]=splitparams[1]                 
+                  if (len(splitparams))==2: param[splitparams[0]]=splitparams[1]                 
       return param
 
 def clean(text):
@@ -2312,10 +2189,8 @@ def send_request_to_google_analytics(utm_url):
        
 def GA(group,name):
         try:
-            try:
-                from hashlib import md5
-            except:
-                from md5 import md5
+            try: from hashlib import md5
+            except: from md5 import md5
             from random import randint
             from urllib import unquote, quote
             from os import environ
@@ -2336,8 +2211,7 @@ def GA(group,name):
                     try:
                         print "============================ POSTING TRACK EVENT ============================"
                         send_request_to_google_analytics(utm_track)
-                    except:
-                        print "============================  CANNOT POST TRACK EVENT ============================" 
+                    except: print "============================  CANNOT POST TRACK EVENT ============================" 
             if name=="None":
                     utm_url = utm_gif_location + "?" + \
                             "utmwv=" + versao + \
@@ -2360,19 +2234,15 @@ def GA(group,name):
                                 "&utmp=" + quote(PATH+"/"+group+"/"+name) + \
                                 "&utmac=" + UATRACK + \
                                 "&utmcc=__utma=%s" % ".".join(["1", VISITOR, VISITOR, VISITOR, VISITOR,"2"])
-                                
             print "============================ POSTING ANALYTICS ============================"
             send_request_to_google_analytics(utm_url)
-            
         except: print "================  CANNOT POST TO ANALYTICS  ================" 
             
 def APP_LAUNCH():
         print '==========================   '+PATH+' '+versao+'   =========================='
         try:
-            try:
-                from hashlib import md5
-            except:
-                from md5 import md5
+            try: from hashlib import md5
+            except: from md5 import md5
             from random import randint
             from urllib import unquote, quote
             from os import environ
@@ -2417,7 +2287,6 @@ try: mode=int(params["mode"])
 except: pass
 try: seriefanart=urllib.unquote_plus(params["seriefanart"])
 except: seriefanart=False
-      
 
 print "Mode: "+str(mode)
 print "URL: "+str(url)
