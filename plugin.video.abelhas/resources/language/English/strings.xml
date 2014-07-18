@@ -48,4 +48,9 @@
 	<string id="40043">Downloading</string>
 	<string id="40044">Download Failed</string>
 	<string id="40045">Time remaining</string>
+	<string id="40046">Start Playlist</string>
+	<string id="40047">Delete Playlist</string>
+	<string id="40048">Deleted the Playlist</string>
+	<string id="40049">Creating Playlist</string>
+	<string id="40050">Create Playlist</string>
 </strings>

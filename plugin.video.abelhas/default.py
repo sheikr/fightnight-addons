@@ -286,6 +286,81 @@ def pastas(url,name,formcont={},conteudo=''):
             
       xbmc.executebuiltin("Container.SetViewMode(51)")            
 
+def criarplaylist(url,name,formcont={},conteudo=''):
+      mensagemprogresso.create('Abelhas.pt', traducao(40049))
+      playlist = xbmc.PlayList(1)
+      playlist.clear()
+      if re.search('action/SearchFiles',url):
+            ref_data = {'Host': 'abelhas.pt', 'Connection': 'keep-alive', 'Referer': 'http://abelhas.pt/','Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8','User-Agent':user_agent,'Referer': 'http://abelhas.pt/'}
+            endlogin=MainURL + 'action/SearchFiles'
+            conteudo= net.http_POST(endlogin,form_data=formcont,headers=ref_data).content.encode('latin-1','ignore')
+            if re.search('O ficheiro n&#227;o foi encontrado',conteudo):
+                  mensagemok('Abelhas.pt','Sem resultados.')
+                  sys.exit(0)
+            try:
+                  filename=re.compile('<input name="FileName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+                  try:ftype=re.compile('<input name="FileType" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+                  except: ftype='All'
+                  pagina=1
+                  token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)"').findall(conteudo)[0]
+                  form_d = {'IsGallery':'True','FileName':filename,'FileType':ftype,'ShowAdultContent':'True','Page':pagina,'__RequestVerificationToken':token}
+                  from t0mm0.common.addon import Addon
+                  addon=Addon('plugin.video.abelhas')
+                  addon.save_data('temp.txt',form_d)
+                  ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':'abelhas.pt','Origin':'http://abelhas.pt','Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
+                  endlogin=MainURL + 'action/SearchFiles/Results'
+                  conteudo= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
+            except: pass
+      else:
+            if conteudo=='':
+                  extra='?requestedFolderMode=filesList&fileListSortType=Name&fileListAscending=True'
+                  conteudo=clean(abrir_url_cookie(url + extra))
+      if re.search('ProtectedFolderChomikLogin',conteudo):
+            chomikid=re.compile('<input id="ChomikId" name="ChomikId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+            folderid=re.compile('<input id="FolderId" name="FolderId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+            foldername=re.compile('<input id="FolderName" name="FolderName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+            token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+            passwordfolder=caixadetexto('password')
+            form_d = {'ChomikId':chomikid,'FolderId':folderid,'FolderName':foldername,'Password':passwordfolder,'Remember':'true','__RequestVerificationToken':token}
+            ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':'abelhas.pt','Origin':'http://abelhas.pt','Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
+            endlogin=MainURL + 'action/Files/LoginToFolder'
+            teste= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
+            teste=urllib.unquote(teste)
+            if re.search('IsSuccess":false',teste):
+                  mensagemok('Abelhas.pt',traducao(40002))
+                  sys.exit(0)
+            else: pastas_ref(url)
+      elif re.search('/action/UserAccess/LoginToProtectedWindow',conteudo):
+            chomikid=re.compile('<input id="TargetChomikId" name="TargetChomikId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+            chomiktype=re.compile('<input id="ChomikType" name="ChomikType" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+            sex=re.compile('<input id="Sex" name="Sex" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+            accname=re.compile('<input id="AccountName" name="AccountName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+            isadult=re.compile('<input id="AdultFilter" name="AdultFilter" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+            adultfilter=re.compile('<input id="AdultFilter" name="AdultFilter" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+            passwordfolder=caixadetexto('password')
+            form_d = {'Password':passwordfolder,'OK':'OK','RemeberMe':'true','IsAdult':isadult,'Sex':sex,'AccountName':accname,'AdultFilter':adultfilter,'ChomikType':chomiktype,'TargetChomikId':chomikid}
+            ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':'abelhas.pt','Origin':'http://abelhas.pt','Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
+            endlogin=MainURL + 'action/UserAccess/LoginToProtectedWindow'
+            teste= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
+            teste=urllib.unquote(teste)
+            if re.search('<span class="field-validation-error">A password introduzida est',teste):
+                  mensagemok('Abelhas.pt',traducao(40002))
+                  sys.exit(0)
+            else: pastas_ref(url)
+      else:
+            items1=re.compile('<li class="fileItemContainer">\s+<p class="filename">\s+<a class="downloadAction" href=".+?">    <span class="bold">.+?</span>(.+?)</a>\s+</p>\s+<div class="thumbnail">\s+<div class="thumbnailWrapper expType" rel="Image" style=".+?">\s+<a href="(.+?)" class="thumbImg" rel="highslide" style=".+?" title="(.+?)">\s+<img src=".+?" rel=".+?" alt=".+?" style=".+?"/>\s+</a>\s+</div>\s+</div>\s+<div class="smallTab">\s+<ul>\s+<li>\s+(.+?)</li>\s+<li><span class="date">(.+?)</span></li>').findall(conteudo)
+            for extensao,urlficheiro,tituloficheiro,tamanhoficheiro,dataficheiro in items1: analyzer(MainURL + urlficheiro,subtitles='',playterm='playlist',playlistTitle=tituloficheiro)
+            items2=re.compile('<ul class="borderRadius tabGradientBg">.+?<li><span>(.+?)</span></li>.+?<li><span class="date">(.+?)</span></li></ul></div>.+?<ul>            <li><a href="/(.+?)" class="downloadAction".+?<li class="fileActionsFacebookSend" data-url=".+?" data-title="(.+?)">.+?<span class="bold">.+?</span>(.+?)</a>').findall(conteudo)
+            for tamanhoficheiro,dataficheiro,urlficheiro, tituloficheiro,extensao in items2: analyzer(MainURL + urlficheiro,subtitles='',playterm='playlist',playlistTitle=tituloficheiro)				  
+            if not items1:
+                  if not items2:
+                        conteudo=clean(conteudo)
+                        items3=re.compile('<div class="thumbnail">.+?<a href="(.+?)".+?title="(.+?)">.+?<div class="smallTab">.+?<li>(.+?)</li>.+?<span class="date">(.+?)</span>').findall(conteudo)
+                        for urlficheiro,tituloficheiro, tamanhoficheiro,dataficheiro in items3: analyzer(MainURL + urlficheiro,subtitles='',playterm='playlist',playlistTitle=tituloficheiro)
+      mensagemprogresso.close()
+      xbmcPlayer = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
+      xbmcPlayer.play(playlist)
+
 def pastas_ref(url):
       pastas(url,name)
 
@@ -319,11 +394,9 @@ def paginas(link):
 
 ########################################################### PLAYER ################################################
 
-def analyzer(url,subtitles='',playterm=False):
-      mensagemprogresso.create('Abelhas.pt', traducao(40025))
+def analyzer(url,subtitles='',playterm=False,playlistTitle=''):
+      if playlistTitle == '': mensagemprogresso.create('Abelhas.pt', traducao(40025))
       linkfinal=''
-      
-      
       if subtitles=='sim': conteudo=abrir_url_cookie(url)
       else:conteudo=abrir_url_cookie(url,erro=False)
       if re.search('Pode acontecer que a mensagem de confirma',conteudo):
@@ -351,7 +424,6 @@ def analyzer(url,subtitles='',playterm=False):
       try:
             if re.search('causar problemas com o uso de aceleradores de download',final):linkfinal=re.compile('a href=\"(.+?)\"').findall(final)[0]
             else: linkfinal=re.compile('"redirectUrl":"(.+?)"').findall(final)[0]
-            
             if subtitles=='sim':return linkfinal
       except:
             if subtitles=='':
@@ -365,7 +437,7 @@ def analyzer(url,subtitles='',playterm=False):
                         return
             else: return
 
-      mensagemprogresso.close()
+      if playlistTitle == '': mensagemprogresso.close()
       linkfinal=linkfinal.replace('\u0026','&').replace('\u003c','<').replace('\u003e','>').replace('\\','')
       if re.search('.jpg',url) or re.search('.png',url) or re.search('.gif',url) or re.search('.bmp',url):
             if re.search('.jpg',url): extfic='temp.jpg'
@@ -380,12 +452,15 @@ def analyzer(url,subtitles='',playterm=False):
             xbmc.executebuiltin("SlideShow("+pastaperfil+")")
       elif re.search('.mkv',url) or re.search('.avi',url) or re.search('.wmv',url) or re.search('.mp4',url):
             endereco=legendas(fileid,url)
-            comecarvideo(name,linkfinal,playterm=playterm,legendas=endereco)
+            if playlistTitle <> '': comecarvideo(playlistTitle,linkfinal,playterm=playterm,legendas=endereco)
+            else: comecarvideo(name,linkfinal,playterm=playterm,legendas=endereco)
       elif re.search('.mp3',url) or re.search('.wma',url):
-            comecarvideo(name,linkfinal,playterm=playterm)
+            if playlistTitle <> '': comecarvideo(playlistTitle,linkfinal,playterm=playterm)
+            else: comecarvideo(name,linkfinal,playterm=playterm)
       else:
             if selfAddon.getSetting('aviso-extensao') == 'true': mensagemok('Abelhas.pt',traducao(40028),traducao(40029),traducao(40030))
-            comecarvideo(name,linkfinal,playterm=playterm)
+            if playlistTitle <> '': comecarvideo(playlistTitle,linkfinal,playterm=playterm)			
+            else: comecarvideo(name,linkfinal,playterm=playterm)
 
 def legendas(moviefileid,url):
       url=url.replace(','+moviefileid,'').replace('.mkv','.srt').replace('.mp4','.srt').replace('.avi','.srt').replace('.wmv','.srt')
@@ -399,7 +474,7 @@ def comecarvideo(name,url,playterm,legendas=None):
               return
         thumbnail=''
         playlist = xbmc.PlayList(1)
-        if not playterm or playeractivo==0: playlist.clear()
+        if not playterm and playeractivo==0: playlist.clear()
         listitem = xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=thumbnail)
         #listitem.setInfo("Video", {"Title":"Balas & Bolinhos","year":2001})
         title='%s' % (name.split('[/B]')[0].replace('[B]',''))
@@ -408,16 +483,29 @@ def comecarvideo(name,url,playterm,legendas=None):
         listitem.setInfo("Music", {"Title":title})
         listitem.setProperty('mimetype', 'video/x-msvideo')
         listitem.setProperty('IsPlayable', 'true')
-        dialogWait = xbmcgui.DialogProgress()
-        dialogWait.create('Video', 'A carregar')
+        if playterm <> 'playlist':
+              dialogWait = xbmcgui.DialogProgress()
+              dialogWait.create('Video', 'A carregar')
         playlist.add(url, listitem)
-        dialogWait.close()
-        del dialogWait
-        if not playterm or playeractivo==0:
+        if playterm <> 'playlist':		
+              dialogWait.close()
+              del dialogWait
+        if not playterm and playeractivo==0:
               xbmcPlayer = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
               xbmcPlayer.play(playlist)
         if legendas!=None: xbmcPlayer.setSubtitles(legendas)
         if playterm=='playlist': xbmc.executebuiltin("XBMC.Notification(abelhas.pt,"+traducao(40039)+",'500000',"+iconpequeno.encode('utf-8')+")")
+
+def limparplaylist():
+        playlist = xbmc.PlayList(1)
+        playlist.clear()
+        xbmc.executebuiltin("XBMC.Notification(abelhas.pt,"+traducao(40048)+",'500000',"+iconpequeno.encode('utf-8')+")")
+
+def comecarplaylist():
+        playlist = xbmc.PlayList(1)
+        if playlist:
+              xbmcPlayer = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
+              xbmcPlayer.play(playlist)
 
 ################################################## PASTAS ################################################################
 
@@ -428,10 +516,14 @@ def addLink(name,url,iconimage):
       return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=liz)
 
 def addDir(name,url,mode,iconimage,total,pasta):
+      contexto=[]
       u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)
       liz=xbmcgui.ListItem(name,iconImage="DefaultFolder.png", thumbnailImage=iconimage)
+      contexto.append((traducao(40050), 'XBMC.RunPlugin(%s?mode=15&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
+      contexto.append((traducao(40047), 'XBMC.RunPlugin(%s?mode=14&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
       liz.setInfo( type="Video", infoLabels={ "Title": name} )
       liz.setProperty('fanart_image', "%s/fanart.jpg"%selfAddon.getAddonInfo("path"))
+      liz.addContextMenuItems(contexto, replaceItems=False) 
       return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=pasta,totalItems=total)
 
 def addCont(name,url,mode,tamanho,iconimage,total,pasta):
@@ -439,6 +531,8 @@ def addCont(name,url,mode,tamanho,iconimage,total,pasta):
       u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&tamanhof="+urllib.quote_plus(tamanho)
       liz=xbmcgui.ListItem(name,iconImage="DefaultFolder.png", thumbnailImage=iconimage)
       contexto.append((traducao(40038), 'XBMC.RunPlugin(%s?mode=10&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
+      contexto.append((traducao(40046), 'XBMC.RunPlugin(%s?mode=13&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
+      contexto.append((traducao(40047), 'XBMC.RunPlugin(%s?mode=14&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
       contexto.append((traducao(40040), 'XBMC.RunPlugin(%s?mode=11&url=%s&name=%s&tamanhof=%s)' % (sys.argv[0], urllib.quote_plus(url),name,tamanho)))
       liz.setInfo( type="Video", infoLabels={ "Title": name} )
       liz.setProperty('fanart_image', "%s/fanart.jpg"%selfAddon.getAddonInfo("path"))
@@ -641,4 +735,7 @@ elif mode==9: favoritos()
 elif mode==10: analyzer(url,subtitles='',playterm='playlist')
 elif mode==11: analyzer(url,subtitles='',playterm='download')
 elif mode==12: proxpesquisa()
+elif mode==13: comecarplaylist()
+elif mode==14: limparplaylist()
+elif mode==15: criarplaylist(url,name)
 xbmcplugin.endOfDirectory(int(sys.argv[1]))
