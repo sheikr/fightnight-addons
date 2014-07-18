@@ -9,7 +9,7 @@ net=Net()
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.0.10'
+versao = '0.0.11'
 addon_id = 'plugin.video.abelhas'
 MainURL = 'http://abelhas.pt/'
 art = '/resources/art/'
@@ -150,7 +150,7 @@ def favoritos():
 
 def proxpesquisa():
     from t0mm0.common.addon import Addon
-    addon=Addon('plugin.video.abelhas')
+    addon=Addon(addon_id)
     form_d=addon.load_data('temp.txt')
     ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':'abelhas.pt','Origin':'http://abelhas.pt','Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
     form_d['Page']= form_d['Page'] + 1
@@ -180,7 +180,7 @@ def pastas(url,name,formcont={},conteudo=''):
 
                   form_d = {'IsGallery':'True','FileName':filename,'FileType':ftype,'ShowAdultContent':'True','Page':pagina,'__RequestVerificationToken':token}
                   from t0mm0.common.addon import Addon
-                  addon=Addon('plugin.video.abelhas')
+                  addon=Addon(addon_id)
                   addon.save_data('temp.txt',form_d)
                   ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':'abelhas.pt','Origin':'http://abelhas.pt','Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
                   endlogin=MainURL + 'action/SearchFiles/Results'
@@ -305,7 +305,7 @@ def criarplaylist(url,name,formcont={},conteudo=''):
                   token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)"').findall(conteudo)[0]
                   form_d = {'IsGallery':'True','FileName':filename,'FileType':ftype,'ShowAdultContent':'True','Page':pagina,'__RequestVerificationToken':token}
                   from t0mm0.common.addon import Addon
-                  addon=Addon('plugin.video.abelhas')
+                  addon=Addon(addon_id)
                   addon.save_data('temp.txt',form_d)
                   ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':'abelhas.pt','Origin':'http://abelhas.pt','Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
                   endlogin=MainURL + 'action/SearchFiles/Results'
