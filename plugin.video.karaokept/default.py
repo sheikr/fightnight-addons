@@ -7,7 +7,7 @@ import xbmc,xbmcaddon,xbmcgui,xbmcplugin,urllib,urllib2,os,re,sys,datetime,time
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.0.05'
+versao = '0.0.06'
 addon_id = 'plugin.video.karaokept'
 MainURL = 'http://abelhas.pt/'
 art = '/resources/art/'
@@ -93,7 +93,8 @@ def menu_principal(ligacao):
             addDir('Todas as Músicas','querotodasasmusicas',1,wtpath + art + 'pasta.png',1,True)
             addDir('TOP30 Cantadas',MainURL,12,wtpath + art + 'pasta.png',2,True)
             addDir('Artistas',MainURL,4,wtpath + art + 'pasta.png',2,True)
-            addDir('Mais recentes',MainURL,7,wtpath + art + 'pasta.png',2,True)
+            addDir('Filtros',MainURL,13,wtpath + art + 'pasta.png',2,True)
+            addDir('Mais recentes','all',7,wtpath + art + 'pasta.png',2,True)
             addDir('Música directa (ID)',MainURL + username,3,wtpath + art + 'pasta.png',2,False)
             addDir('Favoritos','pastas',9,wtpath + art + 'pasta.png',2,True)
             #addDir('Pesquisar','pastas',5,wtpath + art + 'series.png',2,True)
@@ -109,6 +110,29 @@ def menu_principal(ligacao):
       addDir("[COLOR gold][B]%s[/B][/COLOR] | Karaoke Português" % (traducao(40018)),MainURL,8,wtpath + art + 'pasta.png',6,False)
       xbmc.executebuiltin("Container.SetViewMode(51)")
 
+def filtros():
+      addDir('[B]Portuguesas[/B] (brevemente)','oth',14,wtpath + art + 'pasta.png',1,False)
+      addDir('[B]Brasileiras[/B] (brevemente)','oth',14,wtpath + art + 'pasta.png',1,False)
+      
+      addDir('Jardim de Infancia','jdi',14,wtpath + art + 'pasta.png',1,True)
+      addDir('Kantatu','ktt',14,wtpath + art + 'pasta.png',1,True)
+      addDir('Karaoke Mania','kam',14,wtpath + art + 'pasta.png',1,True)
+      addDir('Outros','oth',14,wtpath + art + 'pasta.png',1,True)
+      addDir('Portugal Karaoke','ptk',14,wtpath + art + 'pasta.png',1,True)
+      xbmc.executebuiltin("Container.SetViewMode(51)")
+      
+
+def filtroscat(url):
+      listagem=openfile('listagem.txt')
+      try:favoritos = os.listdir(pastafavoritos)
+      except: favoritos=[]
+      musicas=re.compile('"id":"'+url+'(.+?)","artist":"(.+?)","song":"(.+?)"').findall(listagem)
+      for musicid,artist,song in musicas:
+            if musicid in favoritos: faved=True
+            else: faved=False
+            addCont('[B]%s[/B] - %s (%s)' % (artist,song,'%s%s' % (url,musicid)),'%s%s' % (url,musicid),2,wtpath + art + 'seta.png',len(musicas),faved,False)
+      xbmc.executebuiltin("Container.SetViewMode(51)")
+
 
 def todasasmusicas(url):
       listagem=openfile('listagem.txt')
@@ -116,11 +140,15 @@ def todasasmusicas(url):
       except: favoritos=[]
       
       if url=='querotodasasmusicas':
+            update=re.compile('"update":"(.+?)"').findall(listagem)[0]
+            addLink('[B]Última Actualização[/B]: %s' % update,'',wtpath + art + 'pasta.png')
+            
             musicas=re.compile('"id":"(.+?)","artist":"(.+?)","song":"(.+?)"').findall(listagem)
             for musicid,artist,song in musicas:
                   if musicid in favoritos: faved=True
                   else: faved=False
                   addCont('[B]%s[/B] - %s (%s)' % (artist,song,musicid),musicid,2,wtpath + art + 'seta.png',len(musicas),faved,False)
+      
       else:
             musicas=re.compile('"id":"(.+?)","artist":"'+url+'","song":"(.+?)"').findall(listagem)
             for musicid,song in musicas:
@@ -137,7 +165,8 @@ def artistas():
       seen_add = seen.add
       limpo= [ x for x in musicas if x not in seen and not seen_add(x)]
       for artistas in limpo:
-            addDir(artistas,artistas,1,wtpath + art + 'series.png',len(limpo),True)
+            addDir(artistas,artistas,1,wtpath + art + 'pasta.png',len(limpo),True)
+      xbmc.executebuiltin("Container.SetViewMode(51)")
 
 def top30():
       i=0
@@ -157,8 +186,10 @@ def top30():
       xbmc.executebuiltin("Container.SetViewMode(51)")
 
 
-def ultimasadicionadas():
-      conteudo=abrir_url_cookie(MainURL + str(entrada.decode('rot13')) + 'all?requestedFolderMode=filesList&fileListSortType=Date&fileListAscending=False')
+def ultimasadicionadas(url):
+      if re.search('>>',name):conteudo=abrir_url_cookie(MainURL + url + '?requestedFolderMode=filesList&fileListSortType=Date&fileListAscending=False')
+      else: conteudo=abrir_url_cookie(MainURL + str(entrada.decode('rot13')) + url + '?requestedFolderMode=filesList&fileListSortType=Date&fileListAscending=False')
+      
       ultimas=re.compile('<span class="bold">(.+?)</span>').findall(conteudo)
       listagem=openfile('listagem.txt')
       try: favoritos = os.listdir(pastafavoritos)
@@ -170,8 +201,17 @@ def ultimasadicionadas():
                   musicas=re.compile('"id":"'+referencias+'","artist":"(.+?)","song":"(.+?)"').findall(listagem)[0]
                   addCont('[B]%s[/B] - %s (%s)' % (musicas[0],musicas[1],referencias),referencias,2,wtpath + art + 'seta.png',len(ultimas),faved,False)
             except: pass
+      paginas(conteudo)
       xbmc.executebuiltin("Container.SetViewMode(51)")
       
+def paginas(link):
+      try:
+            pagina=re.compile('anterior.+?<a href="/(.+?)" class="right" rel=".+?"').findall(link)[0].replace(' ','+')
+            addDir('[COLOR blue]Mais Antigas >>>[/COLOR]',pagina,7,wtpath + art + 'seta.png',1,True)
+      except:
+            pass
+
+
 def musicadirecta():
       idname=caixadetexto(url).lower()
       listagem=openfile('listagem.txt')
@@ -221,7 +261,7 @@ def analyzer(url,name):
       mensagemprogresso.update(0)
       from t0mm0.common.net import Net
       net=Net()
-      if re.search('ptk',url):filetype='.mp4'
+      if re.search('ptk',url) or re.search('jdi',url) or re.search('kam',url) or re.search('oth',url):filetype='.mp4'
       else: filetype='.avi'
       conteudo=abrir_url_cookie(MainURL + str(entrada.decode('rot13')) + 'all/' + url + filetype)
 
@@ -427,10 +467,12 @@ elif mode==3: musicadirecta()
 elif mode==4: artistas()
 elif mode==5: caixadetexto(url)
 elif mode==6: login_abelhas()
-elif mode==7: ultimasadicionadas()
+elif mode==7: ultimasadicionadas(url)
 elif mode==8: selfAddon.openSettings()#sacarficheiros()
 elif mode==9: favoritos()
 elif mode==10: guardarfavoritos(url)
 elif mode==11: apagarfavoritos(url)
 elif mode==12: top30()
+elif mode==13: filtros()
+elif mode==14: filtroscat(url)
 xbmcplugin.endOfDirectory(int(sys.argv[1]))

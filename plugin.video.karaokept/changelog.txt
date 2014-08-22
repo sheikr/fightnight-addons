@@ -1,3 +1,11 @@
+[B]v0.0.06 (22 de Agosto de 2014):[/B]
+- Novas músicas/colectaneas adicionadas.
+- Filtros adicionados por tipo de colectanea.
+- Adicionada data de actualizacao de BD.
+- Adicionada possibilidade de visualizar anteriores às mais recentes.
+- Melhorias na artwork.
+- Outras correccoes.
+
 [B]v0.0.05 (7 de Julho de 2014):[/B]
 - Adicionado TOP30.
 - Limpeza de codigo.
