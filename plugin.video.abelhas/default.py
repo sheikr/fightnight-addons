@@ -9,7 +9,7 @@ net=Net()
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.0.11'
+versao = '0.0.12'
 addon_id = 'plugin.video.abelhas'
 MainURL = 'http://abelhas.pt/'
 art = '/resources/art/'
@@ -76,26 +76,27 @@ def menu_principal(ligacao):
             pontos=re.compile('href="/Points.aspx" title="Pontos" rel="nofollow".+?</a><strong>(.+?)</strong>').findall(conteudo)[0]
             mensagens=re.compile('href="/action/PrivateMessage" id="topbarMessage".+?</a><strong>(.+?)</strong>').findall(conteudo)[0]
             transf=re.compile('Transfe.+?ncia.+?<strong>(.+?)</strong>').findall(conteudo)[0]
-            addDir(traducao(40007),MainURL,1,wtpath + art + 'filmes.png',1,True)
-            addDir(traducao(40008),MainURL,2,wtpath + art + 'series.png',2,True)
-            addDir(traducao(40009),MainURL + username,3,wtpath + art + 'series.png',2,True)
-            addDir(traducao(40010),'pastas',5,wtpath + art + 'series.png',2,True)
-            addDir(traducao(40037),MainURL,9,wtpath + art + 'series.png',2,True)
-            addDir(traducao(40011),'pesquisa',7,wtpath + art + 'pesquisa.png',3,True)
-            addLink("",'',wtpath + art + 'nothingx.png')
+            addDir(traducao(40007),MainURL,1,wtpath + art + 'pasta.png',1,True)
+            #addDir('',MainURL,16,wtpath + art + 'pasta.png',2,True)
+            addDir(traducao(40008),MainURL,2,wtpath + art + 'pasta.png',2,True)
+            addDir(traducao(40009),MainURL + username,3,wtpath + art + 'pasta.png',2,True)
+            addDir(traducao(40010),'pastas',5,wtpath + art + 'pasta.png',2,True)
+            addDir(traducao(40037),MainURL,9,wtpath + art + 'pasta.png',2,True)
+            addDir(traducao(40011),'pesquisa',7,wtpath + art + 'pasta.png',3,True)
+            #addLink("",'',wtpath + art + 'nothingx.png')
             #addLink("[COLOR blue][B]"+traducao(40012)+ ":[/B][/COLOR] " + mensagens,'',wtpath + art + 'nothingx.png')
             #addLink("[COLOR blue][B]"+traducao(40013)+ ":[/B][/COLOR] " + transf,'',wtpath + art + 'nothingx.png')            
       elif ligacao==0:
-            addDir(traducao(40015),MainURL,6,wtpath + art + 'refresh.png',1,True)
-            addLink("",'',wtpath + art + 'nothingx.png')
+            addDir(traducao(40015),MainURL,6,wtpath + art + 'pasta.png',1,True)
+            #addLink("",'',wtpath + art + 'nothingx.png')
       #if ligacao==1:
       #      disponivel=versao_disponivel()
       #      if disponivel==versao: addLink(traducao(40017) + versao+ ')','',wtpath + art + 'versao_disp.png')
       #      else: addDir(traducao(40016) + versao + ' | ' + traducao(40019) + disponivel,MainURL,13,wtpath + art + 'versao_disp.png',1,False)
       #else: addLink("[COLOR blue][B]%s[/B][/COLOR] %s" % (traducao(40016),versao),'',wtpath + art + 'versao_disp.png')
-      if ligacao==1: addLink("[COLOR blue][B]%s:[/B][/COLOR] %s  [COLOR blue][B]%s:[/B][/COLOR] %s" % (traducao(40012),mensagens,traducao(40014),pontos),'',wtpath + art + 'nothingx.png')
-      addDir("[COLOR blue][B]%s[/B][/COLOR] | abelhas.pt" % (traducao(40018)),MainURL,8,wtpath + art + 'defs.png',6,True)
-      xbmc.executebuiltin("Container.SetViewMode(50)")
+      if ligacao==1: addLink("[COLOR blue][B]%s:[/B][/COLOR] %s  [COLOR blue][B]%s:[/B][/COLOR] %s" % (traducao(40012),mensagens,traducao(40014),pontos),'',wtpath + art + 'pasta.png')
+      addDir("[COLOR blue][B]%s[/B][/COLOR] | abelhas.pt" % (traducao(40018)),MainURL,8,wtpath + art + 'pasta.png',6,True)
+      xbmc.executebuiltin("Container.SetViewMode(51)")
 
 def entrarnovamente(opcoes):
       if opcoes==1: selfAddon.openSettings()
@@ -235,7 +236,7 @@ def pastas(url,name,formcont={},conteudo=''):
                   pastas_ref(url)
       else:
             try:
-                  conta=re.compile('<h3>(.+?)<span>(.+?)</span></h3>').findall(conteudo)[0]
+                  conta=re.compile('<div class="bigFileInfoRight">.+?<h3>(.+?)<span>(.+?)</span></h3>').findall(conteudo)[0]
                   nomeconta=re.compile('<input id="FriendsTargetChomikName" name="FriendsTargetChomikName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
                   addLink('[COLOR blue][B]' + traducao(40023) + nomeconta + '[/B][/COLOR]: ' + conta[0] + conta[1],'',wtpath + art + 'star2.png')
             except: pass
@@ -284,7 +285,31 @@ def pastas(url,name,formcont={},conteudo=''):
             
             paginas(conteudo)
             
-      xbmc.executebuiltin("Container.SetViewMode(51)")            
+      xbmc.executebuiltin("Container.SetViewMode(51)")
+
+def obterlistadeficheiros():
+            string=[]
+            nrdepaginas=71
+            for i in xrange(1,int(nrdepaginas)+1):
+                  url='http://abelhas.pt/qqcoisa,%s' % i
+                  extra='?requestedFolderMode=filesList&fileListSortType=Name&fileListAscending=True'
+                  conteudo=clean(abrir_url_cookie(url + extra))
+                  items1=re.compile('<li class="fileItemContainer">\s+<p class="filename">\s+<a class="downloadAction" href=".+?">    <span class="bold">.+?</span>(.+?)</a>\s+</p>\s+<div class="thumbnail">\s+<div class="thumbnailWrapper expType" rel="Image" style=".+?">\s+<a href="(.+?)" class="thumbImg" rel="highslide" style=".+?" title="(.+?)">\s+<img src=".+?" rel=".+?" alt=".+?" style=".+?"/>\s+</a>\s+</div>\s+</div>\s+<div class="smallTab">\s+<ul>\s+<li>\s+(.+?)</li>\s+<li><span class="date">(.+?)</span></li>').findall(conteudo)         
+                  for extensao,urlficheiro,tituloficheiro,tamanhoficheiro,dataficheiro in items1:
+                        string.append(tituloficheiro)
+                  #contributo mafarricos com alteracoes, ty
+                  items2=re.compile('<ul class="borderRadius tabGradientBg">.+?<li><span>(.+?)</span></li>.+?<li><span class="date">(.+?)</span></li></ul></div>.+?<ul>            <li><a href="/(.+?)" class="downloadAction".+?<li class="fileActionsFacebookSend" data-url=".+?" data-title="(.+?)">.+?<span class="bold">.+?</span>(.+?)</a>').findall(conteudo)
+                  for tamanhoficheiro,dataficheiro,urlficheiro, tituloficheiro,extensao in items2:
+                        string.append(tituloficheiro)
+                  if not items1:
+                        if not items2:
+                              conteudo=clean(conteudo)
+                              #isto ta feio
+                              items3=re.compile('<div class="thumbnail">.+?<a href="(.+?)".+?title="(.+?)">.+?<div class="smallTab">.+?<li>(.+?)</li>.+?<span class="date">(.+?)</span>').findall(conteudo)
+                              for urlficheiro,tituloficheiro, tamanhoficheiro,dataficheiro in items3:
+                                    string.append(tituloficheiro)
+            print string
+
 
 def criarplaylist(url,name,formcont={},conteudo=''):
       mensagemprogresso.create('Abelhas.pt', traducao(40049))
@@ -738,4 +763,5 @@ elif mode==12: proxpesquisa()
 elif mode==13: comecarplaylist()
 elif mode==14: limparplaylist()
 elif mode==15: criarplaylist(url,name)
+elif mode==16: obterlistadeficheiros()
 xbmcplugin.endOfDirectory(int(sys.argv[1]))
