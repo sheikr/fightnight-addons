@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 """ Karaoke Portugues
-    2013 fightnight"""
+    2014 fightnight"""
 
 import xbmc,xbmcaddon,xbmcgui,xbmcplugin,urllib,urllib2,os,re,sys,datetime,time
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.0.06'
+versao = '0.0.07'
 addon_id = 'plugin.video.karaokept'
 MainURL = 'http://abelhas.pt/'
 art = '/resources/art/'
@@ -15,7 +15,7 @@ BaseURL = 'http://fightnight-xbmc.googlecode.com/svn/karaoke/'
 user_agent = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1468.0 Safari/537.36'
 selfAddon = xbmcaddon.Addon(id=addon_id)
 wtpath = selfAddon.getAddonInfo('path').decode('utf-8')
-iconpequeno=wtpath + art + 'iconpqmudar.jpg'
+iconpequeno=wtpath + art + 'icon32.png'
 traducaoma= selfAddon.getLocalizedString
 mensagemok = xbmcgui.Dialog().ok
 mensagemprogresso = xbmcgui.DialogProgress()
@@ -23,6 +23,7 @@ mensagemprogresso = xbmcgui.DialogProgress()
 pastaperfil = xbmc.translatePath(selfAddon.getAddonInfo('profile')).decode('utf-8')
 entrada='wbnb.fvyin333/Cevinqn/'
 pastafavoritos = os.path.join(pastaperfil, "favoritos")
+pastaguardados = os.path.join(pastaperfil, "guardados")
 cookies = os.path.join(pastaperfil, "cookies.lwp")
 username = urllib.quote(selfAddon.getSetting('abelhas-username'))
 password = selfAddon.getSetting('abelhas-password')
@@ -73,12 +74,7 @@ def login_abelhas():
                         endlogin=MainURL + 'action/Files/LoginToFolder'
                         teste= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
 
-                  listagem=abrir_url(BaseURL + 'listagem2.txt')
-                  localizacao=os.path.join(pastaperfil,'listagem.txt')
-                  try:os.remove(localizacao)
-                  except: pass
-                  savefile(pastaperfil,'listagem.txt',listagem)
-                 
+                  verificarbd()                 
                   menu_principal(1)
             
             elif re.search('Erro',logintest) or link=='Erro':
@@ -86,6 +82,27 @@ def login_abelhas():
                   if opcao: menu_principal(0)
                   else: login_abelhas()
                 
+def verificarbd():
+      try:
+            check=abrir_url(BaseURL + 'listagem2.md5')
+            listagem=openfile('listagem2.md5')
+            if listagem!=check:
+                  ## BD ##
+                  listagem=abrir_url(BaseURL + 'listagem2.txt')
+                  localizacao=os.path.join(pastaperfil,'listagem2.txt')
+                  try:os.remove(localizacao)
+                  except: pass
+                  savefile(pastaperfil,'listagem2.txt',listagem)
+                  ## MD5 ##
+                  localizacao=os.path.join(pastaperfil,'listagem2.md5')
+                  try:os.remove(localizacao)
+                  except: pass
+                  savefile(pastaperfil,'listagem2.md5',check)
+                  print "BD actualizada"
+            else:
+                  print "Ultima BD ja em cache"
+      except: xbmc.executebuiltin("XBMC.Notification(Karaoke Portugues, Não conseguiu actualizar para ultima BD,'100000')")            
+
 ################################################### MENUS PLUGIN ######################################################
 
 def menu_principal(ligacao):
@@ -97,10 +114,12 @@ def menu_principal(ligacao):
             addDir('Mais recentes','all',7,wtpath + art + 'pasta.png',2,True)
             addDir('Música directa (ID)',MainURL + username,3,wtpath + art + 'pasta.png',2,False)
             addDir('Favoritos','pastas',9,wtpath + art + 'pasta.png',2,True)
+            addDir('Guardados','all',16,wtpath + art + 'pasta.png',2,True)
             #addDir('Pesquisar','pastas',5,wtpath + art + 'series.png',2,True)
             #addLink("",'',wtpath + art + 'nothingx.png')
       elif ligacao==0:
             addDir(traducao(40015),MainURL,6,wtpath + art + 'pasta.png',1,True)
+            addDir('Guardados','all',16,wtpath + art + 'pasta.png',2,True)
             #addLink("",'',wtpath + art + 'nothingx.png')
       #if ligacao==1:
       #      disponivel=versao_disponivel()
@@ -123,7 +142,7 @@ def filtros():
       
 
 def filtroscat(url):
-      listagem=openfile('listagem.txt')
+      listagem=openfile('listagem2.txt')
       try:favoritos = os.listdir(pastafavoritos)
       except: favoritos=[]
       musicas=re.compile('"id":"'+url+'(.+?)","artist":"(.+?)","song":"(.+?)"').findall(listagem)
@@ -135,7 +154,7 @@ def filtroscat(url):
 
 
 def todasasmusicas(url):
-      listagem=openfile('listagem.txt')
+      listagem=openfile('listagem2.txt')
       try:favoritos = os.listdir(pastafavoritos)
       except: favoritos=[]
       
@@ -159,7 +178,7 @@ def todasasmusicas(url):
       xbmc.executebuiltin("Container.SetViewMode(51)")
 
 def artistas():
-      listagem=openfile('listagem.txt')
+      listagem=openfile('listagem2.txt')
       musicas=re.compile('"artist":"(.+?)"').findall(listagem)
       seen= set()
       seen_add = seen.add
@@ -172,7 +191,7 @@ def top30():
       i=0
       conteudo=abrir_url_cookie(MainURL + str(entrada.decode('rot13')) + 'all?requestedFolderMode=filesList&fileListSortType=Downloads&fileListAscending=False')
       ultimas=re.compile('<span class="bold">(.+?)</span>').findall(conteudo)
-      listagem=openfile('listagem.txt')
+      listagem=openfile('listagem2.txt')
       try: favoritos = os.listdir(pastafavoritos)
       except: favoritos=[]
       for referencias in ultimas:
@@ -191,7 +210,7 @@ def ultimasadicionadas(url):
       else: conteudo=abrir_url_cookie(MainURL + str(entrada.decode('rot13')) + url + '?requestedFolderMode=filesList&fileListSortType=Date&fileListAscending=False')
       
       ultimas=re.compile('<span class="bold">(.+?)</span>').findall(conteudo)
-      listagem=openfile('listagem.txt')
+      listagem=openfile('listagem2.txt')
       try: favoritos = os.listdir(pastafavoritos)
       except: favoritos=[]
       for referencias in ultimas:
@@ -214,7 +233,7 @@ def paginas(link):
 
 def musicadirecta():
       idname=caixadetexto(url).lower()
-      listagem=openfile('listagem.txt')
+      listagem=openfile('listagem2.txt')
       try:
             musicas=re.compile('"id":"'+idname+'","artist":"(.+?)","song":"(.+?)"').findall(listagem)[0]
             name='[B]%s[/B] - %s (%s)' % (musicas[0],musicas[1],idname)
@@ -223,7 +242,7 @@ def musicadirecta():
             mensagemok('Karaoke Português','ID inválido.')
 
 def favoritos():
-      listagem=openfile('listagem.txt')
+      listagem=openfile('listagem2.txt')
       listagem = unicode(listagem, errors='ignore')
       try: favoritos = os.listdir(pastafavoritos)
       except: favoritos=[]
@@ -242,6 +261,33 @@ def guardarfavoritos(url):
       savefile(pastafavoritos,url,'')
       xbmc.executebuiltin("XBMC.Notification(Karaoke Português,Adicionado aos favoritos,'500000',"+iconpequeno.encode('utf-8')+")")
 
+def guardados():
+      listagem=openfile('listagem2.txt')
+      listagem = unicode(listagem, errors='ignore')
+      try: guardados = os.listdir(pastaguardados)
+      except: guardados=[]
+      try: favoritos = os.listdir(pastafavoritos)
+      except: favoritos=[]
+      for referenciaswithext in guardados:
+            referencias=referenciaswithext.replace('.mp4','').replace('.avi','')
+            if referencias in favoritos: faved=True
+            else: faved=False
+            musicas=re.compile('"id":"'+referencias+'","artist":"(.+?)","song":"(.+?)"').findall(listagem)[0]
+            addCont('[B]%s[/B] - %s (%s)' % (musicas[0],musicas[1],referencias),os.path.join(pastaguardados,referenciaswithext),17,wtpath + art + 'seta.png',len(guardados),faved,False)
+      xbmc.executebuiltin("Container.SetViewMode(51)")      
+
+
+def guardarkaraoke(url):
+      if not os.path.exists(pastaguardados):
+          os.makedirs(pastaguardados)
+      nomeficheiro,url=analyzer(url,name,play=False)
+      pathf=os.path.join(pastaguardados,nomeficheiro)
+      if not os.path.exists(pathf):
+            downloader(url,pathf)
+            xbmc.executebuiltin("XBMC.Notification(Karaoke Português,Karaoke Guardado,'500000',"+iconpequeno.encode('utf-8')+")")
+      else: xbmc.executebuiltin("XBMC.Notification(Karaoke Português,Karaoke já está guardado,'500000',"+iconpequeno.encode('utf-8')+")")
+
+
 def apagarfavoritos(url):
       favorito=os.path.join(pastafavoritos,url)
       os.remove(favorito)
@@ -255,7 +301,7 @@ def entrarnovamente(opcoes):
 
 ########################################################### PLAYER ################################################
 
-def analyzer(url,name):
+def analyzer(url,name,play=True):
       final=''
       mensagemprogresso.create('Karaoke Português', traducao(40025))
       mensagemprogresso.update(0)
@@ -304,7 +350,8 @@ def analyzer(url,name):
                   return
 
       mensagemprogresso.close()
-      comecarvideo(name,linkfinal)
+      if play==True: comecarvideo(name,linkfinal)
+      else: return (url + filetype),linkfinal
 
 def comecarvideo(name,url):
         thumbnail=wtpath + art + 'player.jpg'
@@ -347,6 +394,7 @@ def addCont(name,url,mode,iconimage,total,faved,pasta):
       else:
             contexto.append(('Remover dos favoritos', 'XBMC.RunPlugin(%s?mode=11&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
             iconimage=wtpath + art + 'star2.png'
+      contexto.append(('Guardar Karaoke', 'XBMC.RunPlugin(%s?mode=15&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
       u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)
       liz=xbmcgui.ListItem(name,iconImage="DefaultFolder.png", thumbnailImage=iconimage)
       
@@ -442,6 +490,48 @@ def clean(text):
       regex = re.compile("|".join(map(re.escape, command.keys())))
       return regex.sub(lambda mo: command[mo.group(0)], text)
             
+def downloader(url,dest, mensagem="A fazer download...",useReq = False):
+    dp = xbmcgui.DialogProgress()
+    dp.create("Karaoke Português",mensagem,'')
+
+    if useReq:
+        import urllib2
+        req = urllib2.Request(url)
+        req.add_header('Referer', 'http://wallpaperswide.com/')
+        f       = open(dest, mode='wb')
+        resp    = urllib2.urlopen(req)
+        content = int(resp.headers['Content-Length'])
+        size    = content / 100
+        total   = 0
+        while True:
+            if dp.iscanceled(): 
+                raise Exception("Canceled")                
+                dp.close()
+
+            chunk = resp.read(size)
+            if not chunk:            
+                f.close()
+                break
+
+            f.write(chunk)
+            total += len(chunk)
+            percent = min(100 * total / content, 100)
+            dp.update(percent)       
+    else:
+        urllib.urlretrieve(url,dest,lambda nb, bs, fs, url=url: _pbhook(nb,bs,fs,url,dp))
+
+def _pbhook(numblocks, blocksize, filesize, url=None,dp=None):
+    try:
+        percent = min((numblocks*blocksize*100)/filesize, 100)
+        dp.update(percent)
+    except:
+        percent = 100
+        dp.update(percent)
+    if dp.iscanceled(): 
+        raise Exception("Canceled")
+        dp.close()
+
+
 params=get_params()
 url=None
 name=None
@@ -475,4 +565,7 @@ elif mode==11: apagarfavoritos(url)
 elif mode==12: top30()
 elif mode==13: filtros()
 elif mode==14: filtroscat(url)
+elif mode==15: guardarkaraoke(url)
+elif mode==16: guardados()
+elif mode==17: comecarvideo(name,url)
 xbmcplugin.endOfDirectory(int(sys.argv[1]))

@@ -1,3 +1,10 @@
+[B]v0.0.07 (25 de Agosto de 2014):[/B]
+- Adicionada cache da BD se nao existir nova versao.
+- Adicionada funcionalidade para guardar karaoke (modo offline).
+- Adicionado modo offline para karaokes guardados.
+- Novas musicas adicionadas.
+- Outras correccoes.
+
 [B]v0.0.06 (22 de Agosto de 2014):[/B]
 - Novas músicas/colectaneas adicionadas.
 - Filtros adicionados por tipo de colectanea.
