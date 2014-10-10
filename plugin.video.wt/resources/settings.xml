@@ -20,10 +20,11 @@
    </category>
    <category label="Player">
       <setting label="30033" type="lsep" />
-      <setting id="server-preferido" type="enum" values="Off|Sockshare|Bayfiles|Firedrive" label="30040" default="0"/>
+      <setting id="server-preferido" type="enum" values="Off|Hugefiles|Profity|Kingfiles" label="30040" default="0"/>
 
-      <setting id="server-preferido-premium" type="enum" values="Off|Real-Debrid|Unrestrict.li" label="30043" enable="!eq(-1,0)" default="0"/>
+      <setting id="server-preferido-premium" type="enum" values="Off|Real-Debrid|Unrestrict.li" label="30043" enable="!eq(-1,0)" default="0" visible="false"/>
 
+      <setting id="server-preferido-debrid" type="bool" label="30045" default="false"/>
       <setting id="playertype" type="enum" values="Auto (recomendado)|MPlayer|DVDPlayer|PAPlayer" label="30034" default="0" />
       <setting id="watched-enable" type="bool" label="30022" default="true"/>
       <setting id="watched-percent" type="enum" values="70[B] %[/B]|80[B] %[/B]|90[B] %[/B]|95[B] %[/B]" label="30021" default="2" enable="!eq(-1,false)"/>
@@ -61,10 +62,9 @@
       <setting id="realdebrid-prefer" type="bool" label="yayaya" default="false" enable="!eq(-3,false)" visible="false"/>
       <setting id="realdebrid-usernamecheck2" type="text" label="Real-Debrid Username" default="" visible="false"/>
       <setting id="realdebrid-passwordcheck2" type="text" label="Real-Debrid Password" default="" visible="false"/>
-      <setting type="sep" />
-      <setting id="unrestrict-enable" type="bool" label="30042" default="false"/>
-      <setting id="unrestrict-username" type="text" label="Unrestrict.li Free Username" default="" enable="!eq(-1,false)"/>
-      <setting id="unrestrict-password" type="text" label="Unrestrict.li Free Password" default="" option="hidden" enable="!eq(-2,false)"/>
+      <setting id="unrestrict-enable" type="bool" label="30042" default="false" visible="false"/>
+      <setting id="unrestrict-username" type="text" label="Unrestrict.li Free Username" default="" enable="!eq(-1,false)" visible="false"/>
+      <setting id="unrestrict-password" type="text" label="Unrestrict.li Free Password" default="" option="hidden" enable="!eq(-2,false)" visible="false"/>
       <setting id="unrestrict-usernamecheck2" type="text" label="Unrestrict.li Free Username" default="" visible="false"/>
       <setting id="unrestrict-passwordcheck2" type="text" label="Unrestrict.li Free Password" default="" visible="false"/>
    </category>

@@ -9,7 +9,7 @@ addon_id = 'plugin.video.wt'
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.3.05'
+versao = '0.3.07'
 MainURL = 'http://www.wareztuga.tv/'
 art = '/resources/art/'
 ListMovieURL = 'movies.php'; SingleMovieURL = 'movie.php'
@@ -364,7 +364,6 @@ def unrestrict_link(linkescolha,thumbnail,name,fic,simounao,wturl):
         link = net.http_POST('https://unrestrict.li/unrestrict.php',{'link':linkescolha,'domain':'long'}).content
         import json
         download_link = json.loads(link).items()[0][0] # The response is JSON list, therfore need to iterate the list and select item[0] - item[0]
-        print download_link
         if re.search('"invalid":"File offline."',link):
               xbmc.executebuiltin("XBMC.Notification(wareztuga.tv,"+traducao(40164)+",'500000',"+iconpequeno.encode('utf-8')+")")
               mensagemprogresso.close()
@@ -396,7 +395,7 @@ def unrestrict_link(linkescolha,thumbnail,name,fic,simounao,wturl):
                             encerrarsistema()
                 if simounao=='agora':
                       GA('None','tuga_plays_un')
-                      comecarvideo(fic,streamlink,name,thumbnail,wturl,True)
+                      comecarvideo(fic,streamlink + '|User-Agent=' + urllib.quote(user_agent),name,thumbnail,wturl,True)
 
 def unrestrict_captcha(url,referido):
         mensagemprogresso.update(33)
@@ -493,12 +492,15 @@ def realdebrid(urlvideo,thumbnail,moviename,fic,simounao,wturl):
                         response = openerdeb.open(req)
                         source = response.read()
                         response.close()
-                  print source
                   mensagemprogresso.update(50)
                   if source is not None and re.search('expiration', source):
                         tempomili=str(millis())
                         rdeb='https://real-debrid.com/ajax/unrestrict.php?link='+urlvideo+'&password=&remote=0&time='+ tempomili
                         conteudolink = openerdeb.open(rdeb).read()
+                        if re.search('"error":4', conteudolink):
+                              mensagemok(traducao(40162), traducao(40350), '', '')
+                              mensagemprogresso.close()
+                              return
                         if re.search('"error":5', conteudolink):
                               mensagemok(traducao(40162), traducao(40163), '', '')
                               mensagemprogresso.close()
@@ -881,6 +883,25 @@ def resolver_servidores(url,name,download=False):
             titles.append("[B][COLOR white]Upzin[/COLOR][/B]")
             ligacao.append('http://www.upzin.com/' + upz[0])
             ligacaopref.append('http://www.upzin.com/' + upz[0])
+
+      huge=re.compile('http://hugefiles.net/(.+?)" class="hugefiles"').findall(infoservers)
+      if huge:
+            titles.append("[B][COLOR lime]Huge[/COLOR][COLOR green]files[/COLOR][/B]")
+            ligacao.append('http://hugefiles.net/' + huge[0])
+            ligacaopref.append('http://hugefiles.net/' + huge[0])
+
+      prof=re.compile('http://profity.org/(.+?)" class="profity"').findall(infoservers)
+      if prof:
+            titles.append("[B][COLOR white]Profity[/COLOR][/B]")
+            ligacao.append('http://profity.org/' + prof[0])
+            ligacaopref.append('http://profity.org/' + prof[0])
+
+      king=re.compile('http://www.kingfiles.net/(.+?)" class="kingfiles"').findall(infoservers)
+      if king:
+            titles.append("[B][COLOR white]Kingfiles[/COLOR][/B]")
+            ligacao.append('http://www.kingfiles.net/' + king[0])
+            ligacaopref.append('http://www.kingfiles.net/' + king[0])
+
       if download==False: simounao='agora'
       else:simounao='download'
       try:imdbrate='[COLOR orange][B]IMDb:[/B] ' + re.compile('<div class="imdb-rate"><span>(.+?)</span></div>').findall(link)[0] + '[/COLOR] '
@@ -894,38 +915,39 @@ def resolver_servidores(url,name,download=False):
       if selfAddon.getSetting('server-preferido') !="0":
             parametro='nada'
             fic=legendas(wturl)
-            if selfAddon.getSetting('server-preferido-premium')=="0": extra=''
-            elif selfAddon.getSetting('server-preferido-premium')=="1": extra=' - Real-Debrid'
-            elif selfAddon.getSetting('server-preferido-premium')=="2": extra=' - Unrestrict.li'
+            #if selfAddon.getSetting('server-preferido-premium')=="0": extra=''
+            #elif selfAddon.getSetting('server-preferido-premium')=="1": extra=' - Real-Debrid'
+            #elif selfAddon.getSetting('server-preferido-premium')=="2": extra=' - Unrestrict.li'
+            if selfAddon.getSetting('server-preferido-debrid')=="true": extra=' - Real-Debrid'
             else: extra=''
             if selfAddon.getSetting('server-preferido') =="1": #sockshare
-                  print "Preferencial: Sockshare" + extra
-                  resultado = handle_wait(2,"wareztuga.tv",traducao(40216) + "Sockshare"+extra+").",segunda=traducao(40219))
+                  print "Preferencial: Hugefiles" + extra
+                  resultado = handle_wait(2,"wareztuga.tv",traducao(40216) + "Hugefiles"+extra+").",segunda=traducao(40219))
                   if resultado:
                         for link in ligacaopref:
-                              if re.search('sockshare',link):
+                              if re.search('hugefiles',link):
                                     premon=premiumautomatico(link,thumbnail,name,fic,simounao,wturl)
-                                    if premon=='desactivado': sockshare(link,fic,name,thumbnail,simounao,wturl)
+                                    if premon=='desactivado': hugefiles(link,fic,name,thumbnail,simounao,wturl)
                                     parametro='sim'
                   else: parametro='cancelou'
             elif selfAddon.getSetting('server-preferido') =="2": #bayfiles
-                  print "Preferencial: Bayfiles" + extra
-                  resultado = handle_wait(2,"wareztuga.tv",traducao(40216) + "Bayfiles"+extra+").",segunda=traducao(40219))
+                  print "Preferencial: Profity" + extra
+                  resultado = handle_wait(2,"wareztuga.tv",traducao(40216) + "Profity"+extra+").",segunda=traducao(40219))
                   if resultado:
                         for link in ligacaopref:
-                              if re.search('bayfiles',link):
+                              if re.search('profity',link):
                                     premon=premiumautomatico(link,thumbnail,name,fic,simounao,wturl)
-                                    if premon=='desactivado': bayfiles(link,fic,name,thumbnail,simounao,wturl)
+                                    if premon=='desactivado': profity(link,fic,name,thumbnail,simounao,wturl)
                                     parametro='sim'
                   else: parametro='cancelou'
             elif selfAddon.getSetting('server-preferido') =="3": #firedrive
-                  print "Preferencial: Firedrive" + extra
-                  resultado = handle_wait(2,"wareztuga.tv",traducao(40216) + "Firedrive"+extra+").",segunda=traducao(40219))
+                  print "Preferencial: Kingfiles" + extra
+                  resultado = handle_wait(2,"wareztuga.tv",traducao(40216) + "Kingfiles"+extra+").",segunda=traducao(40219))
                   if resultado:
                         for link in ligacaopref:
-                              if re.search('firedrive',link):
+                              if re.search('kingfiles',link):
                                     premon=premiumautomatico(link,thumbnail,name,fic,simounao,wturl)
-                                    if premon=='desactivado': firedrive(link,fic,name,thumbnail,simounao,wturl)
+                                    if premon=='desactivado': kingfiles(link,fic,name,thumbnail,simounao,wturl)
                                     parametro='sim'
                   else: parametro='cancelou'
             if parametro=='nada' or parametro=='cancelou':
@@ -937,14 +959,16 @@ def resolver_servidores(url,name,download=False):
            menu_servidores(titles,ligacao,name,thumbnail,simounao,wturl,listadecomentarios) 
 
 def premiumautomatico(linkescolha,thumbnail,name,fic,simounao,wturl):
-      automatico=selfAddon.getSetting('server-preferido-premium')
-      if automatico == "0": return 'desactivado'
-      elif automatico == "1": realdebrid(linkescolha,thumbnail,name,fic,simounao,wturl)
-      elif automatico == "2":
-            unrestrict_login()
-            unrestrict_link(linkescolha,thumbnail,name,fic,simounao,wturl)
+      #automatico=selfAddon.getSetting('server-preferido-premium')
+      #if automatico == "0": return 'desactivado'
+      #elif automatico == "1": realdebrid(linkescolha,thumbnail,name,fic,simounao,wturl)
+      #elif automatico == "2":
+      #      unrestrict_login()
+      #      unrestrict_link(linkescolha,thumbnail,name,fic,simounao,wturl)
+      #else: return 'desactivado'
+      if selfAddon.getSetting('server-preferido-debrid') == 'true': realdebrid(linkescolha,thumbnail,name,fic,simounao,wturl)
       else: return 'desactivado'
-
+      
 def listarcomentarios(link):
     comentarios=re.compile('<div class="comment-user"><div class="username"><span>(.+?)</span>.+?<div class="comment-date"><span>(.+?)</span></div></div><div class="comment-number">.+?</div></div></div><div class="clear"></div><div class="comment-body">(.+?)<div class="comment-separator"></div>').findall(link)
     texto=[]
@@ -975,7 +999,7 @@ def entrarnoserver(linkescolha,name,thumbnail,simounao,wturl):
             fic=legendas(wturl)
             titulos=['Normal']
             if selfAddon.getSetting('realdebrid-enable2') == 'true': titulos.append('Real-Debrid')
-            if selfAddon.getSetting('unrestrict-enable') == 'true': titulos.append('Unrestrict.li')
+            #if selfAddon.getSetting('unrestrict-enable') == 'true': titulos.append('Unrestrict.li')
             if len(titulos)==1:
                   index=0
                   vaiparaoserver(linkescolha,thumbnail,name,fic,simounao,wturl,index,titulos)
@@ -990,14 +1014,17 @@ def entrarnoserver(linkescolha,name,thumbnail,simounao,wturl):
 
 def vaiparaoserver(linkescolha,thumbnail,name,fic,simounao,wturl,index,titulos):
       if titulos[index]=='Real-Debrid': realdebrid(linkescolha,thumbnail,name,fic,simounao,wturl)
-      elif titulos[index]=='Unrestrict.li':
-            unrestrict_login()
-            unrestrict_link(linkescolha,thumbnail,name,fic,simounao,wturl)
+      #elif titulos[index]=='Unrestrict.li':
+      #      unrestrict_login()
+      #      unrestrict_link(linkescolha,thumbnail,name,fic,simounao,wturl)
       else:
             if re.search('bayfiles', linkescolha): bayfiles(linkescolha,fic,name,thumbnail,simounao,wturl)
             elif re.search('upzin',linkescolha): upzin(linkescolha,fic,name,thumbnail,simounao,wturl)
             elif re.search('firedrive',linkescolha): firedrive(linkescolha,fic,name,thumbnail,simounao,wturl)
             elif re.search('sockshare',linkescolha): sockshare(linkescolha,fic,name,thumbnail,simounao,wturl)
+            elif re.search('hugefiles',linkescolha): hugefiles(linkescolha,fic,name,thumbnail,simounao,wturl)
+            elif re.search('profity',linkescolha): profity(linkescolha,fic,name,thumbnail,simounao,wturl)
+            elif re.search('kingfiles',linkescolha): kingfiles(linkescolha,fic,name,thumbnail,simounao,wturl)
 
 def sintomecomsorte():
       categorias=[traducao(40330),traducao(40091),traducao(40092),traducao(40093),traducao(40094),traducao(40095),traducao(40096),traducao(40097),traducao(40098),traducao(40099),traducao(40100),traducao(40101),traducao(40102),traducao(40103),traducao(40104),traducao(40105),traducao(40106),traducao(40107),traducao(40108),traducao(40109),traducao(40110)]
@@ -1098,6 +1125,15 @@ class janelaservidores(xbmcgui.WindowXMLDialog):
           elif nome=='[B][COLOR white]Sockshare[/COLOR][/B]':
                 thumb=wtpath + art + 'sockshare2.png'
                 self.criarelemento(nome,'sockshare',i,thumb)
+          elif nome=='[B][COLOR lime]Huge[/COLOR][COLOR green]files[/COLOR][/B]':
+                thumb=wtpath + art + 'hugefiles.png'
+                self.criarelemento(nome,'hugefiles',i,thumb)
+          elif nome=='[B][COLOR white]Profity[/COLOR][/B]':
+                thumb=wtpath + art + 'profity.png'
+                self.criarelemento(nome,'profity',i,thumb)
+          elif nome=='[B][COLOR white]Kingfiles[/COLOR][/B]':
+                thumb=wtpath + art + 'kingfiles.png'
+                self.criarelemento(nome,'kingfiles',i,thumb)
             
     def criarelemento(self,nome,servername,i,thumb):
           listControl = self.getControl(500)
@@ -1229,7 +1265,7 @@ def sockshare(url,srt,name,thumbnail,simounao,wturl):
             ok = mensagemok(traducao(40123),traducao(40125),traducao(40135),'')
             selfAddon.openSettings()
             return                        
-      mensagemprogresso.create('wareztuga.tv', traducao(40054),traducao(40055))       
+      mensagemprogresso.create('wareztuga.tv', traducao(40054),traducao(40055))
       mensagemprogresso.update(33)
       link1 = abrir_url(url)
       link2 = redirect(url)
@@ -1366,6 +1402,141 @@ def bayfiles(url,srt,name,thumbnail,simounao,wturl):
                         elif simounao=='agora':
                               GA('None','tuga_plays_bay')
                               comecarvideo(srt,funcional,name,thumbnail,wturl,True)
+
+def hugefiles(url,srt,name,thumbnail,simounao,wturl):
+      if simounao=='download' and downloadPath=='':
+            ok = mensagemok(traducao(40123),traducao(40125),traducao(40135),'')
+            selfAddon.openSettings()
+            return                        
+      mensagemprogresso.create('wareztuga.tv', traducao(40054),traducao(40055))
+      mensagemprogresso.update(33)
+      from t0mm0.common.net import Net
+      net = Net()
+      link=abrir_url(url)
+      captcha_img = os.path.join(pastaperfil, "putcaptcha.png")
+      noscript=re.compile('<iframe src="(.+?)"').findall(link)[0]
+
+      check = net.http_GET(noscript).content
+      hugekey=re.compile('id="adcopy_challenge" value="(.+?)">').findall(check)[0]
+      captcha_headers= {'User-Agent':'Mozilla/6.0 (Macintosh; I; Intel Mac OS X 11_7_9; de-LI; rv:1.9b4) Gecko/2012010317 Firefox/10.0a4','Host':'api.solvemedia.com','Referer':url,'Accept':'image/png,image/*;q=0.8,*/*;q=0.5'}
+      open(captcha_img, 'wb').write( net.http_GET("http://api.solvemedia.com%s"%re.compile('<img src="(.+?)"').findall(check)[0] ).content)
+      solver = InputWindow(captcha=captcha_img)
+      try:os.remove(captcha_img)
+      except: pass
+      puzzle = solver.get()
+      if puzzle:
+            mensagemprogresso.update(66)
+            op=re.compile('<input type="hidden" name="op" value="(.+?)">').findall(link)[0]
+            usr_login=''
+            rand=re.compile('<input type="hidden" name="rand" value="(.+?)">').findall(link)[0]
+            id=re.compile('<input type="hidden" name="id" value="(.+?)">').findall(link)[0]
+            fname=re.compile('<input type="hidden" name="fname" value="(.+?)">').findall(link)[0]
+            referer=''
+            ctype=re.compile('<input type="hidden" name="ctype" value="(.+?)">').findall(link)[0]
+            method=re.compile('name="method_free".+?value="(.+?)"').findall(link)[0]
+            form_data={'op':op,'usr_login':usr_login,'rand':rand,'id':id,'fname':fname,'referer':referer,'ctype':ctype,'adcopy_response':puzzle,'adcopy_challenge':hugekey,'method_free':method}
+            link= net.http_POST(url,form_data=form_data).content.encode('latin-1','ignore')
+            try:streamurl=re.compile('var fileUrl = "(.+?)"').findall(link)[0]
+            except:
+                  mensagemok(traducao(40123),traducao(40348))
+                  sys.exit(0)
+            mensagemprogresso.update(100)
+            mensagemprogresso.close()
+            if simounao=='download':
+                  GA('None','tuga_down_huge')
+                  fezdown=fazerdownload(name,streamurl)
+                  if fezdown:
+                        if selfAddon.getSetting('download-subs') == 'true': fazerdownload(name,srt)
+                        else: pass
+                  encerrarsistema()
+            elif simounao=='agora':
+                  GA('None','tuga_plays_huge')
+                  comecarvideo(srt,streamurl,name,thumbnail,wturl,False)
+
+      else:mensagemprogresso.close()
+
+def profity(url,srt,name,thumbnail,simounao,wturl):
+      req = urllib2.Request(url)
+      req.add_header('User-Agent', user_agent)
+      response = urllib2.urlopen(req)
+      link=response.read()
+      response.close()
+      timeout=int(re.compile('var seconds = (.+?);').findall(link)[0])
+      #resultado = handle_wait(timeout,"wareztuga.tv",traducao(40349))
+      resultado=True
+      cookie1=urllib.quote(response.info()['Set-Cookie'].split(';')[0])
+      cookie2=urllib.quote('; __atuvc=1%7C41')
+      streamurl=re.compile("download-timer'\).html\(.+?<a href='(.+?)'>").findall(link)[0]
+      streamurlwcook= '%s|Cookie=%s%s' % (streamurl,cookie1,cookie2)
+      #if resultado:
+            #abrir_url(streamurl)
+            #xbmc.sleep(1000)
+            #redirect(streamurlwcook)
+      comecarvideo(srt,streamurlwcook,name,thumbnail,wturl,True)
+      
+def kingfiles(url,srt,name,thumbnail,simounao,wturl):
+      if simounao=='download' and downloadPath=='':
+            ok = mensagemok(traducao(40123),traducao(40125),traducao(40135),'')
+            selfAddon.openSettings()
+            return                        
+      mensagemprogresso.create('wareztuga.tv', traducao(40054),traducao(40055))
+      mensagemprogresso.update(0)
+      from t0mm0.common.net import Net
+      net = Net()
+      link=abrir_url(url)
+      op=re.compile('<input type="hidden" name="op" value="(.+?)">').findall(link)[0]
+      fname=re.compile('<input type="hidden" name="fname" value="(.+?)">').findall(link)[0]
+      usr_login=''
+      id=re.compile('<input type="hidden" name="id" value="(.+?)">').findall(link)[0]
+      referer=''
+      method=re.compile('name="method_free".+?value="(.+?)"').findall(link)[0]
+      form_data={'op':op,'usr_login':usr_login,'id':id,'fname':fname,'referer':referer,'method_free':method}
+      link= net.http_POST(url,form_data=form_data).content.encode('latin-1','ignore')
+      mensagemprogresso.update(33)
+      captcha_img = os.path.join(pastaperfil, "putcaptcha.png")
+      noscript=re.compile('<iframe src="(.+?)"').findall(link)[0]
+
+      check = net.http_GET(noscript).content
+      hugekey=re.compile('id="adcopy_challenge" value="(.+?)">').findall(check)[0]
+      captcha_headers= {'User-Agent':'Mozilla/6.0 (Macintosh; I; Intel Mac OS X 11_7_9; de-LI; rv:1.9b4) Gecko/2012010317 Firefox/10.0a4','Host':'api.solvemedia.com','Referer':url,'Accept':'image/png,image/*;q=0.8,*/*;q=0.5'}
+      open(captcha_img, 'wb').write( net.http_GET("http://api.solvemedia.com%s"%re.compile('<img src="(.+?)"').findall(check)[0] ).content)
+      solver = InputWindow(captcha=captcha_img)
+      try:os.remove(captcha_img)
+      except: pass
+      puzzle = solver.get()
+      if puzzle:
+            mensagemprogresso.update(66)
+            op=re.compile('<input type="hidden" name="op" value="(.+?)">').findall(link)[0]
+            rand=re.compile('<input type="hidden" name="rand" value="(.+?)">').findall(link)[0]
+            id=re.compile('<input type="hidden" name="id" value="(.+?)">').findall(link)[0]
+            #fname=re.compile('<input type="hidden" name="fname" value="(.+?)">').findall(link)[0]
+            downdirect=re.compile('<input type="hidden" name="down_direct" value="1">').findall(link)[0]
+            referer=''
+            method=''
+            methodpremium=''
+            
+            form_data={'op':op,'rand':rand,'id':id,'fname':fname,'referer':referer,'adcopy_response':puzzle,'adcopy_challenge':hugekey,'method_free':method,'method_premium':methodpremium,'down_direct':downdirect}
+            link= net.http_POST(url,form_data=form_data).content.encode('latin-1','ignore')
+            try:streamurl=re.compile("var download_url = '(.+?)'").findall(link)[0]
+            except:
+                  mensagemok(traducao(40123),traducao(40348))
+                  sys.exit(0)
+                  
+            mensagemprogresso.update(100)
+            mensagemprogresso.close()
+            if simounao=='download':
+                  GA('None','tuga_down_king')
+                  fezdown=fazerdownload(name,streamurl)
+                  if fezdown:
+                        if selfAddon.getSetting('download-subs') == 'true': fazerdownload(name,srt)
+                        else: pass
+                  encerrarsistema()
+            elif simounao=='agora':
+                  GA('None','tuga_plays_king')
+                  comecarvideo(srt,streamurl,name,thumbnail,wturl,False)
+
+      else:mensagemprogresso.close()
+
 
 ########################################################### PLAYER ################################################
 
@@ -1740,7 +1911,8 @@ def addFilme(name,url,mode,iconimage,titorig,genre,year,cast,director,plot,fanar
       if agendar==0: cm.append((traducao(40069), "XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('cliped'),'movies',warezid,str(url),overlay)]) + ")"))
       else: cm.append((traducao(40070), "XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('cliped'),'movies',warezid,str(url),overlay)]) + ")"))
       if moviedbid!=0: cm.append((traducao(40077), "XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('trailer'),'movies',moviedbid,str(url),overlay)]) + ")"))
-      cm.append((traducao(40071), "XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('comentarios'),'movies',warezid,str(url),overlay)]) + ")"))      
+      cm.append((traducao(40347), "XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('lersinopse'),'movies',warezid,str(url),overlay)]) + ")"))
+      cm.append((traducao(40071), "XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('comentarios'),'movies',warezid,str(url),overlay)]) + ")"))
       cm.append((traducao(40072), "XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('comentar'),'movies',warezid,str(url),overlay)]) + ")"))
       cm.append((traducao(40078), "XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('votar'),'movies',warezid,str(url),overlay)]) + ")"))
       cm.append((traducao(40198), "XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('reportar'),'movies',warezid,str(url),overlay)]) + ")"))      
@@ -2004,6 +2176,7 @@ def novosepisodios(serie,tipo):
       except: pass
 
 def abrir_url(url):
+      #print "A fazer request de: " + url
       try:
             req = urllib2.Request(url)
             req.add_header('User-Agent', user_agent)
@@ -2019,6 +2192,7 @@ def abrir_url(url):
             sys.exit(0)
 
 def abrir_url_cookie(url):
+      #print "A fazer request com cookie de: " + url
       from t0mm0.common.net import Net
       net=Net()
       net.set_cookies(cookie_wt)
@@ -2032,7 +2206,7 @@ def abrir_url_cookie(url):
       except urllib2.URLError, e:
             mensagemok('wareztuga.tv',traducao(40199) + ' ' + traducao(40200))
             sys.exit(0)
-            
+           
 def accaonosite(tipo,warezid,metodo):
       url=MainURL + 'fave.ajax.php?mediaType=' + tipo + '&mediaID=' + warezid + '&action=' + metodo
       abrir_url_cookie(url)
@@ -2081,11 +2255,10 @@ def handle_wait(time_to_wait,title,text,segunda=''):
       ret = mensagemprogresso.create(' '+title)
       secs=0
       percent=0
-      increment = int(100 / time_to_wait)
       cancelled = False
       while secs < time_to_wait:
             secs = secs + 1
-            percent = increment*secs
+            percent = (secs*100)/time_to_wait
             secs_left = str((time_to_wait - secs))
             if segunda=='': remaining_display = traducao(40003)+secs_left+traducao(40004)
             else: remaining_display=segunda

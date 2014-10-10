@@ -47,6 +47,7 @@
 	<string id="30042">Activar conta Unrestrict.li Free</string>
 	<string id="30043">Servidor preferencial Premium</string>
 	<string id="30044">Melhorar reconhecimento com trakt.tv</string>
+	<string id="30045">Servidor preferencial com Real-Debrid</string>
 	<string id="40000">wareztuga.tv</string>
 	<string id="40001">wareztuga.tv - Erro</string>
 	<string id="40002">Página sobrecarregada.</string>
@@ -294,4 +295,7 @@
  	<string id="40344">Sem Legendas</string>
  	<string id="40345">Legendas Dessincronizadas</string>
  	<string id="40346">Legendas não são do conteúdo</string>
+ 	<string id="40347">Ler Sinopse</string>
+ 	<string id="40348">Código errado.</string>
+ 	<string id="40349"> A carregar stream.</string>
 </strings>

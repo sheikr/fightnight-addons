@@ -47,6 +47,7 @@
 	<string id="30042">Enable Unrestrict.li Free</string>
 	<string id="30043">Preferential Server</string>
 	<string id="30044">Improve trakt.tv scrobbling</string>
+	<string id="30045">Preferential Server with Real-Debrid</string>
 	<string id="40000">wareztuga.tv</string>
 	<string id="40001">wareztuga.tv - Error</string>
 	<string id="40002">Page overloaded. Peak hour. Try again.</string>
@@ -294,4 +295,8 @@
  	<string id="40344">No subtitles</string>
  	<string id="40345">Unsynchronized subtitles</string>
  	<string id="40346">Wrong subtitles</string>
+ 	<string id="40347">Read Plot</string>
+ 	<string id="40348">Wrong code.</string>
+ 	<string id="40349"> Loading...</string>
+ 	<string id="40350">Hoster is not supported by RD.</string>
 </strings>

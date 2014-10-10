@@ -6,6 +6,7 @@ addon_id = 'plugin.video.wt'
 user_agent = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1468.0 Safari/537.36'
 art = '/resources/art/'
 mensagemok = xbmcgui.Dialog().ok
+mensagemprogresso = xbmcgui.DialogProgress()
 selfAddon = xbmcaddon.Addon(id=addon_id)
 wtpath = selfAddon.getAddonInfo('path').decode('utf-8')
 iconpequeno=wtpath + art + 'logo32.png'
@@ -18,6 +19,12 @@ tipo=re.compile("'(.+?)'").findall(sys.argv[1])[1]
 warezid=re.compile("'(.+?)'").findall(sys.argv[1])[2]
 try:urlficheiro=re.compile("'(.+?)'").findall(sys.argv[1])[3]
 except:urlficheiro=''
+
+#def splitCount(s, count):
+#     return [''.join(x) for x in zip(*[list(s[z::count]) for z in range(count)])]
+
+def splitCount(seq, length):
+    return [seq[i:i+length] for i in range(0, len(seq), length)]
 
 def abrir_url_cookie(url,parametros=None):
       from t0mm0.common.net import Net
@@ -33,6 +40,59 @@ def abrir_url_cookie(url,parametros=None):
       except urllib2.URLError, e:
             mensagemok('wareztuga.tv',traducao(40199) + ' ' + traducao(40200))
             sys.exit(0)
+
+def lersinopse():
+    mensagemprogresso.create('wareztuga.tv','A carregar...')
+    link=clean(abrir_url_cookie(urlficheiro,False))
+    #try:
+    text=re.compile('<span id="movie-synopsis-aux" class="movie-synopsis-aux">(.+?)</span>').findall(link)[0]
+    text=text.decode('string-escape')
+    trechos=[]
+    i=0
+    partido=splitCount(text,99)
+    #print partido
+    for pedacos in partido:
+          #print pedacos
+          i=i+1
+          nomeficheiro='temp%s.mp3'%(str(i))
+          temp=os.path.join(pastaperfil,nomeficheiro)
+          trechos.append(temp)
+          #limit = min(100, len(text))#100 characters is the current limit.
+          #text = text[0:limit]
+          url = "http://translate.google.com/translate_tts?tl=pt&q=%s" % (urllib.quote(pedacos))
+          #values = urllib.urlencode({"q": pedacos, "textlen": len(pedacos), "tl": 'pt'})
+          hrs = {"User-Agent": "Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.63 Safari/535.7"}
+          #req = urllib2.Request(url, data=values, headers=hrs)
+          req = urllib2.Request(url,headers=hrs)
+          p = urllib2.urlopen(req)
+          f = open(temp, 'wb')
+          f.write(p.read())
+          f.close()
+          xbmc.sleep(250)
+
+    #import wave
+    outfile=os.path.join(pastaperfil,'final.mp3')
+    try:os.remove(outfile)
+    except: pass
+    import shutil
+    destination = open(outfile, 'wb')
+    for filename in trechos:
+          shutil.copyfileobj(open(filename, 'rb'), destination)
+          try:os.remove(filename)
+          except: pass
+    destination.close()
+
+    playlist = xbmc.PlayList(1)
+    playlist.clear()
+    listitem = xbmcgui.ListItem(traducao(40347), iconImage="DefaultVideo.png", thumbnailImage='')
+    listitem.setInfo("Video", {"Title":traducao(40347)})
+    playlist.add(outfile, listitem)
+    
+    #listitem.setProperty('mimetype', 'video/x-msvideo')
+    #listitem.setProperty('IsPlayable', 'true')
+    mensagemprogresso.close()
+    xbmc.Player(xbmc.PLAYER_CORE_DVDPLAYER).play(playlist)  
+
 
 def abrir_url(url):
     req = urllib2.Request(url)
@@ -162,6 +222,7 @@ def principal():
     if accao== 'cliped': accaonosite(tipo,warezid,'cliped')
     if accao== 'subscribed': accaonosite(tipo,warezid,'subscribed')
     if accao== 'comentarios': comentarios()
+    if accao== 'lersinopse': lersinopse()
     if accao== 'comentar': comentar(tipo,warezid)
     if accao== 'votar': votar(tipo,warezid)
     if accao== 'trailer': trailer(warezid)
