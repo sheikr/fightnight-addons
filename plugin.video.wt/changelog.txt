@@ -1,3 +1,8 @@
+[B]v0.3.08 (13 de Outubro de 2014):[/B]
+- Adicionado suporte total ao modo biblioteca (servico de verificacao de novos episodios e filmes).
+- Multi-filtro para filmes e series (ano/categoria).
+- Outras correccoes.
+
 [B]v0.3.07 (10 de Outubro de 2014):[/B]
 - Adicionado suporte aos novos servidores.
 - Alteracao de sistema interno para suportar alteracoes.

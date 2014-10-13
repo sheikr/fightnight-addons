@@ -87,7 +87,7 @@
 	<string id="40036">Schedules:</string>
 	<string id="40037">Scheduled Movies</string>
 	<string id="40038">Scheduled Episodes</string>
-	<string id="40039">Scheduled TV Shows</string>
+	<string id="40039">Subscribed TV Shows (library)</string>
 	<string id="40040">Account:</string>
 	<string id="40041">Search movies in wareztuga.tv</string>
 	<string id="40042">Go to page </string>
@@ -197,7 +197,7 @@
 	<string id="40146">Soon...</string>
 	<string id="40147">TV Show details</string>
 	<string id="40148">Rate TV Show</string>
-	<string id="40149">Follow TV Show</string>
+	<string id="40149">Subscribe TV Show (library)</string>
 	<string id="40150">Stop following</string>
 	<string id="40151">Remove from subscribed</string>
 	<string id="40152">wareztuga.tv - Search</string>

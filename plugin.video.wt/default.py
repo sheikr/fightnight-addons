@@ -9,7 +9,7 @@ addon_id = 'plugin.video.wt'
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.3.07'
+versao = '0.3.08'
 MainURL = 'http://www.wareztuga.tv/'
 art = '/resources/art/'
 ListMovieURL = 'movies.php'; SingleMovieURL = 'movie.php'
@@ -142,43 +142,38 @@ def menu_filmes():
       addDir(traducao(40026),MainURL + 'pagination.ajax.php?p=1&btn=moviesrecommended&mediaType=movies',3,wtpath + art + 'filmes_recomendados.png',1,True)      
       addDir(traducao(40029),MainURL + ListMovieURL,11,wtpath + art + 'categoria.png',1,True)
       addDir(traducao(40030),MainURL + ListMovieURL,12,wtpath + art + 'ano.png',1,True)
+      addDir('Multi-filtro',MainURL + ListMovieURL,39,wtpath + art + 'categoria.png',1,True)
       #addDir('filmes',MainURL + 'pagination.ajax.php?p=1&order=date&mediaType=movies',32,wtpath + art + 'ano.png',1,True)
       vista_menus()
 
 def instrucoeslibrary():
-      mensagemaviso('Bem vindo ao modo biblioteca!\n\nEsta é a nova funcionalidade disponivel neste addon. Com esta função passa a ser possível ter o conteúdo do wareztuga na vossa biblioteca local. Com esta funcionalidade tem um acesso mais rápido aos conteúdos do site.\n\n Para começar devem activar as opções e efectuar uma actualização do conteúdo.\n\nDe seguida devem ir a Videos->Ficheiros->Adicionar Vídeos e adicionar a pasta onde se encontra a base de dados do wareztuga.\n\n[B][COLOR white]Pasta Inicial -> userdata -> addon_data -> plugin.video.wt -> Biblioteca->Filmes ou Séries e só depois confirmar[/B] (pasta defeito, se alteraram nas definições é a que escolheram)[/COLOR]\n\nDe seguida devem modificar as definições consoante a pasta que escolheram! Podem ir a configurações e definir o idioma que desejam obter para a biblioteca. Caso desejem ter séries e filmes na biblioteca, devem repetir o passo para o tipo de conteúdo em falta!\n\nAs actualizações de conteúdo para já são manuais mas deve surgir nas próximas versões uma função para actualização automática. (verificar changelog para mais infos)')
+      mensagemaviso('Bem vindo ao modo biblioteca!\n\nEsta é a nova funcionalidade disponivel neste addon. Com esta função passa a ser possível ter o conteúdo do wareztuga na vossa biblioteca local. Com esta funcionalidade tem um acesso mais rápido aos conteúdos do site.\n\n Para começar devem activar as opções e efectuar uma actualização do conteúdo.\n\nDe seguida devem ir a Videos->Ficheiros->Adicionar Vídeos e adicionar a pasta onde se encontra a base de dados do wareztuga.\n\n[B][COLOR white]Pasta Inicial -> userdata -> addon_data -> plugin.video.wt -> Biblioteca->Filmes ou Séries e só depois confirmar[/B] (pasta defeito, se alteraram nas definições é a que escolheram)[/COLOR]\n\nDe seguida devem modificar as definições consoante a pasta que escolheram! Podem ir a configurações e definir o idioma que desejam obter para a biblioteca. Caso desejem ter séries e filmes na biblioteca, devem repetir o passo para o tipo de conteúdo em falta!\n\nO addon vai apenas verificar novos episódios nas séries subscritas e actualiza automaticamente a biblioteca. A verificação automática é feito conforme o periodo definido.')
 
-def glib(name):
-      mensagemprogresso.create('wareztuga.tv', 'Aguarde...')
+def glib(name,url,silent=False):
+      algumamudanca=False
+      print "A Iniciar processo de lib"
+      if silent==False:mensagemprogresso.create('wareztuga.tv', 'Aguarde...')
+      else: xbmc.executebuiltin("XBMC.Notification(wareztuga.tv,A verificar novos episódios,'500000',"+iconpequeno.encode('utf-8')+")")
+
       if selfAddon.getSetting('lib-firstrun2') == 'true': selfAddon.setSetting('lib-firstrun2',value='false')
       import xbmcvfs
       biblioteca=xbmc.translatePath(selfAddon.getSetting('lib-basefolder')).decode('utf-8')
       if not os.path.exists(biblioteca): os.makedirs(biblioteca)
+
       filmespath=os.path.join(os.path.join(biblioteca,'Filmes'))
       if not os.path.exists(filmespath): os.makedirs(filmespath)
-      else:
-            yei=xbmcvfs.rmdir(filmespath)
-            if yei:
-                  print "APAGOU"
-                  os.makedirs(filmespath)
-            else: print "NAO APAGOU"
       seriespath=os.path.join(biblioteca,'Series')
       if not os.path.exists(seriespath): os.makedirs(seriespath)
-      else:
-            yei=xbmcvfs.rmdir(seriespath)
-            if yei:
-                  print "APAGOU"
-                  os.makedirs(seriespath)
-            else: print "NAO APAGOU"
+      '''
       if name=='filmes':
             url=MainURL + 'pagination.ajax.php?p=1&order=date&mediaType=movies'
             link=abrir_url(url)
             ultimapagina=re.compile('...</span><a href="javascript: moviesList.+?pagination.ajax.php.+?p=(.+?)&').findall(link)[0]
-            mensagemprogresso.update(0, 'A criar lista')
+            if silent==False: mensagemprogresso.update(0, 'A criar lista')
             for i in xrange(1,int(ultimapagina)+1):
             #for i in xrange(1,3):
                   print i
-                  mensagemprogresso.update(0,'A criar lista','Página %s de %s' % (i,ultimapagina))
+                  if silent==False:mensagemprogresso.update(0,'A criar lista','Página %s de %s' % (i,ultimapagina))
                   urlpagina=MainURL + 'pagination.ajax.php?p=%s&order=date&mediaType=movies' % (i)
                   link=clean(abrir_url(urlpagina))
                   info=re.compile('<a href="movie.php(.+?)"><img src=".+?" alt=".+?" /><div class="thumb-effect" title=".+?"></div></a></div></div><div class="movie-info"><a href=".+?" class="movie-name">.+?</a><div class="clear"></div><div class="movie-detailed-info"><div class="detailed-aux" style=".+?"><span class="genre">.+?</span>.+?year.+?</span>(.+?)<span>.+?</span></span><span class="original-name"> - "(.+?)"</span>').findall(link)
@@ -190,68 +185,66 @@ def glib(name):
                         conteudo=sys.argv[0]+"?url="+urllib.quote_plus(MainURL + SingleMovieURL + urlfilme)+"&mode=5&name="+urllib.quote_plus(nomeingles)
                         nomeficheiro=nomeingles + ' _' + str(ano) + '_.strm'
                         savefile(filmespath,nomeficheiro,conteudo)
-      elif name=='series':
-            url=MainURL + 'pagination.ajax.php?p=1&order=date&mediaType=series'
-            link=abrir_url(url)
-            ultimapagina=re.compile('...</span><a href="javascript: moviesList.+?pagination.ajax.php.+?p=(.+?)&').findall(link)[0]
-            print ultimapagina
-            mensagemprogresso.update(0, 'A criar lista')
-            for i in xrange(1,int(ultimapagina)+1):
-                  print i
-                  mensagemprogresso.update(0,'A criar lista','Página %s de %s' % (i,ultimapagina))
-                  urlpagina=MainURL + 'pagination.ajax.php?p=%s&order=date&mediaType=series' % (i)
-                  link=clean(abrir_url(urlpagina))
-                  info=re.compile('<a href="serie.php(.+?)"><img src=".+?" alt="(.+?)" /><div class="thumb-effect2" title=".+?"></div></a></div><div class="episodes-number"><span>.+?</span> .+?</div></div><div class="movie-info"><a href=".+?" class="movie-name">.+?</a><div class="clear"></div><div class="movie-detailed-info"><span class="genre">.+?</span>.+?year.+?</span>(.+?)<span>.+?</span></span><span class="original-name">- .+?</span>').findall(link)
-                  for urlserie,nomeingles,ano in info:
-                        nomeingles=nomeingles.replace('[B]','').replace('[/B]','').replace('\\','').replace('</div><div class="officialSubs">','')
-                        nomeingles = re.sub('[^-a-zA-Z0-9_.()\\\/ ]+', '',  nomeingles)
-                        pastaserie=os.path.join(seriespath,nomeingles)
-                        if not os.path.exists(pastaserie): os.makedirs(pastaserie)
-                        urlbase=MainURL + SingleSerieURL + urlserie
-                        link=abrir_url_cookie(urlbase)
-                        match=re.compile('<div id="season.+?" class="season"><a href=".+?">(.+?)</a></div>').findall(link)
-                        for seasonnum in match:
-                              link=clean(abrir_url_cookie(urlbase + '&season=' + seasonnum))
-                              #print link
-                              episodelist=re.compile('<div class="slide-content-bg">(.+?)<input type="hidden" id="raterDefault"').findall(link)[0]
-                              indiv=re.compile('<a href="serie.php(.+?)"><img src=".+?" alt=".+?" /><div class="thumb-shadow"></div><div class="thumb-effect"></div><div class="episode-number">(.+?)</div></a>').findall(episodelist)
-                              for urlep, epnumber in indiv:
-                                    epnumber=epnumber.replace('</div><div class="officialSubs">','')
-                                    conteudo=sys.argv[0]+"?url="+urllib.quote_plus(MainURL + SingleSerieURL + urlep)+"&mode=5&name="+urllib.quote_plus(nomeingles)
-                                    nomeficheiro='%s S%sE%s.strm' % (nomeingles, seasonnum,epnumber)
-                                    savefile(pastaserie,nomeficheiro,conteudo)
-      elif name=='subs':
+      '''
+      if name=='umfilme':
+            link=clean(abrir_url_cookie(url))
+            nomeingles=re.compile('<span class="original-name">- "(.+?)"</span>').findall(link)[0]
+            ano=re.compile('<span class="year"><span> \(</span>(.+?)<span>').findall(link)[0]
+            nomeingles=nomeingles.replace('[B]','').replace('[/B]','').replace('\\','').replace('</div><div class="officialSubs">','')
+            nomeingles = re.sub('[^-a-zA-Z0-9_.()\\\/ ]+', '',  nomeingles)
+            conteudo=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode=5&name="+urllib.quote_plus(nomeingles)
+            nomeficheiro=nomeingles + ' _' + str(ano) + '_.strm'
+            savefile(filmespath,nomeficheiro,conteudo)
+            algumamudanca=True
+      
+      if name=='subs':
+            print "A Iniciar processo de subscricoes"
             url=MainURL + 'accountMedia.ajax.php?p=1&action=subscribed&cat=series&order=date'
             link=clean(abrir_url_cookie(url))
             try:ultimapagina=re.compile("""><a href="javascript: myAccount\('accountMedia.ajax.php\?p=(.+?)&""").findall(link)[-1:][0]
             except:ultimapagina=1
-            mensagemprogresso.update(0, 'A criar lista','A espera varia consoante o número de séries subscritas.')
+            if silent==False: mensagemprogresso.update(0, 'A criar lista','A espera varia consoante o número de séries subscritas.')
             for i in xrange(1,int(ultimapagina)+1):
                   url=MainURL + 'accountMedia.ajax.php?p=%s&action=subscribed&cat=series&order=date' % (i)
                   link=clean(abrir_url_cookie(url))
-                  mensagemprogresso.update(0, 'A criar lista (página %s de %s)' % (i,ultimapagina),'A espera varia consoante o número de séries subscritas.')
+                  if silent==False: mensagemprogresso.update(0, 'A criar lista (página %s de %s)' % (i,ultimapagina),'A espera varia consoante o número de séries subscritas.')
                   conteudo=re.compile("""<div id=".+?" class=".+?"><a href="serie.php(.+?)" title="(.+?)">""").findall(link)
                   for urlserie,nomeingles in conteudo:
                         nomeingles=nomeingles.replace('[B]','').replace('[/B]','').replace('\\','').replace('</div><div class="officialSubs">','')
                         nomeingles = re.sub('[^-a-zA-Z0-9_.()\\\/ ]+', '',  nomeingles)
                         pastaserie=os.path.join(seriespath,nomeingles)
-                        if not os.path.exists(pastaserie): os.makedirs(pastaserie)
                         urlbase=MainURL + SingleSerieURL + urlserie
                         link=abrir_url_cookie(urlbase)
-                        match=re.compile('<div id="season.+?" class="season"><a href=".+?">(.+?)</a></div>').findall(link)
-                        for seasonnum in match:
-                              link=clean(abrir_url_cookie(urlbase + '&season=' + seasonnum))
-                             #print link
-                              episodelist=re.compile('<div class="slide-content-bg">(.+?)<input type="hidden" id="raterDefault"').findall(link)[0]
-                              indiv=re.compile('<a href="serie.php(.+?)"><img src=".+?" alt=".+?" /><div class="thumb-shadow"></div><div class="thumb-effect"></div><div class="episode-number">(.+?)</div></a>').findall(episodelist)
-                              for urlep, epnumber in indiv:
-                                    epnumber=epnumber.replace('</div><div class="officialSubs">','')
-                                    conteudo=sys.argv[0]+"?url="+urllib.quote_plus(MainURL + SingleSerieURL + urlep)+"&mode=5&name="+urllib.quote_plus(nomeingles)
-                                    nomeficheiro='%s S%sE%s.strm' % (nomeingles, seasonnum,epnumber)
-                                    savefile(pastaserie,nomeficheiro,conteudo)
-      xbmc.executebuiltin("CleanLibrary(video)")
-      xbmc.executebuiltin("UpdateLibrary(video)")
-      mensagemprogresso.close()
+                        numerowt=re.compile('<div class="episodes-number"><span>(.+?)</span>').findall(clean(link))[0]
+                        numerobiblio=openfile('epnr.txt',pastaficheiro=os.path.join(seriespath,nomeingles))
+                        if numerowt!=numerobiblio:
+                              algumamudanca=True
+                              if not os.path.exists(pastaserie): os.makedirs(pastaserie)
+                              match=re.compile('<div id="season.+?" class="season"><a href=".+?">(.+?)</a></div>').findall(link)
+                              for seasonnum in match:
+                                    link=clean(abrir_url_cookie(urlbase + '&season=' + seasonnum))
+                                   #print link
+                                    episodelist=re.compile('<div class="slide-content-bg">(.+?)<input type="hidden" id="raterDefault"').findall(link)[0]
+                                    indiv=re.compile('<a href="serie.php(.+?)"><img src=".+?" alt=".+?" /><div class="thumb-shadow"></div><div class="thumb-effect"></div><div class="episode-number">(.+?)</div></a>').findall(episodelist)
+                                    for urlep, epnumber in indiv:
+                                          epnumber=epnumber.replace('</div><div class="officialSubs">','')
+                                          conteudo=sys.argv[0]+"?url="+urllib.quote_plus(MainURL + SingleSerieURL + urlep)+"&mode=5&name="+urllib.quote_plus(nomeingles)
+                                          nomeficheiro='%s S%sE%s.strm' % (nomeingles, seasonnum,epnumber)
+                                          savefile(pastaserie,nomeficheiro,conteudo)
+                              savefile(pastaserie,'epnr.txt',numerowt)
+            
+      #xbmc.executebuiltin("CleanLibrary(video)")
+      print "Concluido processo de Lib"
+      if silent==False:
+            mensagemprogresso.close()
+            if algumamudanca==True:
+                  if not xbmc.getCondVisibility('Library.IsScanningVideo'): xbmc.executebuiltin("UpdateLibrary(video)")
+      else:
+            if algumamudanca==False: xbmc.executebuiltin("XBMC.Notification(wareztuga.tv,Nenhum episódio novo,'500000',"+iconpequeno.encode('utf-8')+")")
+            else:
+                  xbmc.executebuiltin("XBMC.Notification(wareztuga.tv,A actualizar biblioteca,'500000',"+iconpequeno.encode('utf-8')+")")
+                  if not xbmc.getCondVisibility('Library.IsScanningVideo'): xbmc.executebuiltin("UpdateLibrary(video)")
+      
       
 def menu_series(url):
       addDir(traducao(40081),MainURL + 'pagination.ajax.php?p=1&order=name&mediaType=' + url,4,wtpath + art + 'todas_as_series.png',1,True)
@@ -264,6 +257,7 @@ def menu_series(url):
       addDir(traducao(40086),MainURL + 'pagination.ajax.php?p=1&btn=seriesrecommended&mediaType=' + url,4,wtpath + art + 'series_recomendadas.png',1,True)
       addDir(traducao(40029),MainURL + url + '.php',11,wtpath + art + 'categoria.png',1,True)
       addDir(traducao(40030),MainURL + url + '.php',12,wtpath + art + 'ano.png',1,True)
+      addDir('Multi-filtro',MainURL + url + '.php',39,wtpath + art + 'categoria.png',1,True)
       #addDir('subs',MainURL + 'pagination.ajax.php?p=1&order=date&mediaType=movies',32,wtpath + art + 'ano.png',1,True)
       vista_menus()
           
@@ -314,6 +308,23 @@ def menu_ano(url):
       addDir("1950-1959",MainURL + 'pagination.ajax.php?p=1&order=date&years=1950' + referencia,modo,wtpath + art + '1950-1959.png',1,True)
       addDir("1900-1949",MainURL + 'pagination.ajax.php?p=1&order=date&years=1900' + referencia,modo,wtpath + art + '1900-1949.png',1,True)
       vista_menus()
+
+def multifiltro():
+      categorias=[traducao(40330),traducao(40091),traducao(40092),traducao(40093),traducao(40094),traducao(40095),traducao(40096),traducao(40097),traducao(40098),traducao(40099),traducao(40100),traducao(40101),traducao(40102),traducao(40103),traducao(40104),traducao(40105),traducao(40106),traducao(40107),traducao(40108),traducao(40109),traducao(40110)]
+      catnumb=['0','1','17','4','5','6','2','21','18','3','7','8','14','15','9','13','11','12','10','16','20']
+      index = xbmcgui.Dialog().select(traducao(40331), categorias)
+      if index > -1:
+            ano=['2014','2013','2012','2011','2010','2009','2008','2007','2006','2000-2005','1990-1999','1980-1989','1970-1979','1960-1969','1950-1959','1900-1949']
+            anonumb=['2014','2013','2012','2011','2010','2009','2008','2007','2006','2000','1990','1980','1970','1960','1950','1900']
+            index2 = xbmcgui.Dialog().select(traducao(40331), ano)
+            if index2 > -1:
+                  urlfinal=MainURL + 'pagination.ajax.php?p=1&order=date&years=%s&genres=%s' % (anonumb[index2],catnumb[index])
+                  print urlfinal
+                  print url
+                  if re.search('animes',url): series_request(urlfinal + '&mediaType=animes',False)
+                  elif re.search('series',url): series_request(urlfinal + '&mediaType=series',False)
+                  elif re.search('movies',url): filmes_request(urlfinal + '&mediaType=movies',False)
+                  
 
 def listas(url):
       if url=='filmes':baselist='http://fightnight-xbmc.googlecode.com/svn/addons/wareztuga/listas.txt'
@@ -1602,6 +1613,7 @@ def comecarvideo(srt,finalurl,name,thumbnail,wturl,proteccaobay):
       del dialogWait
       player = Player(tipo=tipo,warezid=warezid,videoname=name,thumbnail=thumbnail,proteccaobay=proteccaobay,wturl=wturl,imdbcode=imdbcode)
       player.play(playlist)
+      
       if selfAddon.getSetting('subtitles-activate') == 'true': player.setSubtitles(MainURL + srt)
       GA('None','tuga_player')
       while player._playbackLock:
@@ -1903,6 +1915,7 @@ def addFilme(name,url,mode,iconimage,titorig,genre,year,cast,director,plot,fanar
       cm = []
       cm.append((traducao(40074), 'XBMC.Action(Info)'))
       cm.append((traducao(40228), 'XBMC.RunPlugin(%s?mode=21&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
+      cm.append(('Adicionar à biblioteca', 'XBMC.RunPlugin(%s?mode=32&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
       if overlay==6: cm.append((traducao(40066),"XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('visto'),'movies',warezid,str(url),overlay)]) + ")"))
       else: cm.append((traducao(40067),"XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('visto'),'movies',warezid,str(url),overlay)]) + ")"))
       if faved==0: cm.append((traducao(40075), "XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('faved'),'movies',warezid,str(url),overlay)]) + ")"))
@@ -2079,9 +2092,9 @@ def savefile(caminho,filename, contents):
         fh.close()
     except: print "Nao gravou o marcador de: %s" % filename
 
-def openfile(filename):
+def openfile(filename,pastaficheiro=pastaperfil):
     try:
-        destination = os.path.join(pastaperfil, filename)
+        destination = os.path.join(pastaficheiro, filename)
         fh = open(destination, 'rb')
         contents=fh.read()
         fh.close()
@@ -2507,12 +2520,14 @@ elif mode==28: login_wareztuga()
 elif mode==29: conteudolistas(url)
 elif mode==30: itens_conta(url)
 elif mode==31: mensagemaviso('O objectivo das listas é partilhar conteúdos de forma organizada e temática, conforme os gostos de cada um.\n\nCom este espaço podemos descobrir novos titulos de forma simples e directa.\n\nContribuir para este espaço é muito fácil. Visita [B]http://bit.ly/fightnightaddons[/B] para ajudar a contribuir para este espaço. A comunidade agradece.')
-elif mode==32: glib(name)
-elif mode==33: glib('sacarbd')
+elif mode==32: glib('umfilme',url)
+elif mode==33: glib('sacarbd',url)
 elif mode==34: pedidos_request(url)
-elif mode==35: glib('subs')
+elif mode==35: glib('subs',url)
 elif mode==36: menu_conta()
 elif mode==37: instrucoeslibrary()
+elif mode==38: glib('subs',url,silent=True)
+elif mode==39: multifiltro()
 elif mode==69: pass
 
 xbmcplugin.endOfDirectory(int(sys.argv[1]))
