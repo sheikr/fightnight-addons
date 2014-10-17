@@ -20,7 +20,7 @@
    </category>
    <category label="Player">
       <setting label="30033" type="lsep" />
-      <setting id="server-preferido" type="enum" values="Off|Hugefiles|Profity|Kingfiles" label="30040" default="0"/>
+      <setting id="server-preferido" type="enum" values="Off|Hugefiles|Profity|Kingfiles|Videoshare" label="30040" default="0"/>
 
       <setting id="server-preferido-premium" type="enum" values="Off|Real-Debrid|Unrestrict.li" label="30043" enable="!eq(-1,0)" default="0" visible="false"/>
 

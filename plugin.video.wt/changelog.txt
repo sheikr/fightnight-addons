@@ -1,3 +1,7 @@
+[B]v0.3.09 (17 de Outubro de 2014):[/B]
+- Adicionado suporte ao novo servidor VideoShare.
+- Legendas corrigidas.
+
 [B]v0.3.08 (13 de Outubro de 2014):[/B]
 - Adicionado suporte total ao modo biblioteca (servico de verificacao de novos episodios e filmes).
 - Multi-filtro para filmes e series (ano/categoria).

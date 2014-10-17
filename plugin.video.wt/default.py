@@ -9,7 +9,7 @@ addon_id = 'plugin.video.wt'
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.3.08'
+versao = '0.3.09'
 MainURL = 'http://www.wareztuga.tv/'
 art = '/resources/art/'
 ListMovieURL = 'movies.php'; SingleMovieURL = 'movie.php'
@@ -901,17 +901,25 @@ def resolver_servidores(url,name,download=False):
             ligacao.append('http://hugefiles.net/' + huge[0])
             ligacaopref.append('http://hugefiles.net/' + huge[0])
 
-      prof=re.compile('http://profity.org/(.+?)" class="profity"').findall(infoservers)
+      prof=re.compile('profity.org/(.+?)" class="profity"').findall(infoservers)
       if prof:
             titles.append("[B][COLOR white]Profity[/COLOR][/B]")
             ligacao.append('http://profity.org/' + prof[0])
             ligacaopref.append('http://profity.org/' + prof[0])
 
-      king=re.compile('http://www.kingfiles.net/(.+?)" class="kingfiles"').findall(infoservers)
+      king=re.compile('kingfiles.net/(.+?)" class="kingfiles"').findall(infoservers)
       if king:
             titles.append("[B][COLOR white]Kingfiles[/COLOR][/B]")
             ligacao.append('http://www.kingfiles.net/' + king[0])
             ligacaopref.append('http://www.kingfiles.net/' + king[0])
+
+      vshare=re.compile('vshare.eu/(.+?)" class="vshare"').findall(infoservers)
+      if vshare:
+            titles.append("[B][COLOR white]Video[/COLOR][COLOR blue]Share[/COLOR][/B]")
+            ligacao.append('http://vshare.eu/' + vshare[0])
+            ligacaopref.append('http://vshare.eu/' + vshare[0])
+
+
 
       if download==False: simounao='agora'
       else:simounao='download'
@@ -957,6 +965,17 @@ def resolver_servidores(url,name,download=False):
                   if resultado:
                         for link in ligacaopref:
                               if re.search('kingfiles',link):
+                                    premon=premiumautomatico(link,thumbnail,name,fic,simounao,wturl)
+                                    if premon=='desactivado': kingfiles(link,fic,name,thumbnail,simounao,wturl)
+                                    parametro='sim'
+                  else: parametro='cancelou'
+
+            elif selfAddon.getSetting('server-preferido') =="4": #vshare
+                  print "Preferencial: VideoShare" + extra
+                  resultado = handle_wait(2,"wareztuga.tv",traducao(40216) + "VideoShare"+extra+").",segunda=traducao(40219))
+                  if resultado:
+                        for link in ligacaopref:
+                              if re.search('videoshare',link):
                                     premon=premiumautomatico(link,thumbnail,name,fic,simounao,wturl)
                                     if premon=='desactivado': kingfiles(link,fic,name,thumbnail,simounao,wturl)
                                     parametro='sim'
@@ -1036,6 +1055,7 @@ def vaiparaoserver(linkescolha,thumbnail,name,fic,simounao,wturl,index,titulos):
             elif re.search('hugefiles',linkescolha): hugefiles(linkescolha,fic,name,thumbnail,simounao,wturl)
             elif re.search('profity',linkescolha): profity(linkescolha,fic,name,thumbnail,simounao,wturl)
             elif re.search('kingfiles',linkescolha): kingfiles(linkescolha,fic,name,thumbnail,simounao,wturl)
+            elif re.search('vshare',linkescolha): videoshare(linkescolha,fic,name,thumbnail,simounao,wturl)
 
 def sintomecomsorte():
       categorias=[traducao(40330),traducao(40091),traducao(40092),traducao(40093),traducao(40094),traducao(40095),traducao(40096),traducao(40097),traducao(40098),traducao(40099),traducao(40100),traducao(40101),traducao(40102),traducao(40103),traducao(40104),traducao(40105),traducao(40106),traducao(40107),traducao(40108),traducao(40109),traducao(40110)]
@@ -1145,6 +1165,9 @@ class janelaservidores(xbmcgui.WindowXMLDialog):
           elif nome=='[B][COLOR white]Kingfiles[/COLOR][/B]':
                 thumb=wtpath + art + 'kingfiles.png'
                 self.criarelemento(nome,'kingfiles',i,thumb)
+          elif nome=='[B][COLOR white]Video[/COLOR][COLOR blue]Share[/COLOR][/B]':
+                thumb=wtpath + art + 'vshare.png'
+                self.criarelemento(nome,'videoshare',i,thumb)                
             
     def criarelemento(self,nome,servername,i,thumb):
           listControl = self.getControl(500)
@@ -1548,6 +1571,38 @@ def kingfiles(url,srt,name,thumbnail,simounao,wturl):
 
       else:mensagemprogresso.close()
 
+def videoshare(url,srt,name,thumbnail,simounao,wturl):
+      if simounao=='download' and downloadPath=='':
+            ok = mensagemok(traducao(40123),traducao(40125),traducao(40135),'')
+            selfAddon.openSettings()
+            return                        
+      mensagemprogresso.create('wareztuga.tv', traducao(40054),traducao(40055))
+      mensagemprogresso.update(0)
+      from t0mm0.common.net import Net
+      net = Net()
+      link=abrir_url(url)
+      op=re.compile('<input type="hidden" name="op" value="(.+?)">').findall(link)[0]
+      fname=re.compile('<input type="hidden" name="fname" value="(.+?)">').findall(link)[0]
+      usr_login=''
+      id=re.compile('<input type="hidden" name="id" value="(.+?)">').findall(link)[0]
+      referer=''
+      method=re.compile('name="method_free".+?value="(.+?)"').findall(link)[0]
+      form_data={'op':op,'usr_login':usr_login,'id':id,'fname':fname,'referer':referer,'method_free':method}
+      link= net.http_POST(url,form_data=form_data).content.encode('latin-1','ignore')
+      streamurl=re.compile('file: "(.+?)",').findall(link)[0]
+      mensagemprogresso.update(100)
+      mensagemprogresso.close()
+      if simounao=='download':
+            GA('None','tuga_down_vshare')
+            fezdown=fazerdownload(name,streamurl)
+            if fezdown:
+                  if selfAddon.getSetting('download-subs') == 'true': fazerdownload(name,srt)
+                  else: pass
+            encerrarsistema()
+      elif simounao=='agora':
+            GA('None','tuga_plays_vshare')
+            comecarvideo(srt,streamurl,name,thumbnail,wturl,False)
+
 
 ########################################################### PLAYER ################################################
 
@@ -1614,7 +1669,7 @@ def comecarvideo(srt,finalurl,name,thumbnail,wturl,proteccaobay):
       player = Player(tipo=tipo,warezid=warezid,videoname=name,thumbnail=thumbnail,proteccaobay=proteccaobay,wturl=wturl,imdbcode=imdbcode)
       player.play(playlist)
       
-      if selfAddon.getSetting('subtitles-activate') == 'true': player.setSubtitles(MainURL + srt)
+      if selfAddon.getSetting('subtitles-activate') == 'true': player.setSubtitles(srt)
       GA('None','tuga_player')
       while player._playbackLock:
             player._trackPosition()
@@ -2286,8 +2341,10 @@ def handle_wait(time_to_wait,title,text,segunda=''):
 def legendas(url):
       url=url.replace(' ','')
       link=abrir_url_cookie(url + '&url=http')
-      try:match=re.compile('captionUrl: \'./(.+?)\'').findall(link)[0]
-      except:match=''
+      try:match=MainURL + 'subs/' + re.compile('file: "./subs/(.+?)",').findall(link)[0]
+      except:
+            try:match= MainURL + re.compile('captionUrl: \'./(.+?)\'').findall(link)[0]
+            except:match=''
       return match
 
 def redirect(url):
