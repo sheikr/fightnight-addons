@@ -546,6 +546,7 @@ def addDir(name,url,mode,iconimage,total,pasta):
       liz=xbmcgui.ListItem(name,iconImage="DefaultFolder.png", thumbnailImage=iconimage)
       contexto.append((traducao(40050), 'XBMC.RunPlugin(%s?mode=15&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
       contexto.append((traducao(40047), 'XBMC.RunPlugin(%s?mode=14&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
+      contexto.append(('Ver Trailer', 'RunPlugin(%s?mode=17&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),name)))	  
       liz.setInfo( type="Video", infoLabels={ "Title": name} )
       liz.setProperty('fanart_image', "%s/fanart.jpg"%selfAddon.getAddonInfo("path"))
       liz.addContextMenuItems(contexto, replaceItems=False) 
@@ -558,6 +559,7 @@ def addCont(name,url,mode,tamanho,iconimage,total,pasta):
       contexto.append((traducao(40038), 'XBMC.RunPlugin(%s?mode=10&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
       contexto.append((traducao(40046), 'XBMC.RunPlugin(%s?mode=13&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
       contexto.append((traducao(40047), 'XBMC.RunPlugin(%s?mode=14&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
+      contexto.append(('Ver Trailer', 'RunPlugin(%s?mode=17&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),name)))
       contexto.append((traducao(40040), 'XBMC.RunPlugin(%s?mode=11&url=%s&name=%s&tamanhof=%s)' % (sys.argv[0], urllib.quote_plus(url),name,tamanho)))
       liz.setInfo( type="Video", infoLabels={ "Title": name} )
       liz.setProperty('fanart_image', "%s/fanart.jpg"%selfAddon.getAddonInfo("path"))
@@ -725,6 +727,232 @@ def clean(text):
       regex = re.compile("|".join(map(re.escape, command.keys())))
       return regex.sub(lambda mo: command[mo.group(0)], text)
 
+#trailer,sn
+def trailer(name, url):
+	print name,url
+	url = trailer2().run(name, url)
+	if url == None: return
+	item = xbmcgui.ListItem(path=url)
+	item.setProperty("IsPlayable", "true")
+	xbmc.Player().play(url, item)
+
+class trailer2:
+    def __init__(self):
+        self.youtube_base = 'http://www.youtube.com'
+        self.youtube_query = 'http://gdata.youtube.com/feeds/api/videos?q='
+        self.youtube_watch = 'http://www.youtube.com/watch?v=%s'
+        self.youtube_info = 'http://gdata.youtube.com/feeds/api/videos/%s?v=2'
+
+    def run(self, name, url):
+        try:
+            if url.startswith(self.youtube_base):
+                url = self.youtube(url)
+                if url == None: raise Exception()
+                return url
+            elif not url.startswith('http://'):
+                url = self.youtube_watch % url
+                url = self.youtube(url)
+                if url == None: raise Exception()
+                return url
+            else:
+                raise Exception()
+        except:
+            url = self.youtube_query + name + ' trailer'
+            url = self.youtube_search(url)
+            if url == None: return
+            return url
+
+    def youtube_search(self, url):
+        try:
+            query = url.split("?q=")[-1].split("/")[-1].split("?")[0]
+            url= url.split('[/B]')[0].replace('[B]','')
+            url = url.replace(query, urllib.quote_plus(query))
+            result = getUrl(url, timeout='10').result
+            result = parseDOM(result, "entry")
+            result = parseDOM(result, "id")
+			
+            for url in result[:5]:
+                url = url.split("/")[-1]	
+                url = self.youtube_watch % url
+                url = self.youtube(url)
+                if not url == None: return url
+        except: return
+
+    def youtube(self, url):
+        print '#youtube'
+        try:
+            id = url.split("?v=")[-1].split("/")[-1].split("?")[0].split("&")[0]
+            state, reason = None, None
+            result = getUrl(self.youtube_info % id, timeout='10').result
+            try:
+                state = common.parseDOM(result, "yt:state", ret="name")[0]
+                reason = common.parseDOM(result, "yt:state", ret="reasonCode")[0]
+            except:
+                pass
+            if state == 'deleted' or state == 'rejected' or state == 'failed' or reason == 'requesterRegion' : return
+            try:
+                result = getUrl(self.youtube_watch % id, timeout='10').result
+                alert = common.parseDOM(result, "div", attrs = { "id": "watch7-notification-area" })[0]
+                return
+            except:
+                pass
+            url = 'plugin://plugin.video.youtube/?action=play_video&videoid=%s' % id
+            return url
+        except:
+            return
+
+class getUrl(object):
+    def __init__(self, url, close=True, proxy=None, post=None, mobile=False, referer=None, cookie=None, output='', timeout='5'):
+        if not proxy == None:
+            proxy_handler = urllib2.ProxyHandler({'http':'%s' % (proxy)})
+            opener = urllib2.build_opener(proxy_handler, urllib2.HTTPHandler)
+            opener = urllib2.install_opener(opener)
+        if output == 'cookie' or not close == True:
+            import cookielib
+            cookie_handler = urllib2.HTTPCookieProcessor(cookielib.LWPCookieJar())
+            opener = urllib2.build_opener(cookie_handler, urllib2.HTTPBasicAuthHandler(), urllib2.HTTPHandler())
+            opener = urllib2.install_opener(opener)
+        if not post == None:
+            request = urllib2.Request(url, post)
+        else:
+            request = urllib2.Request(url,None)
+        if mobile == True:
+            request.add_header('User-Agent', 'Mozilla/5.0 (iPhone; CPU; CPU iPhone OS 4_0 like Mac OS X; en-us) AppleWebKit/532.9 (KHTML, like Gecko) Version/4.0.5 Mobile/8A293 Safari/6531.22.7')
+        else:
+            request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:22.0) Gecko/20100101 Firefox/22.0')
+        if not referer == None:
+            request.add_header('Referer', referer)
+        if not cookie == None:
+            request.add_header('cookie', cookie)
+        response = urllib2.urlopen(request, timeout=int(timeout))
+        if output == 'cookie':
+            result = str(response.headers.get('Set-Cookie'))
+        elif output == 'geturl':
+            result = response.geturl()
+        else:
+            result = response.read()
+        if close == True:
+            response.close()
+        self.result = result
+
+def parseDOM(html, name=u"", attrs={}, ret=False):
+    if isinstance(name, str): # Should be handled
+        try:  name = name #.decode("utf-8")
+        except: pass
+
+    if isinstance(html, str):
+        try: html = [html.decode("utf-8")] # Replace with chardet thingy
+        except: html = [html]
+    elif isinstance(html, unicode): html = [html]
+    elif not isinstance(html, list): return u""
+
+    if not name.strip(): return u""
+
+    ret_lst = []
+    for item in html:
+        temp_item = re.compile('(<[^>]*?\n[^>]*?>)').findall(item)
+        for match in temp_item: item = item.replace(match, match.replace("\n", " "))
+
+        lst = _getDOMElements(item, name, attrs)
+
+        if isinstance(ret, str):
+            lst2 = []
+            for match in lst:
+                lst2 += _getDOMAttributes(match, name, ret)
+            lst = lst2
+        else:
+            lst2 = []
+            for match in lst:
+                temp = _getDOMContent(item, name, match, ret).strip()
+                item = item[item.find(temp, item.find(match)) + len(temp):]
+                lst2.append(temp)
+            lst = lst2
+        ret_lst += lst
+
+    return ret_lst
+
+def _getDOMContent(html, name, match, ret):  # Cleanup
+
+    endstr = u"</" + name  # + ">"
+
+    start = html.find(match)
+    end = html.find(endstr, start)
+    pos = html.find("<" + name, start + 1 )
+
+    while pos < end and pos != -1:  # Ignore too early </endstr> return
+        tend = html.find(endstr, end + len(endstr))
+        if tend != -1:
+            end = tend
+        pos = html.find("<" + name, pos + 1)
+
+    if start == -1 and end == -1:
+        result = u""
+    elif start > -1 and end > -1:
+        result = html[start + len(match):end]
+    elif end > -1:
+        result = html[:end]
+    elif start > -1:
+        result = html[start + len(match):]
+
+    if ret:
+        endstr = html[end:html.find(">", html.find(endstr)) + 1]
+        result = match + result + endstr
+
+    return result
+
+def _getDOMAttributes(match, name, ret):
+    lst = re.compile('<' + name + '.*?' + ret + '=([\'"].[^>]*?[\'"])>', re.M | re.S).findall(match)
+    if len(lst) == 0:
+        lst = re.compile('<' + name + '.*?' + ret + '=(.[^>]*?)>', re.M | re.S).findall(match)
+    ret = []
+    for tmp in lst:
+        cont_char = tmp[0]
+        if cont_char in "'\"":
+
+            # Limit down to next variable.
+            if tmp.find('=' + cont_char, tmp.find(cont_char, 1)) > -1:
+                tmp = tmp[:tmp.find('=' + cont_char, tmp.find(cont_char, 1))]
+
+            # Limit to the last quotation mark
+            if tmp.rfind(cont_char, 1) > -1:
+                tmp = tmp[1:tmp.rfind(cont_char)]
+        else:
+            if tmp.find(" ") > 0:
+                tmp = tmp[:tmp.find(" ")]
+            elif tmp.find("/") > 0:
+                tmp = tmp[:tmp.find("/")]
+            elif tmp.find(">") > 0:
+                tmp = tmp[:tmp.find(">")]
+
+        ret.append(tmp.strip())
+
+    return ret
+
+def _getDOMElements(item, name, attrs):
+    lst = []
+    for key in attrs:
+        lst2 = re.compile('(<' + name + '[^>]*?(?:' + key + '=[\'"]' + attrs[key] + '[\'"].*?>))', re.M | re.S).findall(item)
+        if len(lst2) == 0 and attrs[key].find(" ") == -1:  # Try matching without quotation marks
+            lst2 = re.compile('(<' + name + '[^>]*?(?:' + key + '=' + attrs[key] + '.*?>))', re.M | re.S).findall(item)
+
+        if len(lst) == 0:
+            lst = lst2
+            lst2 = []
+        else:
+            test = range(len(lst))
+            test.reverse()
+            for i in test:  # Delete anything missing from the next list.
+                if not lst[i] in lst2:
+                    del(lst[i])
+
+    if len(lst) == 0 and attrs == {}:
+        lst = re.compile('(<' + name + '>)', re.M | re.S).findall(item)
+        if len(lst) == 0:
+            lst = re.compile('(<' + name + ' .*?>)', re.M | re.S).findall(item)
+
+    return lst
+#trailer,en
+
 params=get_params()
 url=None
 name=None
@@ -764,4 +992,5 @@ elif mode==13: comecarplaylist()
 elif mode==14: limparplaylist()
 elif mode==15: criarplaylist(url,name)
 elif mode==16: obterlistadeficheiros()
+elif mode==17: trailer(name, url)
 xbmcplugin.endOfDirectory(int(sys.argv[1]))
