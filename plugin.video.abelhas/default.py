@@ -4,6 +4,7 @@
     2013 fightnight"""
 
 import xbmc,xbmcaddon,xbmcgui,xbmcplugin,urllib,urllib2,os,re,sys,datetime,time
+from resources.lib import subtitles
 from t0mm0.common.net import Net
 net=Net()
 
@@ -519,6 +520,10 @@ def comecarvideo(name,url,playterm,legendas=None):
               xbmcPlayer = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
               xbmcPlayer.play(playlist)
         if legendas!=None: xbmcPlayer.setSubtitles(legendas)
+        else:
+			if selfAddon.getSetting("subtitles") == 'true': 
+				legendas = subtitles.getsubtitles(name,selfAddon.getSetting("sublang1"),selfAddon.getSetting("sublang2"))
+				if legendas!=None: xbmcPlayer.setSubtitles(legendas)
         if playterm=='playlist': xbmc.executebuiltin("XBMC.Notification(abelhas.pt,"+traducao(40039)+",'500000',"+iconpequeno.encode('utf-8')+")")
 
 def limparplaylist():
