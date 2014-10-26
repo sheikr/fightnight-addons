@@ -50,8 +50,8 @@
       <setting label="Opcoes de biblioteca" type="lsep" />
       <setting id="lib-serieson" type="bool" label="Activar biblioteca" default="false"/>
       <setting id="lib-seriesact" type="action" action="RunPlugin(plugin://plugin.video.wt/?mode=35&name=subs&url=nada)" label="Forcar manualmente actualizacao de subscricoes" default="" enable="!eq(-1,false)"/>
-      <setting id="lib-updateauto" type="bool" label="Actualizar automaticamente as subscricoes da biblioteca" default="true" enable="!eq(-2,false)"/>
-      <setting id="service_interval" type="enum" label="Intervalo para verificar novos epis󤩯s" values="2h|5h|10h|15h|24h" default="1" enable="!eq(-1,false)"/>
+      <setting id="lib-updateauto" type="bool" label="Actualizar automaticamente as subscrições da biblioteca" default="true" enable="!eq(-2,false)"/>
+      <setting id="service_interval" type="enum" label="Intervalo para verificar novos episódios" values="2h|5h|10h|15h|24h" default="1" enable="!eq(-1,false)"/>
       <setting id="service_run" type="text" default="1970-01-01 23:59:00.000000" visible="false"/>
 
    </category>
