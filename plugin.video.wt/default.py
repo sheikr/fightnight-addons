@@ -428,19 +428,35 @@ def unrestrict_captcha(url,referido):
             hugekey=re.compile('id="adcopy_challenge" value="(.+?)">').findall(check)[0]
             captcha_headers= {'User-Agent':'Mozilla/6.0 (Macintosh; I; Intel Mac OS X 11_7_9; de-LI; rv:1.9b4) Gecko/2012010317 Firefox/10.0a4','Host':'api.solvemedia.com','Referer':response.get_url(),'Accept':'image/png,image/*;q=0.8,*/*;q=0.5'}
             open(captcha_img, 'wb').write( net.http_GET("http://api.solvemedia.com%s"%re.compile('<img src="(.+?)"').findall(check)[0] ).content)
-            solver = InputWindow(captcha=captcha_img)
-            try:os.remove(captcha_img)
-            except: pass
-            puzzle = solver.get()
+            try: solved,id = solvevia9kw(captcha_img)
+            except: 
+				solved = ''
+				id = ''
+            if solved != '':
+				puzzle = solved
+				try:os.remove(captcha_img)
+				except: pass
+            else:
+				solver = InputWindow(captcha=captcha_img)
+				try:os.remove(captcha_img)
+				except: pass
+				puzzle = solver.get()
             if puzzle and referido=='download':
                   data={'response':urllib.quote_plus(puzzle),'challenge':hugekey,'link':media_id}
                   html = net.http_POST('https://unrestrict.li/download.php',data).content
                   download_link = json.loads(html).items()[0][1]
                   if re.search('Incorrect captcha entered',download_link):
+                        if id != '': 
+							try: Ninekwusercaptchacorrectback(id,"2")
+							except:pass
                         xbmc.executebuiltin("XBMC.Notification(wareztuga.tv,"+traducao(40227)+",'500000',"+iconpequeno.encode('utf-8')+")")
                         sys.exit(0)
                         raise
-                  else: return download_link
+                  else: 
+					if id != '': 
+						try: Ninekwusercaptchacorrectback(id,"1")
+						except: pass
+					return download_link
             if puzzle and referido=='login':
                         data = net.http_POST(urlsignin,{'return':'registered','username':usernameunli,'password':passwordunli,'adcopy_response':urllib.quote_plus(puzzle),'adcopy_challenge':hugekey,'signin':'Sign+in'}).content
                         success=re.compile('href=".+?unrestrict.li/profile">(.+?)</a>.+?href=".+?unrestrict.li/sign_out">(.+?)</a>',re.DOTALL).findall(data)
@@ -1454,10 +1470,19 @@ def hugefiles(url,srt,name,thumbnail,simounao,wturl):
       hugekey=re.compile('id="adcopy_challenge" value="(.+?)">').findall(check)[0]
       captcha_headers= {'User-Agent':'Mozilla/6.0 (Macintosh; I; Intel Mac OS X 11_7_9; de-LI; rv:1.9b4) Gecko/2012010317 Firefox/10.0a4','Host':'api.solvemedia.com','Referer':url,'Accept':'image/png,image/*;q=0.8,*/*;q=0.5'}
       open(captcha_img, 'wb').write( net.http_GET("http://api.solvemedia.com%s"%re.compile('<img src="(.+?)"').findall(check)[0] ).content)
-      solver = InputWindow(captcha=captcha_img)
-      try:os.remove(captcha_img)
-      except: pass
-      puzzle = solver.get()
+      try: solved,id = solvevia9kw(captcha_img)
+      except: 
+		solved = ''
+		id = ''
+      if solved != '':
+		puzzle = solved
+		try:os.remove(captcha_img)
+		except: pass
+      else:
+		solver = InputWindow(captcha=captcha_img)
+		try:os.remove(captcha_img)
+		except: pass
+		puzzle = solver.get()
       if puzzle:
             mensagemprogresso.update(66)
             op=re.compile('<input type="hidden" name="op" value="(.+?)">').findall(link)[0]
@@ -1472,10 +1497,16 @@ def hugefiles(url,srt,name,thumbnail,simounao,wturl):
             link= net.http_POST(url,form_data=form_data).content.encode('latin-1','ignore')
             try:streamurl=re.compile('var fileUrl = "(.+?)"').findall(link)[0]
             except:
+                  if id != '': 
+					try: Ninekwusercaptchacorrectback(id,"2")
+					except: pass
                   mensagemok(traducao(40123),traducao(40348))
                   sys.exit(0)
             mensagemprogresso.update(100)
             mensagemprogresso.close()
+            if id != '': 
+				try: Ninekwusercaptchacorrectback(id,"1")
+				except: pass
             if simounao=='download':
                   GA('None','tuga_down_huge')
                   fezdown=fazerdownload(name,streamurl)
@@ -1534,10 +1565,19 @@ def kingfiles(url,srt,name,thumbnail,simounao,wturl):
       hugekey=re.compile('id="adcopy_challenge" value="(.+?)">').findall(check)[0]
       captcha_headers= {'User-Agent':'Mozilla/6.0 (Macintosh; I; Intel Mac OS X 11_7_9; de-LI; rv:1.9b4) Gecko/2012010317 Firefox/10.0a4','Host':'api.solvemedia.com','Referer':url,'Accept':'image/png,image/*;q=0.8,*/*;q=0.5'}
       open(captcha_img, 'wb').write( net.http_GET("http://api.solvemedia.com%s"%re.compile('<img src="(.+?)"').findall(check)[0] ).content)
-      solver = InputWindow(captcha=captcha_img)
-      try:os.remove(captcha_img)
-      except: pass
-      puzzle = solver.get()
+      try: solved,id = solvevia9kw(captcha_img)
+      except: 
+		solved = ''
+		id = ''
+      if solved != '':
+		puzzle = solved
+		try:os.remove(captcha_img)
+		except: pass
+      else:
+		solver = InputWindow(captcha=captcha_img)
+		try:os.remove(captcha_img)
+		except: pass
+		puzzle = solver.get()
       if puzzle:
             mensagemprogresso.update(66)
             op=re.compile('<input type="hidden" name="op" value="(.+?)">').findall(link)[0]
@@ -1553,11 +1593,17 @@ def kingfiles(url,srt,name,thumbnail,simounao,wturl):
             link= net.http_POST(url,form_data=form_data).content.encode('latin-1','ignore')
             try:streamurl=re.compile("var download_url = '(.+?)'").findall(link)[0]
             except:
+                  if id != '': 
+					try: Ninekwusercaptchacorrectback(id,"2")
+					except: pass
                   mensagemok(traducao(40123),traducao(40348))
                   sys.exit(0)
                   
             mensagemprogresso.update(100)
             mensagemprogresso.close()
+            if id != '': 
+				try: Ninekwusercaptchacorrectback(id,"1")
+				except: pass
             if simounao=='download':
                   GA('None','tuga_down_king')
                   fezdown=fazerdownload(name,streamurl)
@@ -2513,6 +2559,64 @@ def APP_LAUNCH():
             except: print "============================  CANNOT POST APP LAUNCH TRACK EVENT ============================" 
         except: print "================  CANNOT POST TO ANALYTICS  ================"
 checkGA()
+
+def NinekwBalance(apikey,apiurl):
+	url="?action=usercaptchaguthaben&source=pythonapi&apikey=" + apikey
+	req = urllib2.Request(apiurl+url)
+	response = urllib2.urlopen(req).read()
+	return response
+
+def Ninekwusercaptchaupload(apikey, apiurl, filename):
+	from base64 import b64encode
+	png_data = open(filename, "rb")	
+	data = png_data.read();	
+	query_args = {'action':'usercaptchaupload', 'source':'pythonapi', 'apikey':apikey, 'base64':'1', 'file-upload-01':b64encode(data) }
+	data = urllib.urlencode(query_args)
+	req = urllib2.Request(apiurl,data)
+	response = urllib2.urlopen(req).read()
+	return response
+
+def Ninekwusercaptchacorrectdata(apikey, apiurl, id):
+	url="?action=usercaptchacorrectdata&source=pythonapi&apikey=" + apikey + "&id=" + id
+	req = urllib2.Request(apiurl+url)
+	response = urllib2.urlopen(req)
+	solved=response.read()
+	if solved == "":
+			wait = 5;
+			time.sleep(wait)
+			for i in range(wait, 20, 1):
+				try:
+					req = urllib2.Request(apiurl+url)
+					response = urllib2.urlopen(req)
+					solved = response.read()
+				except: pass
+				if(solved != ""): break
+				time.sleep(3)
+	return solved
+
+def Ninekwusercaptchacorrectback(id, correct):
+	APIKEY = selfAddon.getSetting('API-9kw');
+	APIURL = "http://www.9kw.eu/index.cgi"
+	url="?action=usercaptchacorrectback&source=pythonapi&apikey=" + APIKEY + "&id=" + id + "&correct=" + correct
+	req = urllib2.Request(APIURL+url)
+	response = urllib2.urlopen(req)
+
+def solvevia9kw(file):
+	APIKEY = selfAddon.getSetting('API-9kw');
+	APIURL = "http://www.9kw.eu/index.cgi"
+	if APIKEY != "":
+			balance = NinekwBalance(APIKEY,APIURL)
+			print '[##9ku]balance: '+balance
+			if balance >= 10:
+				id = Ninekwusercaptchaupload(APIKEY,APIURL,file)
+				print '[##9ku]ID: '+id
+				if id <> '':
+					solved = Ninekwusercaptchacorrectdata(APIKEY,APIURL,id)
+					print '[##9ku]solved: '+solved
+					return solved,id
+				else: return "",""
+			else: return "",""
+	else: return "",""
             
 params=get_params()
 url=None
