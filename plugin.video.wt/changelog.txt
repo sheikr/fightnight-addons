@@ -1,3 +1,8 @@
+[B]v0.3.10 (28 de Outubro de 2014):[/B]
+- Adicionado sistema automatizado de captcha 9kw (ver opcoes para mais informacoes / ty mafarricos!)
+- Corrigido problema em que nada acontecia apos seleccao de servidor.
+- Outras correccoes.
+
 [B]v0.3.09 (17 de Outubro de 2014):[/B]
 - Adicionado suporte ao novo servidor VideoShare.
 - Legendas corrigidas.

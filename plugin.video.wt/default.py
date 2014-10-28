@@ -9,7 +9,7 @@ addon_id = 'plugin.video.wt'
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.3.09'
+versao = '0.3.10'
 MainURL = 'http://www.wareztuga.tv/'
 art = '/resources/art/'
 ListMovieURL = 'movies.php'; SingleMovieURL = 'movie.php'
@@ -148,6 +148,9 @@ def menu_filmes():
 
 def instrucoeslibrary():
       mensagemaviso('Bem vindo ao modo biblioteca!\n\nEsta é a nova funcionalidade disponivel neste addon. Com esta função passa a ser possível ter o conteúdo do wareztuga na vossa biblioteca local. Com esta funcionalidade tem um acesso mais rápido aos conteúdos do site.\n\n Para começar devem activar as opções e efectuar uma actualização do conteúdo.\n\nDe seguida devem ir a Videos->Ficheiros->Adicionar Vídeos e adicionar a pasta onde se encontra a base de dados do wareztuga.\n\n[B][COLOR white]Pasta Inicial -> userdata -> addon_data -> plugin.video.wt -> Biblioteca->Filmes ou Séries e só depois confirmar[/B] (pasta defeito, se alteraram nas definições é a que escolheram)[/COLOR]\n\nDe seguida devem modificar as definições consoante a pasta que escolheram! Podem ir a configurações e definir o idioma que desejam obter para a biblioteca. Caso desejem ter séries e filmes na biblioteca, devem repetir o passo para o tipo de conteúdo em falta!\n\nO addon vai apenas verificar novos episódios nas séries subscritas e actualiza automaticamente a biblioteca. A verificação automática é feito conforme o periodo definido.')
+      
+def instrucoes9kw():
+      mensagemaviso('O 9kw.eu é um site que permite que utilizadores resolvam o nosso captcha, bem como nos resolvamos os de outros utilizadores através de um sistema de créditos. Para utilizarem este serviço, devem criar uma key no site e preencher nas definições deste addon.\n\n\n1- Registar no site: https://www.9kw.eu/register.html\n\n2 - Activar a conta com o email recebido.\n\n3- Fazer login.\n\n4 - Aceder a https://www.9kw.eu/index.cgi?action=userapinew&source=api\n\n5 - Apontar a key da api criada e inserir nas settings do addon.\n\nAdicionalmente:\n\n6 - Resolver captchas em https://www.9kw.eu/usercaptcha.html para obter crédito para que nos sejam resolvidas as nossas captchas.')
 
 def glib(name,url,silent=False):
       algumamudanca=False
@@ -1150,7 +1153,7 @@ class janelaservidores(xbmcgui.WindowXMLDialog):
                 if re.search('informacaodovideo',self.ligacao[i]): self.getControl(800).setLabel(nomesservers)
                 else:self.addListagem(nomesservers,i)
                 i=i+1
-          self.setFocus(500)
+          #self.setFocus(500)
           #self.getControl(803).setText(self.listadecomentarios)
 
     def onClick(self,controlId):
@@ -1462,12 +1465,20 @@ def hugefiles(url,srt,name,thumbnail,simounao,wturl):
       mensagemprogresso.update(33)
       from t0mm0.common.net import Net
       net = Net()
-      link=abrir_url(url)
-      captcha_img = os.path.join(pastaperfil, "putcaptcha.png")
-      noscript=re.compile('<iframe src="(.+?)"').findall(link)[0]
-
-      check = net.http_GET(noscript).content
-      hugekey=re.compile('id="adcopy_challenge" value="(.+?)">').findall(check)[0]
+      #stupid timeout,retry
+      try:
+            link=abrir_url(url)
+            captcha_img = os.path.join(pastaperfil, "putcaptcha.png")
+            noscript=re.compile('<iframe src="(.+?)"').findall(link)[0]
+            check = net.http_GET(noscript).content
+            hugekey=re.compile('id="adcopy_challenge" value="(.+?)">').findall(check)[0]
+      except:
+            link=abrir_url(url)
+            captcha_img = os.path.join(pastaperfil, "putcaptcha.png")
+            noscript=re.compile('<iframe src="(.+?)"').findall(link)[0]
+            check = net.http_GET(noscript).content
+            hugekey=re.compile('id="adcopy_challenge" value="(.+?)">').findall(check)[0]
+            
       captcha_headers= {'User-Agent':'Mozilla/6.0 (Macintosh; I; Intel Mac OS X 11_7_9; de-LI; rv:1.9b4) Gecko/2012010317 Firefox/10.0a4','Host':'api.solvemedia.com','Referer':url,'Accept':'image/png,image/*;q=0.8,*/*;q=0.5'}
       open(captcha_img, 'wb').write( net.http_GET("http://api.solvemedia.com%s"%re.compile('<img src="(.+?)"').findall(check)[0] ).content)
       try: solved,id = solvevia9kw(captcha_img)
@@ -1494,14 +1505,28 @@ def hugefiles(url,srt,name,thumbnail,simounao,wturl):
             ctype=re.compile('<input type="hidden" name="ctype" value="(.+?)">').findall(link)[0]
             method=re.compile('name="method_free".+?value="(.+?)"').findall(link)[0]
             form_data={'op':op,'usr_login':usr_login,'rand':rand,'id':id,'fname':fname,'referer':referer,'ctype':ctype,'adcopy_response':puzzle,'adcopy_challenge':hugekey,'method_free':method}
-            link= net.http_POST(url,form_data=form_data).content.encode('latin-1','ignore')
-            try:streamurl=re.compile('var fileUrl = "(.+?)"').findall(link)[0]
+            #stupid timeout,retry
+            try:
+                  
+                  link= net.http_POST(url,form_data=form_data).content.encode('latin-1','ignore')
+                  try:streamurl=re.compile('var fileUrl = "(.+?)"').findall(link)[0]
+                  except:
+                        if id != '': 
+                                              try: Ninekwusercaptchacorrectback(id,"2")
+                                              except: pass
+                        mensagemok(traducao(40123),traducao(40348))
+                        sys.exit(0)
+            
             except:
-                  if id != '': 
-					try: Ninekwusercaptchacorrectback(id,"2")
-					except: pass
-                  mensagemok(traducao(40123),traducao(40348))
-                  sys.exit(0)
+                  link= net.http_POST(url,form_data=form_data).content.encode('latin-1','ignore')
+                  try:streamurl=re.compile('var fileUrl = "(.+?)"').findall(link)[0]
+                  except:
+                        if id != '': 
+                                              try: Ninekwusercaptchacorrectback(id,"2")
+                                              except: pass
+                        mensagemok(traducao(40123),traducao(40348))
+                        sys.exit(0)
+                  
             mensagemprogresso.update(100)
             mensagemprogresso.close()
             if id != '': 
@@ -2689,6 +2714,7 @@ elif mode==36: menu_conta()
 elif mode==37: instrucoeslibrary()
 elif mode==38: glib('subs',url,silent=True)
 elif mode==39: multifiltro()
+elif mode==40: instrucoes9kw()
 elif mode==69: pass
 
 xbmcplugin.endOfDirectory(int(sys.argv[1]))

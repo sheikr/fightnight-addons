@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
    <category label="30600">
       <setting label="30024" type="lsep" />
@@ -25,7 +25,8 @@
       <setting id="server-preferido-premium" type="enum" values="Off|Real-Debrid|Unrestrict.li" label="30043" enable="!eq(-1,0)" default="0" visible="false"/>
 
       <setting id="server-preferido-debrid" type="bool" label="30045" default="false"/>
-      <setting id="API-9kw" type="text" label="9kw Captcha Solver API Key" default=""/>	  
+      <setting id="API-9kw" type="text" label="9KW API Key Resolvedor de Captchas" default=""/>	  
+      <setting id="API-instrucoes" type="action" action="RunPlugin(plugin://plugin.video.wt/?mode=40&name=sacarbd&url=nada)"  label="Ler instrucoes do modo 9kw (captcha)"/>
       <setting id="playertype" type="enum" values="Auto (recomendado)|MPlayer|DVDPlayer|PAPlayer" label="30034" default="0" />
       <setting id="watched-enable" type="bool" label="30022" default="true"/>
       <setting id="watched-percent" type="enum" values="70[B] %[/B]|80[B] %[/B]|90[B] %[/B]|95[B] %[/B]" label="30021" default="2" enable="!eq(-1,false)"/>
