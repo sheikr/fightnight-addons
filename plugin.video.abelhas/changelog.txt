@@ -1,3 +1,6 @@
+[B]v0.0.14 (28 de Outubro de 2014):[/B]
+- Refix das legendas.
+
 [B]v0.0.13 (28 de Outubro de 2014):[/B]
 - Adicionado sistema automatico para pesquisa de legendas (ty mafarricos).
 - Corrigido legendas na mesma pasta. (ty mafarricos)

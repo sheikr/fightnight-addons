@@ -9,7 +9,7 @@ net=Net()
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.0.13'
+versao = '0.0.14'
 addon_id = 'plugin.video.abelhas'
 MainURL = 'http://abelhas.pt/'
 art = '/resources/art/'
@@ -488,7 +488,7 @@ def analyzer(url,subtitles='',playterm=False,playlistTitle=''):
             else: comecarvideo(name,linkfinal,playterm=playterm)
 
 def legendas(moviefileid,url):
-      url=url.replace(','+moviefileid,'').replace('.mkv','.srt').replace('.mp4','.srt').replace('.avi','.srt').replace('.wmv','.srt')
+      url=url.replace(','+moviefileid,'').replace('.mkv','.srt').replace('.mp4','.srt').replace('.avi','.srt').replace('.wmv','.srt')[:-7]
       legendas=analyzer(url,subtitles='sim')
       return legendas
 
