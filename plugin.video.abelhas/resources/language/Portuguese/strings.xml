@@ -53,4 +53,11 @@
 	<string id="40048">A Playlist está limpa</string>
 	<string id="40049">A Criar Playlist</string>
 	<string id="40050">Criar Playlist</string>
+	<string id="30140">Legendas</string>
+	<string id="30141">As legendas podem não estar disponíveis ou fora de sincronismo.</string>
+	<string id="30142">Utilizar legendas próprias nesse caso.</string>
+	<string id="30143">Permitir Legendas</string>
+	<string id="30144">Idioma Principal</string>
+	<string id="30145">Idioma Secundário</string>
+	<string id="30146">Tempo mínimo do vidro para procurar legendas (em Minutos)</string>
 </strings>
