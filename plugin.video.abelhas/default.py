@@ -4,13 +4,12 @@
     2013 fightnight"""
 
 import xbmc,xbmcaddon,xbmcgui,xbmcplugin,urllib,urllib2,os,re,sys,datetime,time
-from resources.lib import subtitles
 from t0mm0.common.net import Net
 net=Net()
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.0.12'
+versao = '0.0.13'
 addon_id = 'plugin.video.abelhas'
 MainURL = 'http://abelhas.pt/'
 art = '/resources/art/'
@@ -527,6 +526,7 @@ def comecarvideo(name,url,playterm,legendas=None):
 				print '##totaltime',totalTime
 				if totalTime >= int(selfAddon.getSetting("minsize"))*60:
 					print '#pesquisar legendas'
+					from resources.lib import subtitles
 					legendas = subtitles.getsubtitles(name,selfAddon.getSetting("sublang1"),selfAddon.getSetting("sublang2"))
 					if legendas!=None: xbmcPlayer.setSubtitles(legendas)
         if playterm=='playlist': xbmc.executebuiltin("XBMC.Notification(abelhas.pt,"+traducao(40039)+",'500000',"+iconpequeno.encode('utf-8')+")")

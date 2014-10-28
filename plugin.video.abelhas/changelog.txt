@@ -1,3 +1,9 @@
+[B]v0.0.13 (28 de Outubro de 2014):[/B]
+- Adicionado sistema automatico para pesquisa de legendas (ty mafarricos).
+- Corrigido legendas na mesma pasta. (ty mafarricos)
+- Adicionada opção para trailers (ty mafarricos).
+- Outras correcções.
+
 [B]v0.0.12 (26 de Agosto de 2014):[/B]
 - Fix no espaco ocupado por cada utilizador.
 - Outras correccoes e melhorias.
