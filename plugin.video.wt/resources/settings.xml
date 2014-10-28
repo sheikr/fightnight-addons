@@ -25,6 +25,7 @@
       <setting id="server-preferido-premium" type="enum" values="Off|Real-Debrid|Unrestrict.li" label="30043" enable="!eq(-1,0)" default="0" visible="false"/>
 
       <setting id="server-preferido-debrid" type="bool" label="30045" default="false"/>
+      <setting id="API-9kw" type="text" label="9kw Captcha Solver API Key" default=""/>	  
       <setting id="playertype" type="enum" values="Auto (recomendado)|MPlayer|DVDPlayer|PAPlayer" label="30034" default="0" />
       <setting id="watched-enable" type="bool" label="30022" default="true"/>
       <setting id="watched-percent" type="enum" values="70[B] %[/B]|80[B] %[/B]|90[B] %[/B]|95[B] %[/B]" label="30021" default="2" enable="!eq(-1,false)"/>
@@ -49,8 +50,8 @@
       <setting label="Opcoes de biblioteca" type="lsep" />
       <setting id="lib-serieson" type="bool" label="Activar biblioteca" default="false"/>
       <setting id="lib-seriesact" type="action" action="RunPlugin(plugin://plugin.video.wt/?mode=35&name=subs&url=nada)" label="Forcar manualmente actualizacao de subscricoes" default="" enable="!eq(-1,false)"/>
-      <setting id="lib-updateauto" type="bool" label="Actualizar automaticamente as subscricoes da biblioteca" default="true" enable="!eq(-2,false)"/>
-      <setting id="service_interval" type="enum" label="Intervalo para verificar novos epis�dios" values="2h|5h|10h|15h|24h" default="1" enable="!eq(-1,false)"/>
+      <setting id="lib-updateauto" type="bool" label="Actualizar automaticamente as subscrições da biblioteca" default="true" enable="!eq(-2,false)"/>
+      <setting id="service_interval" type="enum" label="Intervalo para verificar novos episódios" values="2h|5h|10h|15h|24h" default="1" enable="!eq(-1,false)"/>
       <setting id="service_run" type="text" default="1970-01-01 23:59:00.000000" visible="false"/>
 
    </category>
