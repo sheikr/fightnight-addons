@@ -8,7 +8,7 @@ import xbmc, xbmcgui, xbmcaddon, xbmcplugin,re,sys, urllib, urllib2
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.0.11'
+versao = '0.0.12'
 addon_id = 'plugin.video.tvgolo'
 MainURL = 'http://www.tvgolo.com/'
 vazio= []
@@ -40,14 +40,11 @@ def menu_principal():
       else: addDir(traducao(40012) + versao + ' | ' + traducao(40013) + disponivel,MainURL,7,'',1,False)
       xbmc.executebuiltin("Container.SetViewMode(501)")
 
-
-
 def listadeligas(url):
       link=abrir_url(url)
       link=link.replace('Portuguese</a>','').replace('English</a>','')
       ligas=re.compile('<a href="(.+?)" target="_top"><img width=".+?" border="0" high=".+?" src="(.+?)">(.+?)</a>').findall(link)
-      for endereco,thumb,titulo in ligas:
-            addDir(titulo,MainURL + 'en/' + endereco,2,thumb,len(ligas),True)
+      for endereco,thumb,titulo in ligas: addDir(titulo,MainURL + 'en/' + endereco,2,thumb,len(ligas),True)
       xbmc.executebuiltin("Container.SetViewMode(51)")
 
 def semanasanteriores(url):
@@ -60,23 +57,20 @@ def epocasanteriores(url):
       link=abrir_url(url)
       link=link.replace('amp;','')
       anteriores=re.compile('<a href="(.+?)"><img src="(.+?)" alt="(.+?)" border="0" width="500" height="100"></a>').findall(link)
-      for endereco,thumb,titulo in anteriores:
-            addDir(titulo,endereco,2,thumb,len(anteriores),True)
+      for endereco,thumb,titulo in anteriores: addDir(titulo,endereco,2,thumb,len(anteriores),True)
       xbmc.executebuiltin("Container.SetViewMode(501)")
 
 def comedyfootball(url):
       link=abrir_url(url)
       ano=re.compile('<li><a href="../(.+?)".+?>(.+?)</a></li>').findall(link)
-      for endereco,titulo in ano:
-            addDir(titulo,MainURL + endereco,1,'',len(ano),False)
+      for endereco,titulo in ano: addDir(titulo,MainURL + endereco,1,'',len(ano),False)
 
 def programacaotv(url):
       link=abrir_url(url)
       link=link.replace('\\','').replace('/','').replace('x26','&').replace('&agrave;','à')
       link=clean(link)
       tv=re.compile(' x3e(.+?)x3ca').findall(link)
-      for titulo in tv:
-            addLink(titulo,MainURL,'')
+      for titulo in tv: addLink(titulo,MainURL,'')
       
 def request(url):
       #mensagemok('a','b')
@@ -84,8 +78,7 @@ def request(url):
       #horalocal(link)
       link=clean(link)
       listagolos=re.compile('<div class="listajogos"><a href="/(.+?)"><img.+?src="(.+?)" />    (.+?)</a></div>').findall(link)
-      for endereco,thumb,titulo in listagolos:
-            addDir(titulo,MainURL + endereco,1,thumb,len(listagolos),False)
+      for endereco,thumb,titulo in listagolos: addDir(titulo,MainURL + endereco,1,thumb,len(listagolos),False)
       if re.search('football.php', url) or re.search('page-start', url): paginas(url,link)
       xbmc.executebuiltin("Container.SetViewMode(51)")
 
@@ -97,23 +90,18 @@ def paginas(url,link):
             valorpagina=int(re.compile('page-start_from_(.+?)_archive.+?.html').findall(enderecopagina)[0])
             pagina=int((valorpagina/30)+1)
             addDir('[COLOR blue][B]' + traducao(40014) + '[/COLOR] [COLOR white]' + str(pagina) + ' >>[/COLOR][/B]',MainURL + 'en/' + enderecopagina,2,'',1,True)
-      except:
-            pass
+      except: pass
 
-            
 def captura(name,url):
       tvgolourl=url
       link=abrir_url(url)
       link=clean(link)
-
       #ty tfouto
       link=link.replace('<div style="float:left;"><iframe','').replace('"contentjogos">','"contentjogos"></iframe>')
       ij=link.find('"contentjogos">')
       link=link[ij:]
       #ty tfouto
-      
       titles=[]; ligacao=[]
-      
       aliezref=int(0)
       aliez=re.compile('<iframe.+?src="http://emb.aliez.tv/(.+?)"').findall(link)
       if aliez:
@@ -123,7 +111,6 @@ def captura(name,url):
                   else: aliez2=' #' + str(aliezref)
                   titles.append('Aliez' + aliez2)
                   ligacao.append('http://emb.aliez.tv/' + codigo)
-
       dailymotionref=int(0)
       dailymotion=re.compile('src="http://www.dailymotion.com/embed/video/(.+?)"',re.DOTALL|re.M).findall(link)
       if dailymotion:
@@ -133,7 +120,6 @@ def captura(name,url):
                   if golo: golo=' (%s)' % (golo)
                   titles.append('Dailymotion' + golo)
                   ligacao.append('http://www.dailymotion.com/video/' + codigo)
-
       #fb www.tvgolo.com/match-showfull-1382558391-1304288520--50
       fbvideoref=int(0)
       fbvideo=re.compile('src="http://www.facebook.com/video/embed.+?video_id=(.+?)"',re.DOTALL|re.M).findall(link)
@@ -144,7 +130,6 @@ def captura(name,url):
                  if golo: golo=' (%s)' % (golo)
                  titles.append('Facebook' + golo)
                  ligacao.append("http://www.facebook.com/video/embed?video_id=" + codigo)
-                 
       #kiwi http://www.tvgolo.com/match-showfull-1382558564-1304288520--50                  
       kiwiref=int(0)
       kiwi=re.compile('src="http://v.kiwi.kz/v2/(.+?)/"',re.DOTALL|re.M).findall(link)
@@ -155,7 +140,6 @@ def captura(name,url):
                   if golo: golo=' (%s)' % (golo)
                   titles.append('Kiwi'+ golo)
                   ligacao.append(codigo)
-                  
       #Falta
       longtailref=int(0)
       longtail=re.compile('flashvars=".+?".+?src="http://player.longtailvideo.com/player5.2.swf"').findall(link)
@@ -166,7 +150,6 @@ def captura(name,url):
                   else: longtail2=' #' + str(longtailref)
                   titles.append('Longtail' + longtail2 + ' (' + traducao(40015) + ')')
                   ligacao.append(0)
-                  
       metauaref=int(0)
       metaua=re.compile('src="http://video.meta.ua/players/video/3.2.19k/Player.swf.+?fileID=(.+?)&').findall(link)
       if metaua:
@@ -176,17 +159,17 @@ def captura(name,url):
                   else: metaua2=' #' + str(metauaref)
                   titles.append('Meta.ua' + metaua2 + ' (' + traducao(40015) + ')')
                   ligacao.append(0)
-                  
       #http://www.tvgolo.com/match-showfull-1396982174---50
       playwire=re.compile('data-publisher-id="(.+?)" data-video-id="(.+?)"').findall(link)
+      if not playwire: playwire=re.compile('http://config.playwire.com/videos/(.+?)/(.+?)/').findall(link)
       if playwire:
           for publisher,codigo in playwire:
+                  if publisher=='v2': publisher='configopener'
                   golo=findgolo(link,codigo)
                   golo=cleangolo(golo).replace('<','')
                   if golo: golo=' (%s)' % (golo)
                   titles.append('Playwire' + golo)
                   ligacao.append('http://cdn.playwire.com/v2/%s/config/%s.json' % (publisher,codigo))
-
       #rutube http://www.tvgolo.com/match-showfull-1376242370---02
       rutuberef=int(0)
       rutube=re.compile('src=".+?rutube.ru/video/embed/(.+?)"',re.DOTALL|re.M).findall(link)
@@ -197,7 +180,6 @@ def captura(name,url):
                   if golo: golo=' (%s)' % (golo)
                   titles.append("Rutube" + golo)
                   ligacao.append(codigo)
-                        
       saporef=int(0)
       sapo=re.compile('src="http://videos.sapo.pt/playhtml.+?file=(.+?)/1&"',re.DOTALL|re.M).findall(link)
       if sapo:
@@ -207,7 +189,6 @@ def captura(name,url):
                   if golo: golo=' (%s)' % (golo)
                   titles.append('Videos Sapo' + golo)
                   ligacao.append(endereco)
-                  
       videaref=int(0)
       videa=re.compile('src="http://videa.hu/(.+?)"',re.DOTALL|re.M).findall(link)
       if videa:
@@ -217,7 +198,6 @@ def captura(name,url):
                   if golo: golo=' (%s)' % (golo)
                   titles.append('Videa' + golo)
                   ligacao.append('http://videa.hu/' + codigo)
-                  
       #http://www.tvgolo.com/match-showfull-1376242370---02
       vkref=int(0)
       vk=re.compile('src="http://vk.com/(.+?)"',re.DOTALL|re.M).findall(link)
@@ -228,7 +208,6 @@ def captura(name,url):
                 if golo: golo=' (%s)' % (golo)
                 titles.append('VK' + golo)
                 ligacao.append('http://vk.com/' + codigo)
-                
       youtuberef=int(0)
       youtube=re.compile('src="http://www.youtube.com/embed/(.+?)"',re.DOTALL|re.M).findall(link)
       if not youtube: youtube=re.compile('src="//www.youtube.com/embed/(.+?)"',re.DOTALL|re.M).findall(link)
@@ -238,8 +217,7 @@ def captura(name,url):
               golo=cleangolo(golo).replace('<','')
               if golo: golo=' (%s)' % (golo)
               titles.append('Youtube' + golo)
-              ligacao.append('http://www.youtube.com/watch?v=' + codigo)
-              
+              ligacao.append(codigo)
       if len(ligacao)==1: index=0
       elif len(ligacao)==0: ok=mensagemok(traducao(40000), traducao(40016)); return     
       else:
@@ -254,45 +232,41 @@ def captura(name,url):
                          try:streamurl=re.compile('"m3u8": "(.+?)"').findall(link)[0]
                          except:streamurl=re.compile('"default": "(.+?)"').findall(link)[0]
                          comecarvideo(name,streamurl,'')
-
                    elif re.search('Aliez',servidor):
                          linkescolha=linkescolha.replace('amp;','')
                          link=abrir_url(linkescolha)
                          streamurl=re.compile("file.+?'(.+?)'").findall(link)[0]
                          comecarvideo(name,streamurl,'')
-
                    elif re.search('Playwire',servidor):
-                         link=abrir_url(linkescolha)
-                         streamurl=re.compile('"src":"(.+?)"').findall(link)[0]
+                         if re.search('configopener',linkescolha):
+                               videoid=''.join(linkescolha.split('/')[-1:]).replace('.json','')
+                               streamurl=redirect('http://config.playwire.com/videos/v2/%s/player.json'%videoid).replace('player.json','manifest.f4m')
+                         else:
+                               link=abrir_url(linkescolha)
+                               streamurl=re.compile('"src":"(.+?)"').findall(link)[0]
                          if re.search('.f4m',streamurl):
                                titles=[]
                                ligacao=[]
                                f4m=abrir_url(streamurl)
                                baseurl=re.compile('<baseURL>(.+?)</baseURL>').findall(f4m)[0]
-                               videos=re.compile('url="(.+?)" height="(.+?)"').findall(f4m)
+                               videos=re.compile('url="(.+?)".+?height="(.+?)"').findall(f4m)
                                for urlname,quality in videos:
                                      titles.append(quality + 'p')
                                      ligacao.append(urlname)
                                if len(ligacao)==1:index=0
                                else: index = menuescolha("Qualidade", titles)
-                               if index > -1:
-                                     streamurl='%s/%s' % (baseurl,ligacao[index])
+                               if index > -1: streamurl='%s/%s' % (baseurl,ligacao[index])
                                else: return
-                                     
                          streamurl=streamurl.replace('rtmp://streaming.playwire.com/','http://cdn.playwire.com/').replace('mp4:','')
                          comecarvideo(name,streamurl,'')
-                         
                    elif re.search('VK',servidor):
                          linkescolha=linkescolha.replace('amp;','')
                          link=abrir_url(linkescolha)
                          link=link.replace('\\','')
-                         
-                         if re.search('No videos found.',link):
-                               ok=mensagemok("TVGolo",'Video not found')
+                         if re.search('No videos found.',link): ok=mensagemok("TVGolo",'Video not found')
                          else:
                                titles=[]
                                ligacao=[]
-                               
                                try:
                                      streamurl=re.compile('"url1080":"(.+?)"').findall(link)[0]
                                      titles.append("1080p")
@@ -323,31 +297,28 @@ def captura(name,url):
                                if index > -1:
                                      linkescolha=ligacao[index]
                                      comecarvideo(name,linkescolha,'')                        
-
-                   elif re.search('Sapo',servidor):
-                         comecarvideo(name,linkescolha,'')
-                         
+                   elif re.search('Sapo',servidor): comecarvideo(name,linkescolha,'')
                    elif re.search('Facebook',servidor):
-
                          link=abrir_url(linkescolha)
                          params = re.compile('"params","([\w\%\-\.\\\]+)').findall(link)[0]
                          html = urllib.unquote(params.replace('\u0025', '%')).decode('utf-8')
                          html = html.replace('\\', '')
                          streamurl = re.compile('(?:hd_src|sd_src)\":\"([\w\-\.\_\/\&\=\:\?]+)').findall(html)[0]
                          comecarvideo(name,streamurl,'')
-
-
                    elif re.search('Kiwi',servidor):
                          link=urllib.unquote(abrir_url('http://v.kiwi.kz/v2/'+linkescolha))
                          streamurl=re.compile('&url=(.+?)&poster').findall(link)[0]
                          comecarvideo(name,streamurl,'')
-                               
                    elif re.search('videa',linkescolha):
                          referencia=re.compile('flvplayer.swf.+?v=(.+?)"').findall(linkescolha)[0]
                          link=abrir_url('http://videa.hu/flvplayer_get_video_xml.php?v='+ referencia)
                          streamurl=re.compile('<version quality="standard" video_url="(.+?)"').findall(link)[0]
                          comecarvideo(name,streamurl,'')
-                   elif re.search('youtube',linkescolha) or re.search('dailymotion',linkescolha):
+                   elif re.search('Youtube',servidor):
+                         streamurl='plugin://plugin.video.youtube/?action=play_video&videoid='+codigo
+                         comecarvideo(name,streamurl,'')
+                         
+                   elif re.search('dailymotion',linkescolha):
                          import urlresolver
                          sources=[]
                          hosted_media = urlresolver.HostedMediaFile(url=linkescolha)
@@ -359,9 +330,7 @@ def captura(name,url):
                                            okcheck = xbmcgui.Dialog().ok
                                            okcheck(traducao(40000),traducao(40019))
                                            return
-                                     else:
-                                           comecarvideo(name,linkescolha,'')
-                   
+                                     else: comecarvideo(name,linkescolha,'')
 
 def comecarvideo(titulo,url,thumb):
       playlist = xbmc.PlayList(1)
@@ -405,8 +374,7 @@ def pesquisa():
                   link=abrir_url('http://www.tvgolo.com/en/search.php?dosearch=yes&search_in_archives=yes&title=' + encode)
                   #horalocal(link)
                   jogos=re.compile('<div style="font-family:Arial, Helvetica, sans-serif; font-size:12px;"><a href="/(.+?)">(.+?)</a></div>').findall(link)
-                  for endereco,titulo in jogos:
-                        addDir(titulo,MainURL + endereco,1,'',len(jogos),False)
+                  for endereco,titulo in jogos: addDir(titulo,MainURL + endereco,1,'',len(jogos),False)
                         
 def abrir_url(url):
       req = urllib2.Request(url)
@@ -423,14 +391,12 @@ def abrir_url_tommy(url,referencia):
     try:
         link = net.http_GET(url,referencia).content
         return link
-
     except urllib2.HTTPError, e:
       mensagemok('TVGolo',str(urllib2.HTTPError(e.url, e.code, "Erro na página.", e.hdrs, e.fp)))
       sys.exit(0)
     except urllib2.URLError, e:
       mensagemok('TVGolo',"Erro na página.")
       sys.exit(0)
-
 
 def versao_disponivel():
       try:
@@ -440,7 +406,6 @@ def versao_disponivel():
             ok = mensagemok('TV Golo',traducao(40026),traducao(40027),'')
             match=traducao(40028)
       return match
-
 
 def redirect(url):
       req = urllib2.Request(url)
@@ -455,15 +420,13 @@ def get_params():
       if len(paramstring)>=2:
             params=sys.argv[2]
             cleanedparams=params.replace('?','')
-            if (params[len(params)-1]=='/'):
-                  params=params[0:len(params)-2]
+            if (params[len(params)-1]=='/'): params=params[0:len(params)-2]
             pairsofparams=cleanedparams.split('&')
             param={}
             for i in range(len(pairsofparams)):
                   splitparams={}
                   splitparams=pairsofparams[i].split('=')
-                  if (len(splitparams))==2:
-                        param[splitparams[0]]=splitparams[1]                 
+                  if (len(splitparams))==2: param[splitparams[0]]=splitparams[1]                 
       return param
 
 def clean(text):
@@ -488,8 +451,7 @@ def findgolo(link, codigo):
       trueEnd=max([end1,end2])
       golo=text[trueBegin:trueEnd]
       return golo
-      
-                  
+
 params=get_params()
 url=None
 name=None
@@ -504,7 +466,6 @@ except: pass
 print "Mode: "+str(mode)
 print "URL: "+str(url)
 print "Name: "+str(name)
-
 
 if mode==None or url==None or len(url)<1: print "Versao Instalada: v" + versao; menu_principal()
 elif mode==1: captura(name,url)
