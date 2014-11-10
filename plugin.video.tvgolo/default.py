@@ -196,7 +196,6 @@ def captura(name,url):
                   ligacao.append('http://cdn.playwire.com/v2/%s/config/%s.json' % (publisher,codigo))
             
       playwire_v2=re.compile('http://config.playwire.com/(.+?)/videos/v2/(.+?)/player.json').findall(link)
-      print "coooonaaaa",playwire_v2
       if playwire_v2:
           for publisher,codigo in playwire_v2:
                   golo=findgolo(link,codigo)
