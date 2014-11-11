@@ -29,4 +29,6 @@
     <string id="40026">Addon failed to connect to the update</string>
     <string id="40027">server. Check that.</string>
     <string id="40028">Error. Check error origin.</string>
+    <string id="40029">DNS unblock</string>
+    <string id="40030">General</string>
 </strings>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings>
+	<category label="40030">
+	    	<setting id="dns_unblock" type="bool" label="40029" default="false"/>
+	    	<setting id="last_dns_unblock" type="text" default="1970-01-01 23:59:00.000000" visible="false"/>
+	    	<setting id="last_ip" type="text" default="" visible="false"/>
+	</category>
+</settings>

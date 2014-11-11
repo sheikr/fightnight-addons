@@ -4,13 +4,12 @@
     2014 fightnight
 """
 
-import xbmc, xbmcgui, xbmcaddon, xbmcplugin,re,sys, urllib, urllib2
+import xbmc, xbmcgui, xbmcaddon, xbmcplugin,os,re,sys, urllib, urllib2,datetime,time
 
 ####################################################### CONSTANTES #####################################################
 
 versao = '0.0.12'
 addon_id = 'plugin.video.tvgolo'
-MainURL = 'http://www.tvgolo.com/'
 vazio= []
 art = '/resources/art/'
 user_agent = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:10.0a1) Gecko/20111029 Firefox/10.0a1'
@@ -19,6 +18,25 @@ traducao= selfAddon.getLocalizedString
 tvgolopath = selfAddon.getAddonInfo('path')
 menuescolha = xbmcgui.Dialog().select
 mensagemok = xbmcgui.Dialog().ok
+if selfAddon.getSetting('dns_unblock') == 'false': MainURL = 'http://www.tvgolo.com/'
+else:
+	try:t1 = datetime.datetime.strptime(selfAddon.getSetting("last_dns_unblock"), "%Y-%m-%d %H:%M:%S.%f")
+	except:t1 = datetime.datetime.fromtimestamp(time.mktime(time.strptime(selfAddon.getSetting("last_dns_unblock"), "%Y-%m-%d %H:%M:%S.%f")))
+	t2 = datetime.datetime.now()
+	update = abs(t2 - t1) > datetime.timedelta(hours=2)
+	if update:
+		import socket
+		try:
+			host = socket.getaddrinfo('tvgolo.com',80)[0][-1][0]
+		except: host = 'www.tvgolo.com'
+		selfAddon.setSetting('last_dns_unblock',value=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
+		selfAddon.setSetting('last_ip',host)
+	else:
+		host = selfAddon.getSetting('last_ip')
+		
+	MainURL = 'http://' + host + '/'
+
+
 
 def horalocal(link):
       hora=re.compile('<div class="clock">Local Time: (.+?)</div>').findall(link)[0]
@@ -26,10 +44,10 @@ def horalocal(link):
 
 def menu_principal():
       #mensagemok(traducao(40000),traducao(40001),traducao(40002))
-      addDir(traducao(40003),MainURL + 'football.php',2,'',1,True)
-      addDir(traducao(40004),MainURL + 'football.php',3,'',1,True)
-      addDir(traducao(40005),MainURL + 'football.php',4,'',1,True)
-      addDir(traducao(40006),MainURL + 'goal-of-the-week.php',2,'',1,True)
+      addDir(traducao(40003),MainURL,2,'',1,True)
+      addDir(traducao(40004),MainURL + 'en',3,'',1,True)
+      addDir(traducao(40005),MainURL + 'en',4,'',1,True)
+      addDir(traducao(40006),MainURL + 'en/goal-of-the-week.php',2,'',1,True)
       addDir(traducao(40007),MainURL + 'en/previous.php',5,'',1,True)
       addDir(traducao(40008),MainURL + 'en/comedy-football.php',6,'',1,True)
       addDir(traducao(40009),MainURL + 'tv.html',9,'',1,True)
@@ -54,11 +72,14 @@ def semanasanteriores(url):
       request(MainURL + 'en/' + anterior)
 
 def epocasanteriores(url):
-      link=abrir_url(url)
-      link=link.replace('amp;','')
-      anteriores=re.compile('<a href="(.+?)"><img src="(.+?)" alt="(.+?)" border="0" width="500" height="100"></a>').findall(link)
-      for endereco,thumb,titulo in anteriores: addDir(titulo,endereco,2,thumb,len(anteriores),True)
-      xbmc.executebuiltin("Container.SetViewMode(501)")
+	link=abrir_url(url)
+	link=link.replace('amp;','')
+	anteriores=re.compile('<a href="(.+?)"><img src="(.+?)" alt="(.+?)" border="0" width="500" height="100"></a>').findall(link)
+	for endereco,thumb,titulo in anteriores:
+		if 'http://www.tvgolo.com/football.php' in endereco:
+			endereco = endereco.replace('http://www.tvgolo.com/football.php',MainURL + 'en/')
+		addDir(titulo,endereco,2,thumb,len(anteriores),True)
+	xbmc.executebuiltin("Container.SetViewMode(501)")
 
 def comedyfootball(url):
       link=abrir_url(url)
@@ -95,6 +116,7 @@ def paginas(url,link):
 def captura(name,url):
       tvgolourl=url
       link=abrir_url(url)
+      linkoriginal = link
       link=clean(link)
       #ty tfouto
       link=link.replace('<div style="float:left;"><iframe','').replace('"contentjogos">','"contentjogos"></iframe>')
@@ -113,6 +135,8 @@ def captura(name,url):
                   ligacao.append('http://emb.aliez.tv/' + codigo)
       dailymotionref=int(0)
       dailymotion=re.compile('src="http://www.dailymotion.com/embed/video/(.+?)"',re.DOTALL|re.M).findall(link)
+      if not dailymotion: dailymotion = re.compile('src="http://www.dailymotion.com/embed/video/(.+?)"',re.DOTALL|re.M).findall(linkoriginal)
+     
       if dailymotion:
             for codigo in dailymotion:
                   golo=findgolo(link,codigo)
@@ -170,9 +194,21 @@ def captura(name,url):
                   if golo: golo=' (%s)' % (golo)
                   titles.append('Playwire' + golo)
                   ligacao.append('http://cdn.playwire.com/v2/%s/config/%s.json' % (publisher,codigo))
+            
+      playwire_v2=re.compile('http://config.playwire.com/(.+?)/videos/v2/(.+?)/player.json').findall(link)
+      if playwire_v2:
+          for publisher,codigo in playwire_v2:
+                  golo=findgolo(link,codigo)
+                  golo=cleangolo(golo).replace('<','')
+                  if golo: golo=' (%s)' % (golo)
+                  titles.append('Playwire' + golo)
+                  ligacao.append('http://config.playwire.com/%s/videos/v2/%s/player.json' % (publisher,codigo))               
+                  
       #rutube http://www.tvgolo.com/match-showfull-1376242370---02
       rutuberef=int(0)
       rutube=re.compile('src=".+?rutube.ru/video/embed/(.+?)"',re.DOTALL|re.M).findall(link)
+      if not rutube: rutube=re.compile('value="http://video.rutube.ru/(.+?)"',re.DOTALL|re.M).findall(linkoriginal)  
+      if not rutube: rutube=re.compile('src="http://rutube.ru/video/embed/(.+?)"',re.DOTALL|re.M).findall(linkoriginal)
       if rutube:
             for codigo in rutube:
                   golo=findgolo(link,codigo)
@@ -242,6 +278,7 @@ def captura(name,url):
                                videoid=''.join(linkescolha.split('/')[-1:]).replace('.json','')
                                streamurl=redirect('http://config.playwire.com/videos/v2/%s/player.json'%videoid).replace('player.json','manifest.f4m')
                          else:
+                               print "im here",linkescolha
                                link=abrir_url(linkescolha)
                                streamurl=re.compile('"src":"(.+?)"').findall(link)[0]
                          if re.search('.f4m',streamurl):
@@ -352,6 +389,7 @@ def comecarvideo(titulo,url,thumb):
 def addLink(name,url,iconimage):
       ok=True; liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
       liz.setInfo( type="Video", infoLabels={ "Title": name } )
+      liz.setProperty('fanart_image', os.path.join(tvgolopath,'fanart.jpg'))
       ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=liz)
       return ok
 
@@ -359,6 +397,7 @@ def addDir(name,url,mode,iconimage,total,pasta):
       u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)
       ok=True; liz=xbmcgui.ListItem(name, iconImage="DefaultFolder.png", thumbnailImage=iconimage)
       liz.setInfo( type="Video", infoLabels={ "Title": name } )
+      liz.setProperty('fanart_image', os.path.join(tvgolopath,'fanart.jpg'))
       ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=pasta,totalItems=total)
       return ok
 
@@ -371,7 +410,7 @@ def pesquisa():
             encode=urllib.quote(search)
             if encode=='': pass
             else:
-                  link=abrir_url('http://www.tvgolo.com/en/search.php?dosearch=yes&search_in_archives=yes&title=' + encode)
+                  link=abrir_url( MainURL + '/en/search.php?dosearch=yes&search_in_archives=yes&title=' + encode)
                   #horalocal(link)
                   jogos=re.compile('<div style="font-family:Arial, Helvetica, sans-serif; font-size:12px;"><a href="/(.+?)">(.+?)</a></div>').findall(link)
                   for endereco,titulo in jogos: addDir(titulo,MainURL + endereco,1,'',len(jogos),False)
