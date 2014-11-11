@@ -26,6 +26,9 @@
     <string id="40023">repositorio fightnight e prima c ou durante 2seg</string>
     <string id="40024">e force a actualizacao. De seguida, reinicie o XBMC.</string>
     <string id="40025">Hora Local: </string>
+    <string id="40026">Addon nao conseguiu conectar ao servidor</string>
+    <string id="40027">de actualizacao. Verifique a situacao.</string>
+    <string id="40028">Erro. Verificar origem do erro.</string>
     <string id="40029">Desbloquear DNS</string>
     <string id="40030">Geral</string>
 </strings>

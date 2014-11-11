@@ -1,3 +1,9 @@
+[B]v0.1.00 (11 de Novembro de 2014):[/B]
+PR lancado pelo enen92:
+- Fanart adicionada.
+- Servidores corrigidos.
+- Fix dns para dominio bloqueado nas settings.
+
 [B]v0.0.12 (29 de Agosto de 2014):[/B]
 - Correccao de Servidores.
 - Limpeza de codigo. (ty mafarricos)

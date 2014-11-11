@@ -8,7 +8,7 @@ import xbmc, xbmcgui, xbmcaddon, xbmcplugin,os,re,sys, urllib, urllib2,datetime,
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.0.12'
+versao = '0.1.00'
 addon_id = 'plugin.video.tvgolo'
 vazio= []
 art = '/resources/art/'
@@ -278,7 +278,6 @@ def captura(name,url):
                                videoid=''.join(linkescolha.split('/')[-1:]).replace('.json','')
                                streamurl=redirect('http://config.playwire.com/videos/v2/%s/player.json'%videoid).replace('player.json','manifest.f4m')
                          else:
-                               print "im here",linkescolha
                                link=abrir_url(linkescolha)
                                streamurl=re.compile('"src":"(.+?)"').findall(link)[0]
                          if re.search('.f4m',streamurl):
