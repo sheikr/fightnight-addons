@@ -18,7 +18,7 @@ traducao= selfAddon.getLocalizedString
 tvgolopath = selfAddon.getAddonInfo('path')
 menuescolha = xbmcgui.Dialog().select
 mensagemok = xbmcgui.Dialog().ok
-if selfAddon.getSetting('dns_unblock') == 'false': MainURL = 'http://www.tvgolo.com/'
+if selfAddon.getSetting('dns_unblock') == 'false': MainURL = 'http://www.tvgolo.mobi/'
 else:
 	try:t1 = datetime.datetime.strptime(selfAddon.getSetting("last_dns_unblock"), "%Y-%m-%d %H:%M:%S.%f")
 	except:t1 = datetime.datetime.fromtimestamp(time.mktime(time.strptime(selfAddon.getSetting("last_dns_unblock"), "%Y-%m-%d %H:%M:%S.%f")))
@@ -27,8 +27,8 @@ else:
 	if update:
 		import socket
 		try:
-			host = socket.getaddrinfo('tvgolo.com',80)[0][-1][0]
-		except: host = 'www.tvgolo.com'
+			host = socket.getaddrinfo('tvgolo.mobi',80)[0][-1][0]
+		except: host = 'www.tvgolo.mobi'
 		selfAddon.setSetting('last_dns_unblock',value=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
 		selfAddon.setSetting('last_ip',host)
 	else:
@@ -76,8 +76,8 @@ def epocasanteriores(url):
 	link=link.replace('amp;','')
 	anteriores=re.compile('<a href="(.+?)"><img src="(.+?)" alt="(.+?)" border="0" width="500" height="100"></a>').findall(link)
 	for endereco,thumb,titulo in anteriores:
-		if 'http://www.tvgolo.com/football.php' in endereco:
-			endereco = endereco.replace('http://www.tvgolo.com/football.php',MainURL + 'en/')
+		if 'http://www.tvgolo.mobi/football.php' in endereco:
+			endereco = endereco.replace('http://www.tvgolo.mobi/football.php',MainURL + 'en/')
 		addDir(titulo,endereco,2,thumb,len(anteriores),True)
 	xbmc.executebuiltin("Container.SetViewMode(501)")
 
