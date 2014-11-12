@@ -1,3 +1,9 @@
+[B]v0.1.00 (12 de Novembro de 2014):[/B]
+- Adicionado sistema de atalhos.
+- Adicionado botao de "uma pasta atras".
+- Conteudos da pesquisa vao para pasta e nao abrem directamente os conteudos.
+- Outras correccoes.
+
 [B]v0.0.14 (28 de Outubro de 2014):[/B]
 - Refix das legendas.
 

@@ -9,7 +9,7 @@ net=Net()
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.0.14'
+versao = '0.1.00'
 addon_id = 'plugin.video.abelhas'
 MainURL = 'http://abelhas.pt/'
 art = '/resources/art/'
@@ -77,23 +77,14 @@ def menu_principal(ligacao):
             mensagens=re.compile('href="/action/PrivateMessage" id="topbarMessage".+?</a><strong>(.+?)</strong>').findall(conteudo)[0]
             transf=re.compile('Transfe.+?ncia.+?<strong>(.+?)</strong>').findall(conteudo)[0]
             addDir(traducao(40007),MainURL,1,wtpath + art + 'pasta.png',1,True)
-            #addDir('',MainURL,16,wtpath + art + 'pasta.png',2,True)
             addDir(traducao(40008),MainURL,2,wtpath + art + 'pasta.png',2,True)
             addDir(traducao(40009),MainURL + username,3,wtpath + art + 'pasta.png',2,True)
             addDir(traducao(40010),'pastas',5,wtpath + art + 'pasta.png',2,True)
             addDir(traducao(40037),MainURL,9,wtpath + art + 'pasta.png',2,True)
+            addDir('Atalhos',MainURL,18,wtpath + art + 'pasta.png',2,True)
             addDir(traducao(40011),'pesquisa',7,wtpath + art + 'pasta.png',3,True)
-            #addLink("",'',wtpath + art + 'nothingx.png')
-            #addLink("[COLOR blue][B]"+traducao(40012)+ ":[/B][/COLOR] " + mensagens,'',wtpath + art + 'nothingx.png')
-            #addLink("[COLOR blue][B]"+traducao(40013)+ ":[/B][/COLOR] " + transf,'',wtpath + art + 'nothingx.png')            
       elif ligacao==0:
             addDir(traducao(40015),MainURL,6,wtpath + art + 'pasta.png',1,True)
-            #addLink("",'',wtpath + art + 'nothingx.png')
-      #if ligacao==1:
-      #      disponivel=versao_disponivel()
-      #      if disponivel==versao: addLink(traducao(40017) + versao+ ')','',wtpath + art + 'versao_disp.png')
-      #      else: addDir(traducao(40016) + versao + ' | ' + traducao(40019) + disponivel,MainURL,13,wtpath + art + 'versao_disp.png',1,False)
-      #else: addLink("[COLOR blue][B]%s[/B][/COLOR] %s" % (traducao(40016),versao),'',wtpath + art + 'versao_disp.png')
       if ligacao==1: addLink("[COLOR blue][B]%s:[/B][/COLOR] %s  [COLOR blue][B]%s:[/B][/COLOR] %s" % (traducao(40012),mensagens,traducao(40014),pontos),'',wtpath + art + 'pasta.png')
       addDir("[COLOR blue][B]%s[/B][/COLOR] | abelhas.pt" % (traducao(40018)),MainURL,8,wtpath + art + 'pasta.png',6,True)
       xbmc.executebuiltin("Container.SetViewMode(51)")
@@ -161,8 +152,51 @@ def proxpesquisa():
     addon.save_data('temp.txt',form_d)
     pastas(MainURL + 'action/nada','coco',conteudo=conteudo)
 
-def pastas(url,name,formcont={},conteudo=''):
-      
+def atalhos(type=False):
+      pastatracks = os.path.join(pastaperfil, "atalhos")
+      if not os.path.exists(pastatracks):
+            os.makedirs(pastatracks)
+            savefile('ref.tmp','0',pastafinal=pastatracks)
+      if type=='addfolder':
+            ref=int(openfile('ref.tmp',pastafinal=pastatracks)) + 1
+            builder='{"name":"""%s""","url":"""%s""","type":"folder"}' % (name,url)
+            savefile('%s.txt' % ref,builder,pastafinal=pastatracks)
+            savefile('ref.tmp',str(ref),pastafinal=pastatracks)
+            xbmc.executebuiltin("XBMC.Notification(abelhas.pt,Atalho adicionado,'500000',"+iconpequeno.encode('utf-8')+")")
+      elif type=='addfile':
+            ref=int(openfile('ref.tmp',pastafinal=pastatracks)) + 1
+            builder='{"name":"""%s""","url":"""%s""","type":"file"}' % (name,url)
+            savefile('%s.txt' % ref,builder,pastafinal=pastatracks)
+            savefile('ref.tmp',str(ref),pastafinal=pastatracks)
+            xbmc.executebuiltin("XBMC.Notification(abelhas.pt,Atalho adicionado,'500000',"+iconpequeno.encode('utf-8')+")")
+      elif type=='remove':
+            try:os.remove(os.path.join(pastatracks,name))
+            except:pass
+            xbmc.executebuiltin("Container.Refresh")
+            
+      else:
+            try:lista = os.listdir(pastatracks)
+            except: lista=[]
+            
+            for atal in lista:
+                  
+                  content=openfile(atal,pastafinal=pastatracks)
+                  
+                  try:ftype=re.compile('"type":"(.+?)"').findall(content)[0]
+                  except:ftype=''
+                  try:fname=re.compile('"name":"""(.+?)"""').findall(content)[0]
+                  except:fname=''
+                  try:furl=re.compile('"url":"""(.+?)"""').findall(content)[0]
+                  except:furl=''
+                  path=urllib.unquote_plus('/'.join(''.join(furl.split(MainURL)).split('/')[:-1]).replace('*','%'))
+                  if ftype=='file': addCont('%s (%s)' % (fname,path),furl,4,'',wtpath + art + 'file.png',len(lista),False,atalhos=atal)
+                  elif ftype=='folder': addDir('%s (%s)' % (fname,path),furl,3,wtpath + art + 'pasta.png',len(lista),True,atalhos=atal)
+                  xbmc.executebuiltin("Container.SetViewMode(51)")
+                        
+                  
+            
+
+def pastas(url,name,formcont={},conteudo='',past=False):     
       if re.search('action/SearchFiles',url):
             ref_data = {'Host': 'abelhas.pt', 'Connection': 'keep-alive', 'Referer': 'http://abelhas.pt/','Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8','User-Agent':user_agent,'Referer': 'http://abelhas.pt/'}
             endlogin=MainURL + 'action/SearchFiles'
@@ -242,6 +276,13 @@ def pastas(url,name,formcont={},conteudo=''):
             except: pass
 
             try:
+                  checker=url.split('/')[:-1]
+                  if len(checker) > 3:
+                        urlbefore='/'.join(checker)
+                        addDir('[COLOR blue][B]Uma pasta atrás[/B][/COLOR]',urlbefore,3,wtpath + art + 'seta.png',1,True)
+            except: pass
+
+            try:
                   pastas=re.compile('<div id="foldersList">(.+?)</table>').findall(conteudo)[0]
                   seleccionados=re.compile('<a href="/(.+?)".+?title="(.+?)">(.+?)</a>').findall(pastas)
                   for urlpasta,nomepasta,password in seleccionados:
@@ -260,7 +301,9 @@ def pastas(url,name,formcont={},conteudo=''):
                   elif extensao=='.mkv' or extensao == '.MKV' or extensao == '.avi' or extensao == '.AVI' or extensao=='.mp4' or extensao=='.MP4' or extensao=='.3gp' or extensao=='.3GP' or extensao=='.wmv' or extensao=='.WMV': thumb=wtpath + art + 'video.png'
                   else:thumb=wtpath + art + 'file.png'
                   tamanhoparavariavel=' (' + tamanhoficheiro + ')'
-                  addCont('[B]' + tituloficheiro + '[/B]' + tamanhoparavariavel,MainURL + urlficheiro,4,tamanhoparavariavel,thumb,len(items1),False)
+                  if past==False: modo=4
+                  else: modo=22
+                  addCont('[B]' + tituloficheiro + '[/B]' + tamanhoparavariavel,MainURL + urlficheiro,modo,tamanhoparavariavel,thumb,len(items1),past,False)                  
             #contributo mafarricos com alteracoes, ty
             items2=re.compile('<ul class="borderRadius tabGradientBg">.+?<li><span>(.+?)</span></li>.+?<li><span class="date">(.+?)</span></li></ul></div>.+?<ul>            <li><a href="/(.+?)" class="downloadAction".+?<li class="fileActionsFacebookSend" data-url=".+?" data-title="(.+?)">.+?<span class="bold">.+?</span>(.+?)</a>').findall(conteudo)
             for tamanhoficheiro,dataficheiro,urlficheiro, tituloficheiro,extensao in items2:
@@ -271,7 +314,9 @@ def pastas(url,name,formcont={},conteudo=''):
                   elif extensao=='.mkv' or extensao == '.MKV' or extensao == '.avi' or extensao == '.AVI' or extensao=='.mp4' or extensao=='.MP4' or extensao=='.3gp' or extensao=='.3GP' or extensao=='.wmv' or extensao=='.WMV': thumb=wtpath + art + 'video.png'
                   else:thumb=wtpath + art + 'file.png'
                   tamanhoparavariavel=' (' + tamanhoficheiro + ')'
-                  addCont('[B]' + tituloficheiro + extensao + '[/B]' + tamanhoparavariavel,MainURL + urlficheiro,4,tamanhoparavariavel,thumb,len(items2),False)
+                  if past==False: modo=4
+                  else: modo=22
+                  addCont('[B]' + tituloficheiro + extensao + '[/B]' + tamanhoparavariavel,MainURL + urlficheiro,modo,tamanhoparavariavel,thumb,len(items2),past,False)
             if not items1:
                   if not items2:
                         conteudo=clean(conteudo)
@@ -281,8 +326,10 @@ def pastas(url,name,formcont={},conteudo=''):
                               tamanhoficheiro=tamanhoficheiro.replace(' ','')
                               thumb=wtpath + art + 'file.png'
                               tamanhoparavariavel=' (' + tamanhoficheiro + ')'
-                              addCont('[B]' + tituloficheiro + '[/B]' + tamanhoparavariavel,MainURL + urlficheiro,4,tamanhoparavariavel,thumb,len(items2),False)
-            
+                              if past==False: modo=4
+                              else: modo=22
+                              addCont('[B]' + tituloficheiro + '[/B]' + tamanhoparavariavel,MainURL + urlficheiro,modo,tamanhoparavariavel,thumb,len(items2),past,False)
+                              
             paginas(conteudo)
             
       xbmc.executebuiltin("Container.SetViewMode(51)")
@@ -515,8 +562,9 @@ def comecarvideo(name,url,playterm,legendas=None):
         if playterm <> 'playlist':		
               dialogWait.close()
               del dialogWait
+        xbmcPlayer = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
         if not playterm and playeractivo==0:
-              xbmcPlayer = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
+              
               xbmcPlayer.play(playlist)
         if legendas!=None: xbmcPlayer.setSubtitles(legendas)
         else:
@@ -550,19 +598,21 @@ def addLink(name,url,iconimage):
       liz.setProperty('fanart_image', "%s/fanart.jpg"%selfAddon.getAddonInfo("path"))
       return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=liz)
 
-def addDir(name,url,mode,iconimage,total,pasta):
+def addDir(name,url,mode,iconimage,total,pasta,atalhos=False):
       contexto=[]
       u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)
       liz=xbmcgui.ListItem(name,iconImage="DefaultFolder.png", thumbnailImage=iconimage)
       contexto.append((traducao(40050), 'XBMC.RunPlugin(%s?mode=15&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
       contexto.append((traducao(40047), 'XBMC.RunPlugin(%s?mode=14&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
-      contexto.append(('Ver Trailer', 'RunPlugin(%s?mode=17&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),name)))	  
+      contexto.append(('Ver Trailer', 'RunPlugin(%s?mode=17&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),name)))
+      if atalhos==False:contexto.append(('Adicionar atalho', 'RunPlugin(%s?mode=20&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),name)))
+      else:contexto.append(('Remover atalho', 'RunPlugin(%s?mode=21&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),atalhos)))
       liz.setInfo( type="Video", infoLabels={ "Title": name} )
       liz.setProperty('fanart_image', "%s/fanart.jpg"%selfAddon.getAddonInfo("path"))
       liz.addContextMenuItems(contexto, replaceItems=False) 
       return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=pasta,totalItems=total)
 
-def addCont(name,url,mode,tamanho,iconimage,total,pasta):
+def addCont(name,url,mode,tamanho,iconimage,total,pasta=False,atalhos=False):
       contexto=[]
       u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&tamanhof="+urllib.quote_plus(tamanho)
       liz=xbmcgui.ListItem(name,iconImage="DefaultFolder.png", thumbnailImage=iconimage)
@@ -570,6 +620,8 @@ def addCont(name,url,mode,tamanho,iconimage,total,pasta):
       contexto.append((traducao(40046), 'XBMC.RunPlugin(%s?mode=13&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
       contexto.append((traducao(40047), 'XBMC.RunPlugin(%s?mode=14&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
       contexto.append(('Ver Trailer', 'RunPlugin(%s?mode=17&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),name)))
+      if atalhos==False: contexto.append(('Adicionar atalho', 'RunPlugin(%s?mode=19&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),name)))
+      else: contexto.append(('Remover atalho', 'RunPlugin(%s?mode=21&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),atalhos)))
       contexto.append((traducao(40040), 'XBMC.RunPlugin(%s?mode=11&url=%s&name=%s&tamanhof=%s)' % (sys.argv[0], urllib.quote_plus(url),name,tamanho)))
       liz.setInfo( type="Video", infoLabels={ "Title": name} )
       liz.setProperty('fanart_image', "%s/fanart.jpg"%selfAddon.getAddonInfo("path"))
@@ -652,7 +704,7 @@ def caixadetexto(url,ftype=''):
             elif url=='password': return search
             elif url=='pesquisa':
                   form_d = {'FileName':encode,'submitSearchFiles':'Procurar','FileType':ftype,'IsGallery':'False'}
-                  pastas(MainURL + 'action/SearchFiles',name,formcont=form_d)
+                  pastas(MainURL + 'action/SearchFiles',name,formcont=form_d,past=True)
             
       else: sys.exit(0)
             
@@ -1003,4 +1055,9 @@ elif mode==14: limparplaylist()
 elif mode==15: criarplaylist(url,name)
 elif mode==16: obterlistadeficheiros()
 elif mode==17: trailer(name, url)
+elif mode==18: atalhos()
+elif mode==19: atalhos(type='addfile')
+elif mode==20: atalhos(type='addfolder')
+elif mode==21: atalhos(type='remove')
+elif mode==22: pastas('/'.join(url.split('/')[:-1]),name)
 xbmcplugin.endOfDirectory(int(sys.argv[1]))
