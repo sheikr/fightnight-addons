@@ -1,3 +1,9 @@
+[B]v0.1.01 (13 de Novembro de 2014):[/B]
+- Fix url do site. (ty mafarricos)
+- Pequenas correccoes de art.
+- Fix nas paginas.
+- Outras correccoes.
+
 [B]v0.1.00 (11 de Novembro de 2014):[/B]
 PR lancado pelo enen92:
 - Fanart adicionada.

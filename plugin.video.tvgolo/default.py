@@ -8,7 +8,7 @@ import xbmc, xbmcgui, xbmcaddon, xbmcplugin,os,re,sys, urllib, urllib2,datetime,
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.1.00'
+versao = '0.1.01'
 addon_id = 'plugin.video.tvgolo'
 vazio= []
 art = '/resources/art/'
@@ -44,19 +44,15 @@ def horalocal(link):
 
 def menu_principal():
       #mensagemok(traducao(40000),traducao(40001),traducao(40002))
-      addDir(traducao(40003),MainURL,2,'',1,True)
-      addDir(traducao(40004),MainURL + 'en',3,'',1,True)
-      addDir(traducao(40005),MainURL + 'en',4,'',1,True)
-      addDir(traducao(40006),MainURL + 'en/goal-of-the-week.php',2,'',1,True)
-      addDir(traducao(40007),MainURL + 'en/previous.php',5,'',1,True)
-      addDir(traducao(40008),MainURL + 'en/comedy-football.php',6,'',1,True)
-      addDir(traducao(40009),MainURL + 'tv.html',9,'',1,True)
-      addDir(traducao(40010),MainURL,8,'',1,True)
-      addLink("",'','')
-      disponivel=versao_disponivel()
-      if disponivel==versao: addLink(traducao(40011) + versao+ ')','','')
-      else: addDir(traducao(40012) + versao + ' | ' + traducao(40013) + disponivel,MainURL,7,'',1,False)
-      xbmc.executebuiltin("Container.SetViewMode(501)")
+      addDir(traducao(40003),MainURL + 'en',2,tvgolopath + art + 'pasta.png',1,True)
+      addDir(traducao(40004),MainURL + 'en',3,tvgolopath + art + 'pasta.png',1,True)
+      addDir(traducao(40005),MainURL + 'en',4,tvgolopath + art + 'pasta.png',1,True)
+      addDir(traducao(40006),MainURL + 'en/goal-of-the-week.php',2,tvgolopath + art + 'pasta.png',1,True)
+      addDir(traducao(40007),MainURL + 'en/previous.php',5,tvgolopath + art + 'pasta.png',1,True)
+      addDir(traducao(40008),MainURL + 'en/comedy-football.php',6,tvgolopath + art + 'pasta.png',1,True)
+      addDir(traducao(40009),MainURL + 'tv.html',9,tvgolopath + art + 'pasta.png',1,True)
+      addDir(traducao(40010),MainURL,8,tvgolopath + art + 'pasta.png',1,True)
+      xbmc.executebuiltin("Container.SetViewMode(51)")
 
 def listadeligas(url):
       link=abrir_url(url)
@@ -76,6 +72,7 @@ def epocasanteriores(url):
 	link=link.replace('amp;','')
 	anteriores=re.compile('<a href="(.+?)"><img src="(.+?)" alt="(.+?)" border="0" width="500" height="100"></a>').findall(link)
 	for endereco,thumb,titulo in anteriores:
+                endereco=endereco.replace('www.tvgolo.com','www.tvgolo.mobi')
 		if 'http://www.tvgolo.mobi/football.php' in endereco:
 			endereco = endereco.replace('http://www.tvgolo.mobi/football.php',MainURL + 'en/')
 		addDir(titulo,endereco,2,thumb,len(anteriores),True)
@@ -94,13 +91,11 @@ def programacaotv(url):
       for titulo in tv: addLink(titulo,MainURL,'')
       
 def request(url):
-      #mensagemok('a','b')
       link=abrir_url(url)
-      #horalocal(link)
       link=clean(link)
       listagolos=re.compile('<div class="listajogos"><a href="/(.+?)"><img.+?src="(.+?)" />    (.+?)</a></div>').findall(link)
       for endereco,thumb,titulo in listagolos: addDir(titulo,MainURL + endereco,1,thumb,len(listagolos),False)
-      if re.search('football.php', url) or re.search('page-start', url): paginas(url,link)
+      if re.search('football.php', url) or re.search('page-start', link): paginas(url,link)
       xbmc.executebuiltin("Container.SetViewMode(51)")
 
 
@@ -371,7 +366,7 @@ def captura(name,url):
 def comecarvideo(titulo,url,thumb):
       playlist = xbmc.PlayList(1)
       playlist.clear()
-      listitem = xbmcgui.ListItem(titulo, iconImage="DefaultVideo.png", thumbnailImage=thumb)            
+      listitem = xbmcgui.ListItem(titulo, iconImage="DefaultVideo.png", thumbnailImage=tvgolopath + 'icon.png')
       listitem.setInfo("Video", {"Title":titulo})
       listitem.setProperty('mimetype', 'video/x-msvideo')
       listitem.setProperty('IsPlayable', 'true')
