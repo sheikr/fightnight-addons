@@ -8,7 +8,7 @@ import xbmc,xbmcaddon,xbmcgui,xbmcplugin,urllib,urllib2,os,re,sys
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.0.06'
+versao = '0.1.00'
 addon_id = 'plugin.video.sapo'
 MainURL = 'http://videos.sapo.pt/'
 vazio= []
@@ -30,10 +30,10 @@ def menu_principal():
       addDir("Directos",MainURL + 'directos.html',8,'',1)
       addDir("Categorias",MainURL + 'categorias.html',3,'',1)
       addDir("Pesquisar",MainURL,4,'',1)
-      addLink("",'','')
-      disponivel=versao_disponivel()
-      if disponivel==versao: addLink('Última versao instalada (' + versao+ ')','','')
-      else: addDir('Instalada v' + versao + ' | Actualização v' + disponivel,MainURL,4,'',1)
+      #addLink("",'','')
+      #disponivel=versao_disponivel()
+      #if disponivel==versao: addLink('Última versao instalada (' + versao+ ')','','')
+      #else: addDir('Instalada v' + versao + ' | Actualização v' + disponivel,MainURL,4,'',1)
 
 def pesquisa():
       keyb = xbmc.Keyboard('', 'Sapo Vídeos')
@@ -79,12 +79,12 @@ def get_random():
              
 def request(url):
       ref_data = {'Accept':'text/javascript,text/xml,application/xml,application/xhtml+xml,text/html,application/json;q=0.9,text/plain;q=0.8,video/x-mng,image/png,image/jpeg,image/gif;q=0.2,*/*;q=0.1','User-Agent':user_agent,'X-Ink-Version':'1','X-Requested-With':'XMLHttpRequest'}
-      link= abrir_url_cookie(url,ref_data)
+      link= clean(abrir_url_cookie(url,ref_data))
 
       videos=re.compile('"title":"(.+?)".+?"randname":"(.+?)",.+?"views":(.+?),.+?"thumb_url":"(.+?)"').findall(link)
       for titulo,idend,views,thumb in videos:
             thumb=thumb.replace('\\','')
-            titulo=titulo.decode('latin-1','ignore').encode('utf-8')
+            #titulo=titulo.decode('latin-1','ignore').encode('utf-8')
             pastastream('[B]%s[/B] (%s visualizações)' % (titulo,views),MainURL + idend,5,thumb,len(videos))
 
 def openfile(filename,pastafinal=pastaperfil):
@@ -147,10 +147,11 @@ def comecarvideo(titulo,url,username,thumb):
       listitem.setProperty('mimetype', 'video/x-msvideo')
       listitem.setProperty('IsPlayable', 'true')
       dialogWait = xbmcgui.DialogProgress()
-      dialogWait.create('Sapo Videos', 'A carregar')
+      #dialogWait.create('Sapo Videos', 'A carregar')
       playlist.add(url, listitem)
-      dialogWait.close()
-      del dialogWait
+      xbmcplugin.setResolvedUrl(int(sys.argv[1]),True,listitem)
+      #dialogWait.close()
+      #del dialogWait
       xbmcPlayer = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
       xbmcPlayer.play(playlist)
 
@@ -222,10 +223,9 @@ def get_params():
       return param
 
 def clean(text):
-      command={'&nbsp;':' ','&quot;':'"','&#039;':''}
+      command={'&nbsp;':' ','&laquo;':'','&raquo;':'','&eacute;':'é','&iacute;':'í','&aacute;':'á','&oacute;':'ó','&uacute;':'ú','&ccedil;':'ç','&otilde;':'õ','&atilde;':'ã','&agrave;':'à','&acirc;':'â'}
       regex = re.compile("|".join(map(re.escape, command.keys())))
       return regex.sub(lambda mo: command[mo.group(0)], text)
-
 
 params=get_params()
 url=None
@@ -257,5 +257,7 @@ elif mode==5: captura(name,url)
 elif mode==6: request(url)
 elif mode==7: destaques()
 elif mode==8: directos()
+
+#plugin://plugin.video.sapo/?mode=5&url=http://videos.sapo.pt/qAUkoLFQegUKv0jDDs33&name=Nomedovideo
   
 xbmcplugin.endOfDirectory(int(sys.argv[1]))

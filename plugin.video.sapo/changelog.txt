@@ -1,3 +1,8 @@
+[B]v0.1.00 (13 de Novembro de 2014):[/B]
+- Correccao de caracteres nao codificados.
+- Plugin pode ser chamado de fora do addon (ex: plugin://plugin.video.sapo/?mode=5&url=http://videos.sapo.pt/qAUkoLFQegUKv0jDDs33&name=Nomedovideo)
+- Outras correccoes.
+
 [B]v0.0.06 (21 de Junho de 2014):[/B]
 - Correccao global ao novo layout do site.
 - Outras melhorias e correccoes.
