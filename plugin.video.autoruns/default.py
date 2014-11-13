@@ -3,32 +3,24 @@
 """ Autoruns
     2013 fightnight"""
 
-import xbmc,xbmcaddon,xbmcgui,xbmcplugin,urllib,urllib2,os,re,sys
+import xbmc,xbmcaddon,xbmcgui,xbmcplugin,urllib,os,re,sys
 
-####################################################### CONSTANTES #####################################################
-
-versao = '0.0.02'
+versao = '0.1.00'
 addon_id = 'plugin.video.autoruns'
-art = '/resources/art/'
 user_agent = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1468.0 Safari/537.36'
 selfAddon = xbmcaddon.Addon(id=addon_id)
-wtpath = selfAddon.getAddonInfo('path').decode('utf-8')
-iconpequeno=wtpath + art + 'logo32.png'
-mensagemok = xbmcgui.Dialog().ok
-mensagemprogresso = xbmcgui.DialogProgress()
-pastaperfil = xbmc.translatePath(selfAddon.getAddonInfo('profile')).decode('utf-8')
-pastadeaddons = os.path.join(xbmc.translatePath('special://home/addons'), '')
                
 ################################################### MENUS PLUGIN ######################################################
 
 def menu_principal():
       if selfAddon.getSetting('avisoinicial') == 'true':
-            mensagemok('Autoruns','This addon improves xbmc speed by disabling','addons from startup. Be careful. Some addons','may require the startup service to run.')
-            mensagemok('Autoruns','Click on addon name to turn off/on service.','Restart XBMC to reload changes.')
+            xbmcgui.Dialog().ok('Autoruns','This addon improves xbmc speed by disabling','addons from startup. Be careful. Some addons','may require the startup service to run.')
+            xbmcgui.Dialog().ok('Autoruns','Click on addon name to turn off/on service.','Restart XBMC to reload changes.')
             selfAddon.setSetting('avisoinicial', 'false')
       listaraddons()
 
 def listaraddons():
+      pastadeaddons = os.path.join(xbmc.translatePath('special://home/addons'), '')
       directories = os.listdir(pastadeaddons)
       for nomedeaddon in directories:
             pastadirecta = os.path.join(pastadeaddons, nomedeaddon)
@@ -36,10 +28,9 @@ def listaraddons():
             if os.path.exists(addonxmlcaminho):
                   conteudo=openfile(addonxmlcaminho)
                   if re.search('point="xbmc.service"',conteudo):
-                        addDir(nomedeaddon + ' (on)',pastadirecta,1,pastadirecta + 'icon.png',1,False)
+                        addDir(nomedeaddon + ' (on)',pastadirecta,1,os.path.join(pastadirecta,'icon.png'),1,False)
                   elif re.search('point="xbmc.pass"',conteudo):
-                        addDir('[B][COLOR gold]'+ nomedeaddon + '[/B] (off)[/COLOR]',pastadirecta,1,pastadirecta + 'icon.png',1,False)
-            else: print "NAO EXISTE!!!!"
+                        addDir('[B][COLOR gold]'+ nomedeaddon + '[/B] (off)[/COLOR]',pastadirecta,1,os.path.join(pastadirecta,'icon.png'),1,False)
 
 def mudaestado(name,url):
       directoparaxml=os.path.join(url,'addon.xml')
@@ -67,36 +58,10 @@ def savefile(pastacaminho,conteudo):
         fh.close()
     except: print "Nao gravou o marcador de: %s" % filename
 
-
-def addLink(name,url,iconimage):
-      liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
-      liz.setInfo( type="Video", infoLabels={ "Title": name } )
-      liz.setProperty('fanart_image', "%s/fanart.jpg"%selfAddon.getAddonInfo("path"))
-      return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=liz)
-
 def addDir(name,url,mode,iconimage,total,pasta):
       u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)
       liz=xbmcgui.ListItem(name,iconImage="DefaultFolder.png", thumbnailImage=iconimage)
-      liz.setInfo( type="Video", infoLabels={ "Title": name} )
-      liz.setProperty('fanart_image', "%s/fanart.jpg"%selfAddon.getAddonInfo("path"))
       return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=pasta,totalItems=total)
-
-def abrir_url(url):
-      req = urllib2.Request(url)
-      req.add_header('User-Agent', user_agent)
-      response = urllib2.urlopen(req)
-      link=response.read()
-      response.close()
-      return link
-
-def versao_disponivel():
-      try:
-            link=abrir_url('http://fightnight-xbmc.googlecode.com/svn/addons/wareztuga/plugin.video.wt/addon.xml')
-            match=re.compile('name="wareztuga.tv"\r\n       version="(.+?)"\r\n       provider-name="wareztuga">').findall(link)[0]
-      except:
-            ok = mensagemok('wareztuga.tv',traducao(40184),traducao(40185),'')
-            match=traducao(40186)
-      return match
 
 def get_params():
       param=[]
@@ -132,7 +97,7 @@ print "Mode: "+str(mode)
 print "URL: "+str(url)
 print "Name: "+str(name)
 
-if mode==None or url==None or len(url)<1:
+if mode==None:
       print "Versao Instalada: v" + versao
       menu_principal()
 elif mode==1: mudaestado(name,url)
