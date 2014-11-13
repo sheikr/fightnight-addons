@@ -1,31 +1,14 @@
 # -*- coding: utf-8 -*-
 
 """ XBMC Log Viewer
-    2013 fightnight"""
+    2014 fightnight"""
 
-import xbmc,xbmcaddon,xbmcgui,xbmcplugin,urllib,urllib2,os,re,sys,datetime,shutil
+import xbmc,xbmcaddon,xbmcgui,xbmcplugin,urllib,os,re,sys
 
-####################################################### CONSTANTES #####################################################
-
-versao = '0.0.02'
+versao = '0.1.00'
 addon_id = 'plugin.video.xbmclogviewer'
-art = '/resources/art/'
-user_agent = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1468.0 Safari/537.36'
 selfAddon = xbmcaddon.Addon(id=addon_id)
-wtpath = selfAddon.getAddonInfo('path').decode('utf-8')
-iconpequeno=wtpath + art + 'logo32.png'
-mensagemok = xbmcgui.Dialog().ok
-mensagemprogresso = xbmcgui.DialogProgress()
-pastaperfil = xbmc.translatePath(selfAddon.getAddonInfo('profile')).decode('utf-8')
-pastadeaddons = os.path.join(xbmc.translatePath('special://home/addons'), '')
                
-################################################### MENUS PLUGIN ######################################################
-
-def menu_principal():
-      selfAddon.setSetting('avisoinicial', 'false')
-      mostrarlog()
-      addDir('Recarregar Log','nada',1,'',1,False)
-            
 def loglocation(): 
     versionNumber = int(xbmc.getInfoLabel("System.BuildVersion" )[0:2])
     if versionNumber < 12:
@@ -54,15 +37,22 @@ def mostrarlog():
       except: pass
 
       copyfile(pathoriginal, pathcopia)
-      
-      ##hora log##
-      dt  = datetime.datetime.now()
-      dt.strftime('%Y-%m-%d%%20%H:%M')
-      dts = dt.strftime('%Y-%m-%d%%20%H:%M')
-      
+     
       conteudolog=openfile(pathcopia)
+      if selfAddon.getSetting('inverter') == 'true':
+            inverted=conteudolog.splitlines()[::-1]
+            try:
+                  nrlinhas=selfAddon.getSetting('nrlinhas')
+                  if nrlinhas=='1': inverted=inverted[0:100]
+                  elif nrlinhas=='2': inverted=inverted[0:50]
+                  elif nrlinhas=='3': inverted=inverted[0:20]
+            except: pass
+            conteudolog='\n'.join(inverted)
+      
+      window(conteudolog)
 
-      ##janela##
+def window(conteudolog):
+      
       try:
             xbmc.executebuiltin("ActivateWindow(10147)")
             window = xbmcgui.Window(10147)
@@ -70,16 +60,10 @@ def mostrarlog():
             window.getControl(1).setLabel("XBMC Log Viewer")
             window.getControl(5).setText(conteudolog)
       except:
-            ## CRIAR JANELA ##
             pass
 
 
 def copyfile(source, dest, buffer_size=1024*1024):
-    """
-    Copy a file from source to dest. source and dest
-    can either be strings or any object with a read or
-    write method, like StringIO for example.
-    """
     if not hasattr(source, 'read'):
         source = open(source, 'rb')
     if not hasattr(dest, 'write'):
@@ -105,77 +89,21 @@ def openfile(pastacaminho):
         print "Nao abriu o marcador de: %s" % pastacaminho
         return None
 
-def savefile(pastacaminho,conteudo):
-    try:
-        fh = open(pastacaminho, 'wb')
-        fh.write(conteudo)  
-        fh.close()
-    except: print "Nao gravou o marcador de: %s" % filename
-
-
-def addLink(name,url,iconimage):
-      liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
-      liz.setInfo( type="Video", infoLabels={ "Title": name } )
-      liz.setProperty('fanart_image', "%s/fanart.jpg"%selfAddon.getAddonInfo("path"))
-      return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=liz)
-
-def addDir(name,url,mode,iconimage,total,pasta):
-      u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)
+def addReload(name,iconimage=''):
+      u=sys.argv[0]+"?&mode=None"
       liz=xbmcgui.ListItem(name,iconImage="DefaultFolder.png", thumbnailImage=iconimage)
-      liz.setInfo( type="Video", infoLabels={ "Title": name} )
-      liz.setProperty('fanart_image', "%s/fanart.jpg"%selfAddon.getAddonInfo("path"))
-      return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=pasta,totalItems=total)
+      return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=False)
 
-def abrir_url(url):
-      req = urllib2.Request(url)
-      req.add_header('User-Agent', user_agent)
-      response = urllib2.urlopen(req)
-      link=response.read()
-      response.close()
-      return link
-
-def get_params():
-      param=[]
-      paramstring=sys.argv[2]
-      if len(paramstring)>=2:
-            params=sys.argv[2]
-            cleanedparams=params.replace('?','')
-            if (params[len(params)-1]=='/'):
-                  params=params[0:len(params)-2]
-            pairsofparams=cleanedparams.split('&')
-            param={}
-            for i in range(len(pairsofparams)):
-                  splitparams={}
-                  splitparams=pairsofparams[i].split('=')
-                  if (len(splitparams))==2:
-                        param[splitparams[0]]=splitparams[1]                 
-      return param
-
-params=get_params()
-url=None
-name=None
 mode=None
 
-try: url=urllib.unquote_plus(params["url"])
-except: pass
-try: name=urllib.unquote_plus(params["name"])
-except: pass
-try: mode=int(params["mode"])
-except: pass
+if sys.argv[2]=='showlog/':
+      mostrarlog()      
 
-
-print "Mode: "+str(mode)
-print "URL: "+str(url)
-print "Name: "+str(name)
-
-if mode==None or url==None or len(url)<1:
+elif mode==None:
       print "Versao Instalada: v" + versao
       pathoriginal=loglocation() + 'xbmc.log'
-      pathcopia=os.path.join(pastaperfil,'xbmc.log')
-      menu_principal()
-elif mode==1:
-      pathoriginal=loglocation() + 'xbmc.log'
-      pathcopia=os.path.join(pastaperfil,'xbmc.log')
+      pathcopia=os.path.join(xbmc.translatePath(selfAddon.getAddonInfo('profile')).decode('utf-8'),'xbmc.log')
       mostrarlog()
+      addReload('Recarregar Log')
                        
 xbmcplugin.endOfDirectory(int(sys.argv[1]))
