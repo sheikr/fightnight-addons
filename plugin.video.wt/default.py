@@ -3,19 +3,18 @@
 """ wareztuga.tv
     2014 fightnight"""
 
-import xbmc,xbmcaddon,xbmcgui,xbmcplugin,cookielib,urllib,urllib2,os,re,sys,time,datetime
-from random import randint
+import xbmc,xbmcaddon,xbmcgui,xbmcplugin,cookielib,urllib,urllib2,os,re,sys
 addon_id = 'plugin.video.wt'
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.3.10'
+versao = '0.4.00'
 MainURL = 'http://www.wareztuga.tv/'
 art = '/resources/art/'
 ListMovieURL = 'movies.php'; SingleMovieURL = 'movie.php'
 ListSerieURL = 'series.php'; SingleSerieURL = 'serie.php'
 AccountItemURL = 'account.php'
-user_agent = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1468.0 Safari/537.36'
+user_agent = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'
 selfAddon = xbmcaddon.Addon(id=addon_id)
 wtpath = selfAddon.getAddonInfo('path').decode('utf-8')
 iconpequeno=wtpath + art + 'logo32.png'
@@ -32,8 +31,6 @@ username = urllib.quote(selfAddon.getSetting('wareztuga-username'))
 password = urllib.quote(selfAddon.getSetting('wareztuga-password'))
 usernameunli=selfAddon.getSetting('unrestrict-username')
 passwordunli = selfAddon.getSetting('unrestrict-password')
-PATH = "XBMC_WT"            
-UATRACK="UA-38320397-1"
 
 def traducao(texto):
       return traducaoma(texto).encode('utf-8')
@@ -74,7 +71,6 @@ def menu_principal(ligacao):
       #      ok = mensagemok('wareztuga.tv',traducao(40170), traducao(40171),'http://fb.com/xxxxxxxxxx')
       #      selfAddon.setSetting('mensagemfb2',value='false')
       if ligacao==1:
-            GA('None','tuga_menu')
             addDir(traducao(40012),MainURL,1,wtpath + art + 'filmes.png',1,True)
             addDir(traducao(40013),'series',2,wtpath + art + 'series.png',2,True)
             addDir(traducao(40215),'animes',2,wtpath + art + 'animacao.png',2,True)
@@ -86,6 +82,7 @@ def menu_principal(ligacao):
                         notif=re.compile('<a href="notifications.php" class=".+?"><span .+?></span><span>(.+?)</span>').findall(notifop)[0]
                         if notif!='0': new='[COLOR yellow][B] (' + notif + ')[/B][/COLOR]'
                   except: pass
+            seguirserie()
             addDir('[B][COLOR white]' + traducao(40015) + '[/COLOR][/B]' + new,MainURL,36,wtpath + art + 'biografia.png',4,True)
             #addDir('[B][COLOR white]' + 'Lista de Atalhos' + '[/COLOR][/B]',MainURL,23,wtpath + art + 'biografia.png',4,True)
             addDir('[B][COLOR white]' + traducao(40177) + '[/COLOR][/B]',MainURL,15,wtpath + art + 'biografia.png',5,True)
@@ -145,6 +142,14 @@ def menu_filmes():
       addDir('Multi-filtro',MainURL + ListMovieURL,39,wtpath + art + 'categoria.png',1,True)
       #addDir('filmes',MainURL + 'pagination.ajax.php?p=1&order=date&mediaType=movies',32,wtpath + art + 'ano.png',1,True)
       vista_menus()
+
+def seguirserie():
+      try:
+            content=openfile('following.txt')
+            serie=re.compile('"name":"(.+?)","url":"(.+?)"').findall(content)[0]
+            seasonnumb=serie[1].split('&season=')[1]
+            addTemp("[COLOR white][B]A seguir série[/B][/COLOR] (%s T%s)" % (serie[0],seasonnumb),MainURL + serie[1],7,wtpath + art + seasonnumb + '.png',1,True)
+      except: pass
 
 def instrucoeslibrary():
       mensagemaviso('Bem vindo ao modo biblioteca!\n\nEsta é a nova funcionalidade disponivel neste addon. Com esta função passa a ser possível ter o conteúdo do wareztuga na vossa biblioteca local. Com esta funcionalidade tem um acesso mais rápido aos conteúdos do site.\n\n Para começar devem activar as opções e efectuar uma actualização do conteúdo.\n\nDe seguida devem ir a Videos->Ficheiros->Adicionar Vídeos e adicionar a pasta onde se encontra a base de dados do wareztuga.\n\n[B][COLOR white]Pasta Inicial -> userdata -> addon_data -> plugin.video.wt -> Biblioteca->Filmes ou Séries e só depois confirmar[/B] (pasta defeito, se alteraram nas definições é a que escolheram)[/COLOR]\n\nDe seguida devem modificar as definições consoante a pasta que escolheram! Podem ir a configurações e definir o idioma que desejam obter para a biblioteca. Caso desejem ter séries e filmes na biblioteca, devem repetir o passo para o tipo de conteúdo em falta!\n\nO addon vai apenas verificar novos episódios nas séries subscritas e actualiza automaticamente a biblioteca. A verificação automática é feito conforme o periodo definido.')
@@ -401,14 +406,12 @@ def unrestrict_link(linkescolha,thumbnail,name,fic,simounao,wturl):
                             selfAddon.openSettings()
                             return          
                       else:
-                            GA('None','tuga_down_un')
                             fezdown=fazerdownload(name,streamlink)
                             if fezdown:
                                   if selfAddon.getSetting('download-subs') == 'true': fazerdownload(moviename,fic)
                                   else: pass
                             encerrarsistema()
                 if simounao=='agora':
-                      GA('None','tuga_plays_un')
                       comecarvideo(fic,streamlink + '|User-Agent=' + urllib.quote(user_agent),name,thumbnail,wturl,True)
 
 def unrestrict_captcha(url,referido):
@@ -427,39 +430,40 @@ def unrestrict_captcha(url,referido):
             try:media_id=re.compile('id="link" type="hidden" value="(.+?)" />').findall(html)[0]
             except: pass
             noscript=re.compile('<iframe src="(.+?)"').findall(html)[0]
+            
             check = net.http_GET(noscript).content
             hugekey=re.compile('id="adcopy_challenge" value="(.+?)">').findall(check)[0]
             captcha_headers= {'User-Agent':'Mozilla/6.0 (Macintosh; I; Intel Mac OS X 11_7_9; de-LI; rv:1.9b4) Gecko/2012010317 Firefox/10.0a4','Host':'api.solvemedia.com','Referer':response.get_url(),'Accept':'image/png,image/*;q=0.8,*/*;q=0.5'}
             open(captcha_img, 'wb').write( net.http_GET("http://api.solvemedia.com%s"%re.compile('<img src="(.+?)"').findall(check)[0] ).content)
             try: solved,id = solvevia9kw(captcha_img)
-            except: 
-				solved = ''
-				id = ''
+            except:
+                  solved = ''
+                  id = ''
             if solved != '':
-				puzzle = solved
-				try:os.remove(captcha_img)
-				except: pass
+                  puzzle = solved
+                  try:os.remove(captcha_img)
+                  except: pass
             else:
-				solver = InputWindow(captcha=captcha_img)
-				try:os.remove(captcha_img)
-				except: pass
-				puzzle = solver.get()
+                  solver = InputWindow(captcha=captcha_img)
+                  try:os.remove(captcha_img)
+                  except: pass
+                  puzzle = solver.get()
             if puzzle and referido=='download':
                   data={'response':urllib.quote_plus(puzzle),'challenge':hugekey,'link':media_id}
                   html = net.http_POST('https://unrestrict.li/download.php',data).content
                   download_link = json.loads(html).items()[0][1]
                   if re.search('Incorrect captcha entered',download_link):
-                        if id != '': 
-							try: Ninekwusercaptchacorrectback(id,"2")
-							except:pass
+                        if id != '':
+                              try: Ninekwusercaptchacorrectback(id,"2")
+                              except:pass
                         xbmc.executebuiltin("XBMC.Notification(wareztuga.tv,"+traducao(40227)+",'500000',"+iconpequeno.encode('utf-8')+")")
                         sys.exit(0)
                         raise
-                  else: 
-					if id != '': 
-						try: Ninekwusercaptchacorrectback(id,"1")
-						except: pass
-					return download_link
+                  else:
+                        if id != '':
+                              try: Ninekwusercaptchacorrectback(id,"1")
+                              except: pass
+                        return download_link
             if puzzle and referido=='login':
                         data = net.http_POST(urlsignin,{'return':'registered','username':usernameunli,'password':passwordunli,'adcopy_response':urllib.quote_plus(puzzle),'adcopy_challenge':hugekey,'signin':'Sign+in'}).content
                         success=re.compile('href=".+?unrestrict.li/profile">(.+?)</a>.+?href=".+?unrestrict.li/sign_out">(.+?)</a>',re.DOTALL).findall(data)
@@ -488,7 +492,7 @@ class InputWindow(xbmcgui.WindowDialog):# Cheers to Bastardsmkr code already don
 
     def get(self):
         self.show()
-        time.sleep(3)
+        xbmc.sleep(150)#3000
         self.kbd.doModal()
         if (self.kbd.isConfirmed()):
             text = self.kbd.getText()
@@ -556,14 +560,12 @@ def realdebrid(urlvideo,thumbnail,moviename,fic,simounao,wturl):
                                           selfAddon.openSettings()
                                           return          
                                     else:
-                                          GA('None','tuga_down_rd')
                                           fezdown=fazerdownload(moviename,linkfinal)
                                           if fezdown:
                                                 if selfAddon.getSetting('download-subs') == 'true': fazerdownload(moviename,fic)
                                                 else: pass
                                           encerrarsistema()                              
                               if simounao=='agora':
-                                    GA('None','tuga_plays_rd')
                                     comecarvideo(fic,linkfinal,moviename,thumbnail,wturl,False)
                   else:
                         realdebrid_login(urlvideo,thumbnail,moviename,fic,simounao,wturl)
@@ -1103,6 +1105,7 @@ class sorte(xbmcgui.WindowXMLDialog):
 
     def contaleatorio(self):
           frase=['A carregar o bixo!','Vamos lá ver o que sai daqui','És esquisito?','Deixa cá ver o que se arranja','Acho que este é perfeito para ti','Milhares de coisas e andas armado em esquisito','Agora é que vai ser!','Desafio-te a ver este :)','Já estou cansado de dar sugestões','Dizem que este é bom','Eu não confiava nos meus gostos','A minha inteligência para escolher é altamente','#YOLO','É AGORA!']
+          from random import randint
           self.getControl(3000).setLabel('[B][COLOR yellow]%s[/COLOR][/B]' %(frase[randint(0,len(frase)-1)]))
           self.getControl(9999).setVisible(True)
           url=MainURL + 'pagination.ajax.php?p=1&genres=%s' % (self.catnumb)
@@ -1223,14 +1226,12 @@ def upzin(url,srt,name,thumbnail,simounao,wturl):
       mensagemprogresso.update(100)
       mensagemprogresso.close()
       if simounao=='download':
-            GA('None','tuga_down_upz')
             fezdown=fazerdownload(name,code)
             if fezdown:
                   if selfAddon.getSetting('download-subs') == 'true': fazerdownload(name,srt)
                   else: pass
             encerrarsistema()
       elif simounao=='agora':
-            GA('None','tuga_plays_upz')
             comecarvideo(srt,code,name,thumbnail,wturl,False)
                             
 def firedrive(url,srt,name,thumbnail,simounao,wturl):
@@ -1303,14 +1304,12 @@ def firedrive(url,srt,name,thumbnail,simounao,wturl):
       mensagemprogresso.close()
       print put2
       if simounao=='download':
-            GA('None','tuga_down_put')
             fezdown=fazerdownload(name,put2)
             if fezdown:
                   if selfAddon.getSetting('download-subs') == 'true': fazerdownload(name,srt)
                   else: pass
             encerrarsistema()
       elif simounao=='agora':
-            GA('None','tuga_plays_put')
             comecarvideo(srt,put2,name,thumbnail,wturl,False)
 
 def sockshare(url,srt,name,thumbnail,simounao,wturl):
@@ -1382,14 +1381,12 @@ def sockshare(url,srt,name,thumbnail,simounao,wturl):
       mensagemprogresso.update(100)
       mensagemprogresso.close()
       if simounao=='download':
-            GA('None','tuga_down_put')
             fezdown=fazerdownload(name,put2)
             if fezdown:
                   if selfAddon.getSetting('download-subs') == 'true': fazerdownload(name,srt)
                   else: pass
             encerrarsistema()
       elif simounao=='agora':
-            GA('None','tuga_plays_put')
             comecarvideo(srt,put2,name,thumbnail,wturl,False)
 
 def bayfiles(url,srt,name,thumbnail,simounao,wturl):
@@ -1418,14 +1415,12 @@ def bayfiles(url,srt,name,thumbnail,simounao,wturl):
             except:urlpremium=[]
             if urlpremium:
                   if simounao=='download':
-                        GA('None','tuga_down_bay')
                         fezdown=fazerdownload(name,urlpremium)
                         if fezdown:
                               if selfAddon.getSetting('download-subs') == 'true': fazerdownload(name,srt)
                               else: pass
                         encerrarsistema()
                   elif simounao=='agora':
-                        GA('None','tuga_plays_bay')
                         comecarvideo(srt,urlpremium,name,thumbnail,wturl,False)
             else:
                   if simounao=='agora': ok = mensagemok(traducao(40056),traducao(40057),traducao(40058))
@@ -1446,14 +1441,12 @@ def bayfiles(url,srt,name,thumbnail,simounao,wturl):
                         try:funcional = matches[0] #final url mp4
                         except: return
                         if simounao=='download':
-                              GA('None','tuga_down_bay')
                               fezdown=fazerdownload(name,funcional)
                               if fezdown:
                                     if selfAddon.getSetting('download-subs') == 'true': fazerdownload(name,srt)
                                     else: pass
                               encerrarsistema()
                         elif simounao=='agora':
-                              GA('None','tuga_plays_bay')
                               comecarvideo(srt,funcional,name,thumbnail,wturl,True)
 
 def hugefiles(url,srt,name,thumbnail,simounao,wturl):
@@ -1466,34 +1459,45 @@ def hugefiles(url,srt,name,thumbnail,simounao,wturl):
       from t0mm0.common.net import Net
       net = Net()
       #stupid timeout,retry
+      link=abrir_url(url)
+      if re.search('/404.html',link):
+            mensagemok('wareztuga.tv','Ficheiro não disponível.')
+            sys.exit(0)
+      captcha_img = os.path.join(pastaperfil, "putcaptcha.png")
+      try:os.remove(captcha_img)
+      except: pass
       try:
-            link=abrir_url(url)
-            captcha_img = os.path.join(pastaperfil, "putcaptcha.png")
+            print "Solvemedia"
+            captchatype="solvemedia"
             noscript=re.compile('<iframe src="(.+?)"').findall(link)[0]
             check = net.http_GET(noscript).content
             hugekey=re.compile('id="adcopy_challenge" value="(.+?)">').findall(check)[0]
+            captcha_headers= {'User-Agent':'Mozilla/6.0 (Macintosh; I; Intel Mac OS X 11_7_9; de-LI; rv:1.9b4) Gecko/2012010317 Firefox/10.0a4','Host':'api.solvemedia.com','Referer':url,'Accept':'image/png,image/*;q=0.8,*/*;q=0.5'}
+            open(captcha_img, 'wb').write( net.http_GET("http://api.solvemedia.com%s"%re.compile('<img src="(.+?)"').findall(check)[0] ).content)
       except:
-            link=abrir_url(url)
-            captcha_img = os.path.join(pastaperfil, "putcaptcha.png")
-            noscript=re.compile('<iframe src="(.+?)"').findall(link)[0]
-            check = net.http_GET(noscript).content
-            hugekey=re.compile('id="adcopy_challenge" value="(.+?)">').findall(check)[0]
-            
-      captcha_headers= {'User-Agent':'Mozilla/6.0 (Macintosh; I; Intel Mac OS X 11_7_9; de-LI; rv:1.9b4) Gecko/2012010317 Firefox/10.0a4','Host':'api.solvemedia.com','Referer':url,'Accept':'image/png,image/*;q=0.8,*/*;q=0.5'}
-      open(captcha_img, 'wb').write( net.http_GET("http://api.solvemedia.com%s"%re.compile('<img src="(.+?)"').findall(check)[0] ).content)
+            try:
+                  print "Recaptcha"
+                  captchatype="recaptcha"
+                  headers={'Referer': url}
+                  noscript=re.compile('src=".+?recaptcha/api/([^"]+?)">').findall(link)[0]
+                  check = net.http_GET('http://www.google.com/recaptcha/api/' + noscript,headers=headers).content
+                  hugekey = re.search("challenge \: \\'(.+?)\\'", check)
+                  open(captcha_img, 'wb').write(net.http_GET('http://www.google.com/recaptcha/api/image?c='+hugekey.group(1)).content)
+            except:
+                  mensagemok('wareztuga.tv','Erro a obter captcha.')
+                  print link
+                  sys.exit(0)
+
+
       try: solved,id = solvevia9kw(captcha_img)
-      except: 
-		solved = ''
-		id = ''
+      except:
+            solved = ''
+            id = ''
       if solved != '':
-		puzzle = solved
-		try:os.remove(captcha_img)
-		except: pass
+            puzzle = solved
       else:
-		solver = InputWindow(captcha=captcha_img)
-		try:os.remove(captcha_img)
-		except: pass
-		puzzle = solver.get()
+            solver = InputWindow(captcha=captcha_img)
+            puzzle = solver.get()
       if puzzle:
             mensagemprogresso.update(66)
             op=re.compile('<input type="hidden" name="op" value="(.+?)">').findall(link)[0]
@@ -1504,43 +1508,40 @@ def hugefiles(url,srt,name,thumbnail,simounao,wturl):
             referer=''
             ctype=re.compile('<input type="hidden" name="ctype" value="(.+?)">').findall(link)[0]
             method=re.compile('name="method_free".+?value="(.+?)"').findall(link)[0]
-            form_data={'op':op,'usr_login':usr_login,'rand':rand,'id':id,'fname':fname,'referer':referer,'ctype':ctype,'adcopy_response':puzzle,'adcopy_challenge':hugekey,'method_free':method}
-            #stupid timeout,retry
-            try:
-                  
-                  link= net.http_POST(url,form_data=form_data).content.encode('latin-1','ignore')
-                  try:streamurl=re.compile('var fileUrl = "(.+?)"').findall(link)[0]
-                  except:
-                        if id != '': 
-                                              try: Ninekwusercaptchacorrectback(id,"2")
-                                              except: pass
-                        mensagemok(traducao(40123),traducao(40348))
-                        sys.exit(0)
             
+            if captchatype=="solvemedia":
+                  form_data={'op':op,'usr_login':usr_login,'rand':rand,'id':id,'fname':fname,'referer':referer,'ctype':ctype,'adcopy_response':puzzle,'adcopy_challenge':hugekey,'method_free':method}
+            elif captchatype=="recaptcha":
+                  form_data={'op':op,'usr_login':usr_login,'rand':rand,'id':id,'fname':fname,'referer':referer,'ctype':ctype,'recaptcha_challenge_field':hugekey.group(1),'recaptcha_response_field':puzzle,'method_free':method}
+
+            link= net.http_POST(url,form_data=form_data).content.encode('latin-1','ignore')
+            
+            try:streamurl=re.compile('var fileUrl = "(.+?)"').findall(link)[0]
             except:
-                  link= net.http_POST(url,form_data=form_data).content.encode('latin-1','ignore')
-                  try:streamurl=re.compile('var fileUrl = "(.+?)"').findall(link)[0]
-                  except:
-                        if id != '': 
-                                              try: Ninekwusercaptchacorrectback(id,"2")
-                                              except: pass
-                        mensagemok(traducao(40123),traducao(40348))
+                  if id != '': 
+                        try: Ninekwusercaptchacorrectback(id,"2")
+                        except: pass
+                  opcao=xbmcgui.Dialog().yesno(traducao(40123),traducao(40348),'Tentar novamente?')
+                  if opcao:
+                        mensagemprogresso.close()
+                        hugefiles(url,srt,name,thumbnail,simounao,wturl)
+                        return
+                  else:
                         sys.exit(0)
                   
+            if id != '':
+                  try: Ninekwusercaptchacorrectback(id,"1")
+                  except: pass
+
             mensagemprogresso.update(100)
             mensagemprogresso.close()
-            if id != '': 
-				try: Ninekwusercaptchacorrectback(id,"1")
-				except: pass
             if simounao=='download':
-                  GA('None','tuga_down_huge')
                   fezdown=fazerdownload(name,streamurl)
                   if fezdown:
                         if selfAddon.getSetting('download-subs') == 'true': fazerdownload(name,srt)
                         else: pass
                   encerrarsistema()
             elif simounao=='agora':
-                  GA('None','tuga_plays_huge')
                   comecarvideo(srt,streamurl,name,thumbnail,wturl,False)
 
       else:mensagemprogresso.close()
@@ -1574,6 +1575,9 @@ def kingfiles(url,srt,name,thumbnail,simounao,wturl):
       from t0mm0.common.net import Net
       net = Net()
       link=abrir_url(url)
+      if re.search('/404.html',link):
+            mensagemok('wareztuga.tv','Ficheiro não disponível.')
+            sys.exit(0)
       op=re.compile('<input type="hidden" name="op" value="(.+?)">').findall(link)[0]
       fname=re.compile('<input type="hidden" name="fname" value="(.+?)">').findall(link)[0]
       usr_login=''
@@ -1584,25 +1588,38 @@ def kingfiles(url,srt,name,thumbnail,simounao,wturl):
       link= net.http_POST(url,form_data=form_data).content.encode('latin-1','ignore')
       mensagemprogresso.update(33)
       captcha_img = os.path.join(pastaperfil, "putcaptcha.png")
-      noscript=re.compile('<iframe src="(.+?)"').findall(link)[0]
+      try:os.remove(captcha_img)
+      except: pass
+      try:
+            print "Solvemedia"
+            captchatype="solvemedia"
+            noscript=re.compile('<iframe src="(.+?)"').findall(link)[0]
+            check = net.http_GET(noscript).content
+            hugekey=re.compile('id="adcopy_challenge" value="(.+?)">').findall(check)[0]
+            captcha_headers= {'User-Agent':'Mozilla/6.0 (Macintosh; I; Intel Mac OS X 11_7_9; de-LI; rv:1.9b4) Gecko/2012010317 Firefox/10.0a4','Host':'api.solvemedia.com','Referer':url,'Accept':'image/png,image/*;q=0.8,*/*;q=0.5'}
+            open(captcha_img, 'wb').write( net.http_GET("http://api.solvemedia.com%s"%re.compile('<img src="(.+?)"').findall(check)[0] ).content)
+      except:
+            try:
+                  print "Recaptcha"
+                  captchatype="recaptcha"
+                  headers={'Referer': url}
+                  noscript=re.compile('src=".+?recaptcha/api/([^"]+?)">').findall(link)[0]
+                  check = net.http_GET('http://www.google.com/recaptcha/api/' + noscript,headers=headers).content
+                  hugekey = re.search("challenge \: \\'(.+?)\\'", check)
+                  open(captcha_img, 'wb').write(net.http_GET('http://www.google.com/recaptcha/api/image?c='+hugekey.group(1)).content)
+            except:
+                  mensagemok('wareztuga.tv','Erro a obter captcha.')
+                  sys.exit(0)
 
-      check = net.http_GET(noscript).content
-      hugekey=re.compile('id="adcopy_challenge" value="(.+?)">').findall(check)[0]
-      captcha_headers= {'User-Agent':'Mozilla/6.0 (Macintosh; I; Intel Mac OS X 11_7_9; de-LI; rv:1.9b4) Gecko/2012010317 Firefox/10.0a4','Host':'api.solvemedia.com','Referer':url,'Accept':'image/png,image/*;q=0.8,*/*;q=0.5'}
-      open(captcha_img, 'wb').write( net.http_GET("http://api.solvemedia.com%s"%re.compile('<img src="(.+?)"').findall(check)[0] ).content)
       try: solved,id = solvevia9kw(captcha_img)
-      except: 
-		solved = ''
-		id = ''
+      except:
+            solved = ''
+            id = ''
       if solved != '':
-		puzzle = solved
-		try:os.remove(captcha_img)
-		except: pass
+            puzzle = solved
       else:
-		solver = InputWindow(captcha=captcha_img)
-		try:os.remove(captcha_img)
-		except: pass
-		puzzle = solver.get()
+            solver = InputWindow(captcha=captcha_img)
+            puzzle = solver.get()
       if puzzle:
             mensagemprogresso.update(66)
             op=re.compile('<input type="hidden" name="op" value="(.+?)">').findall(link)[0]
@@ -1613,31 +1630,38 @@ def kingfiles(url,srt,name,thumbnail,simounao,wturl):
             referer=''
             method=''
             methodpremium=''
+
+            if captchatype=="solvemedia":
+                  form_data={'op':op,'rand':rand,'id':id,'fname':fname,'referer':referer,'adcopy_response':puzzle,'adcopy_challenge':hugekey,'method_free':method,'method_premium':methodpremium,'down_direct':downdirect}
+            elif captchatype=="recaptcha":
+                  form_data={'op':op,'rand':rand,'id':id,'fname':fname,'referer':referer,'recaptcha_challenge_field':hugekey.group(1),'recaptcha_response_field':puzzle,'method_free':method,'method_premium':methodpremium,'down_direct':downdirect}
             
-            form_data={'op':op,'rand':rand,'id':id,'fname':fname,'referer':referer,'adcopy_response':puzzle,'adcopy_challenge':hugekey,'method_free':method,'method_premium':methodpremium,'down_direct':downdirect}
             link= net.http_POST(url,form_data=form_data).content.encode('latin-1','ignore')
             try:streamurl=re.compile("var download_url = '(.+?)'").findall(link)[0]
             except:
-                  if id != '': 
-					try: Ninekwusercaptchacorrectback(id,"2")
-					except: pass
-                  mensagemok(traducao(40123),traducao(40348))
-                  sys.exit(0)
+                  if id != '':
+                        try: Ninekwusercaptchacorrectback(id,"2")
+                        except: pass
+                  opcao=xbmcgui.Dialog().yesno(traducao(40123),traducao(40348),'Tentar novamente?')
+                  if opcao:
+                        mensagemprogresso.close()
+                        kingfiles(url,srt,name,thumbnail,simounao,wturl)
+                        return
+                  else:
+                        sys.exit(0)
                   
             mensagemprogresso.update(100)
             mensagemprogresso.close()
-            if id != '': 
-				try: Ninekwusercaptchacorrectback(id,"1")
-				except: pass
+            if id != '':
+                  try: Ninekwusercaptchacorrectback(id,"1")
+                  except: pass
             if simounao=='download':
-                  GA('None','tuga_down_king')
                   fezdown=fazerdownload(name,streamurl)
                   if fezdown:
                         if selfAddon.getSetting('download-subs') == 'true': fazerdownload(name,srt)
                         else: pass
                   encerrarsistema()
             elif simounao=='agora':
-                  GA('None','tuga_plays_king')
                   comecarvideo(srt,streamurl,name,thumbnail,wturl,False)
 
       else:mensagemprogresso.close()
@@ -1664,14 +1688,12 @@ def videoshare(url,srt,name,thumbnail,simounao,wturl):
       mensagemprogresso.update(100)
       mensagemprogresso.close()
       if simounao=='download':
-            GA('None','tuga_down_vshare')
             fezdown=fazerdownload(name,streamurl)
             if fezdown:
                   if selfAddon.getSetting('download-subs') == 'true': fazerdownload(name,srt)
                   else: pass
             encerrarsistema()
       elif simounao=='agora':
-            GA('None','tuga_plays_vshare')
             comecarvideo(srt,streamurl,name,thumbnail,wturl,False)
 
 
@@ -1692,8 +1714,9 @@ def comecarvideo(srt,finalurl,name,thumbnail,wturl,proteccaobay):
       listitem = xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=thumbnail)            
       if re.search('Temp.', name):
             conteudopagina=abrir_url_cookie(wturl)
-            show=re.compile('<div class="thumb serie" title="(.+?)">').findall(conteudopagina)[0]
+            seasonurl=re.compile('<a href="([^"]+?)" class="slctd">').findall(conteudopagina)[0]
             serie=re.compile('<title>wareztuga.tv - .+? - (.+?): Temporada (.+?), Epis.+?io (.+?)</title>').findall(conteudopagina)[0]
+            show=re.compile('<div class="thumb serie" title="(.+?)">').findall(conteudopagina)[0]
             conteudopagina=conteudopagina.replace('(','').replace('<span>)','-')
             try:year=re.compile('<span class="year"><span> </span>(.+?)-').findall(conteudopagina)[0]
             except: year=0
@@ -1712,6 +1735,8 @@ def comecarvideo(srt,finalurl,name,thumbnail,wturl,proteccaobay):
       else:
             name=name+'-'
             conteudopagina=abrir_url_cookie(wturl)
+            seasonurl=''
+            show=False
             conteudopagina=conteudopagina.replace('(','').replace('<span>)','-')
             try:year=re.compile('<span class="year"><span> </span>(.+?)-').findall(conteudopagina)[0]
             except: year=0
@@ -1737,18 +1762,17 @@ def comecarvideo(srt,finalurl,name,thumbnail,wturl,proteccaobay):
       dialogWait.create('wareztuga.tv', traducao(40065))
       dialogWait.close()
       del dialogWait
-      player = Player(tipo=tipo,warezid=warezid,videoname=name,thumbnail=thumbnail,proteccaobay=proteccaobay,wturl=wturl,imdbcode=imdbcode)
+      player = Player(tipo=tipo,warezid=warezid,videoname=name,thumbnail=thumbnail,proteccaobay=proteccaobay,wturl=wturl,imdbcode=imdbcode,seasonurl=seasonurl,show=show)
       player.play(playlist)
       
       if selfAddon.getSetting('subtitles-activate') == 'true': player.setSubtitles(srt)
-      GA('None','tuga_player')
       while player._playbackLock:
             player._trackPosition()
             xbmc.sleep(5000)
 
 ## THX 1CH ##
 class Player(xbmc.Player):
-      def __init__(self,tipo,warezid,videoname,thumbnail,proteccaobay,wturl,imdbcode):
+      def __init__(self,tipo,warezid,videoname,thumbnail,proteccaobay,wturl,imdbcode,seasonurl,show):
             if selfAddon.getSetting("playertype") == "0": xbmc.Player(xbmc.PLAYER_CORE_AUTO)
             elif selfAddon.getSetting("playertype") == "1": xbmc.Player(xbmc.PLAYER_CORE_MPLAYER)
             elif selfAddon.getSetting("playertype") == "2": xbmc.Player(xbmc.PLAYER_CORE_DVDPLAYER)
@@ -1764,6 +1788,8 @@ class Player(xbmc.Player):
             self.proteccaobay = proteccaobay
             self.imdbcode = imdbcode
             self.wturl=wturl
+            self.seasonurl=seasonurl
+            self.show=show
             self._lastPos = 0
             self.nomeficheiro=self.tipo + '_' + self.warezid
             self.caminhoficheiro=os.path.join(pastaperfil, self.nomeficheiro)
@@ -1784,6 +1810,8 @@ class Player(xbmc.Player):
                               bookmark=openfile(self.caminhoficheiro)
                               opcao=xbmcgui.Dialog().yesno("wareztuga.tv", '',traducao(40173) + ' %s?' % (format_time(float(bookmark))),'', traducao(40174), traducao(40175))
                               if opcao: self.seekTime(float(bookmark))
+            if self.show != False:
+                  savefile(pastaperfil,'following.txt','"name":"%s","url":"%s"' % (self.show,self.seasonurl))
                               
       def onPlayBackStopped(self):
             print "Parou o player"
@@ -2117,7 +2145,7 @@ def fazerdownload(name,url):
       vidname=name.replace('[B]','').replace('[/B]','').replace('\\','')
       vidname = re.sub('[^-a-zA-Z0-9_.()\\\/ ]+', '',  vidname)
       if os.path.exists(downloadPath):
-            if re.search('subs/',url): vidname = vidname+'.srt'; url=MainURL + url
+            if re.search('subs/',url): vidname = vidname+'.srt'
             else: vidname = vidname+'.mp4'
             mypath=os.path.join(downloadPath,vidname)
       else: mypath= '0'           
@@ -2133,6 +2161,7 @@ def fazerdownload(name,url):
                   try:
                         dp = xbmcgui.DialogProgress()
                         dp.create(traducao(40127), '', name)
+                        import time
                         start_time = time.time()
                         try: urllib.urlretrieve(url, mypath, lambda nb, bs, fs: dialogdown(nb, bs, fs, dp, start_time))
                         except:
@@ -2477,114 +2506,6 @@ def clean(text):
       regex = re.compile("|".join(map(re.escape, command.keys())))
       return regex.sub(lambda mo: command[mo.group(0)], text)
 
-def parseDate(dateString):
-      try: return datetime.datetime.fromtimestamp(time.mktime(time.strptime(dateString.encode('utf-8', 'replace'), "%Y-%m-%d %H:%M:%S")))
-      except: return datetime.datetime.today() - datetime.timedelta(days = 1) #force update
-
-def checkGA():
-      secsInHour = 60 * 60
-      threshold  = 2 * secsInHour
-      now   = datetime.datetime.today()
-      prev  = parseDate(selfAddon.getSetting('ga_time2'))
-      delta = now - prev
-      nDays = delta.days
-      nSecs = delta.seconds
-      doUpdate = (nDays > 0) or (nSecs > threshold)
-      if not doUpdate: return
-      selfAddon.setSetting('ga_time2', str(now).split('.')[0])
-      APP_LAUNCH() 
-                    
-def send_request_to_google_analytics(utm_url):
-      try:
-            req = urllib2.Request(utm_url, None, {'User-Agent':user_agent})
-            response = urllib2.urlopen(req).read()
-      except: print ("GA fail: %s" % utm_url)         
-      return response
-       
-def GA(group,name):
-        try:
-            try: from hashlib import md5
-            except: from md5 import md5
-            from random import randint
-            from urllib import unquote, quote
-            from os import environ
-            from hashlib import sha1
-            #VISITOR = ADDON.getSetting('ga_visitor')
-            VISITOR = environ.get("GA_VISITOR", username)
-            VISITOR = str(int("0x%s" % sha1(VISITOR).hexdigest(), 0))[:10]
-            utm_gif_location = "http://www.google-analytics.com/__utm.gif"
-            if not group=="None":
-                    utm_track = utm_gif_location + "?" + \
-                            "utmwv=" + versao + \
-                            "&utmn=" + str(randint(0, 0x7fffffff)) + \
-                            "&utmt=" + "event" + \
-                            "&utme="+ quote("5("+PATH+"*"+group+"*"+name+")")+\
-                            "&utmp=" + quote(PATH) + \
-                            "&utmac=" + UATRACK + \
-                            "&utmcc=__utma=%s" % ".".join(["1", VISITOR, VISITOR, VISITOR,VISITOR,"2"])
-                    try:
-                        print "============================ POSTING TRACK EVENT ============================"
-                        send_request_to_google_analytics(utm_track)
-                    except: print "============================  CANNOT POST TRACK EVENT ============================" 
-            if name=="None":
-                    utm_url = utm_gif_location + "?" + \
-                            "utmwv=" + versao + \
-                            "&utmn=" + str(randint(0, 0x7fffffff)) + \
-                            "&utmp=" + quote(PATH) + \
-                            "&utmac=" + UATRACK + \
-                            "&utmcc=__utma=%s" % ".".join(["1", VISITOR, VISITOR, VISITOR, VISITOR,"2"])
-            else:
-                if group=="None":
-                       utm_url = utm_gif_location + "?" + \
-                                "utmwv=" + versao + \
-                                "&utmn=" + str(randint(0, 0x7fffffff)) + \
-                                "&utmp=" + quote(PATH+"/"+name) + \
-                                "&utmac=" + UATRACK + \
-                                "&utmcc=__utma=%s" % ".".join(["1", VISITOR, VISITOR, VISITOR, VISITOR,"2"])
-                else:
-                       utm_url = utm_gif_location + "?" + \
-                                "utmwv=" + versao + \
-                                "&utmn=" + str(randint(0, 0x7fffffff)) + \
-                                "&utmp=" + quote(PATH+"/"+group+"/"+name) + \
-                                "&utmac=" + UATRACK + \
-                                "&utmcc=__utma=%s" % ".".join(["1", VISITOR, VISITOR, VISITOR, VISITOR,"2"])
-            print "============================ POSTING ANALYTICS ============================"
-            send_request_to_google_analytics(utm_url)
-        except: print "================  CANNOT POST TO ANALYTICS  ================" 
-            
-def APP_LAUNCH():
-        print '==========================   '+PATH+' '+versao+'   =========================='
-        try:
-            try: from hashlib import md5
-            except: from md5 import md5
-            from random import randint
-            from urllib import unquote, quote
-            from os import environ
-            from hashlib import sha1
-            import platform
-            VISITOR = environ.get("GA_VISITOR", username)
-            VISITOR = str(int("0x%s" % sha1(VISITOR).hexdigest(), 0))[:10]
-            if re.search('12.0',xbmc.getInfoLabel( "System.BuildVersion"),re.IGNORECASE) or re.search('12.1',xbmc.getInfoLabel( "System.BuildVersion"),re.IGNORECASE): build="Frodo" 
-            if re.search('11.0',xbmc.getInfoLabel( "System.BuildVersion"),re.IGNORECASE): build="Eden" 
-            if re.search('13.0',xbmc.getInfoLabel( "System.BuildVersion"),re.IGNORECASE): build="Gotham"
-            try: PLATFORM=platform.system()+' '+platform.release()
-            except: PLATFORM=platform.system()
-            utm_gif_location = "http://www.google-analytics.com/__utm.gif"
-            utm_track = utm_gif_location + "?" + \
-                    "utmwv=" + versao + \
-                    "&utmn=" + str(randint(0, 0x7fffffff)) + \
-                    "&utmt=" + "event" + \
-                    "&utme="+ quote("5(APP LAUNCH*"+PATH+"-"+build+"*"+PLATFORM+")")+\
-                    "&utmp=" + quote(PATH) + \
-                    "&utmac=" + UATRACK + \
-                    "&utmcc=__utma=%s" % ".".join(["1", VISITOR, VISITOR, VISITOR,VISITOR,"2"])
-            try:
-                print "============================ POSTING APP LAUNCH TRACK EVENT ============================"
-                send_request_to_google_analytics(utm_track)
-            except: print "============================  CANNOT POST APP LAUNCH TRACK EVENT ============================" 
-        except: print "================  CANNOT POST TO ANALYTICS  ================"
-checkGA()
-
 def NinekwBalance(apikey,apiurl):
 	url="?action=usercaptchaguthaben&source=pythonapi&apikey=" + apikey
 	req = urllib2.Request(apiurl+url)
@@ -2607,8 +2528,8 @@ def Ninekwusercaptchacorrectdata(apikey, apiurl, id):
 	response = urllib2.urlopen(req)
 	solved=response.read()
 	if solved == "":
-			wait = 5;
-			time.sleep(wait)
+			wait = 5000;
+			xbmc.sleep(wait)
 			for i in range(wait, 20, 1):
 				try:
 					req = urllib2.Request(apiurl+url)
@@ -2616,7 +2537,7 @@ def Ninekwusercaptchacorrectdata(apikey, apiurl, id):
 					solved = response.read()
 				except: pass
 				if(solved != ""): break
-				time.sleep(3)
+				xbmc.sleep(3000)
 	return solved
 
 def Ninekwusercaptchacorrectback(id, correct):
@@ -2667,6 +2588,7 @@ print "Name: "+str(name)
 if mode==None or url==None or len(url)<1:
       print "Versao Instalada: v" + versao;
       login_wareztuga()
+      
 elif mode==1: menu_filmes()
 elif mode==2: menu_series(url)
 elif mode==3: filmes_request(url,pesquisa)

@@ -1,3 +1,10 @@
+[B]v0.4.00 (16 de Novembro de 2014):[/B]
+- Adicionada opcao para tentar novamente captcha se errado.
+- Adicionado atalho para a ultima temporada da serie vista na home.
+- Corrigidos alguns bugs em servidores.
+- Legendas em download corrigidas.
+- Melhorias de codigo.
+
 [B]v0.3.10 (28 de Outubro de 2014):[/B]
 - Adicionado sistema automatizado de captcha 9kw (ver opcoes para mais informacoes / ty mafarricos!)
 - Corrigido problema em que nada acontecia apos seleccao de servidor.
