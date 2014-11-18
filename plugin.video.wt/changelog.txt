@@ -1,3 +1,6 @@
+[B]v0.4.01 (18 de Novembro de 2014):[/B]
+- Corrigido problema em que o captcha exibido nao era o correcto.
+
 [B]v0.4.00 (16 de Novembro de 2014):[/B]
 - Adicionada opcao para tentar novamente captcha se errado.
 - Adicionado atalho para a ultima temporada da serie vista na home.

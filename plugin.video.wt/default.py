@@ -8,7 +8,7 @@ addon_id = 'plugin.video.wt'
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.4.00'
+versao = '0.4.01'
 MainURL = 'http://www.wareztuga.tv/'
 art = '/resources/art/'
 ListMovieURL = 'movies.php'; SingleMovieURL = 'movie.php'
@@ -24,6 +24,7 @@ mensagemprogresso = xbmcgui.DialogProgress()
 downloadPath = selfAddon.getSetting('download-folder').decode('utf-8')
 pastaperfil = xbmc.translatePath(selfAddon.getAddonInfo('profile')).decode('utf-8')
 pastafavoritos = os.path.join(pastaperfil, "favoritos")
+pastacaptcha = os.path.join(pastaperfil, "captcha")
 cookie_rd = os.path.join(pastaperfil, "cookierdv4.lwp")
 cookie_wt = os.path.join(pastaperfil, "cookiewt.lwp")
 cookie_un = os.path.join(pastaperfil, "cookieun.lwp")
@@ -31,6 +32,8 @@ username = urllib.quote(selfAddon.getSetting('wareztuga-username'))
 password = urllib.quote(selfAddon.getSetting('wareztuga-password'))
 usernameunli=selfAddon.getSetting('unrestrict-username')
 passwordunli = selfAddon.getSetting('unrestrict-password')
+if not os.path.exists(pastacaptcha):
+      os.makedirs(pastacaptcha)
 
 def traducao(texto):
       return traducaoma(texto).encode('utf-8')
@@ -420,10 +423,8 @@ def unrestrict_captcha(url,referido):
         net=Net()
         import json
         urlsignin='https://unrestrict.li/sign_in'
-        try:
-            captcha_img = os.path.join(pastaperfil, 'unrestrict_li_puzzle.png')
-            os.remove(captcha_img)
-        except: pass
+        from random import randint
+        captcha_img = os.path.join(pastacaptcha,str(randint(0, 9999999))+ ".png")
         try:
             response = net.http_GET(url)
             html =  response.content                    
@@ -441,13 +442,11 @@ def unrestrict_captcha(url,referido):
                   id = ''
             if solved != '':
                   puzzle = solved
-                  try:os.remove(captcha_img)
-                  except: pass
             else:
                   solver = InputWindow(captcha=captcha_img)
-                  try:os.remove(captcha_img)
-                  except: pass
                   puzzle = solver.get()
+            try:os.remove(captcha_img)
+            except: pass
             if puzzle and referido=='download':
                   data={'response':urllib.quote_plus(puzzle),'challenge':hugekey,'link':media_id}
                   html = net.http_POST('https://unrestrict.li/download.php',data).content
@@ -492,7 +491,7 @@ class InputWindow(xbmcgui.WindowDialog):# Cheers to Bastardsmkr code already don
 
     def get(self):
         self.show()
-        xbmc.sleep(150)#3000
+        #xbmc.sleep(150)#3000
         self.kbd.doModal()
         if (self.kbd.isConfirmed()):
             text = self.kbd.getText()
@@ -1463,9 +1462,8 @@ def hugefiles(url,srt,name,thumbnail,simounao,wturl):
       if re.search('/404.html',link):
             mensagemok('wareztuga.tv','Ficheiro não disponível.')
             sys.exit(0)
-      captcha_img = os.path.join(pastaperfil, "putcaptcha.png")
-      try:os.remove(captcha_img)
-      except: pass
+      from random import randint
+      captcha_img = os.path.join(pastacaptcha,str(randint(0, 9999999))+ ".png")
       try:
             print "Solvemedia"
             captchatype="solvemedia"
@@ -1498,6 +1496,8 @@ def hugefiles(url,srt,name,thumbnail,simounao,wturl):
       else:
             solver = InputWindow(captcha=captcha_img)
             puzzle = solver.get()
+      try:os.remove(captcha_img)
+      except: pass
       if puzzle:
             mensagemprogresso.update(66)
             op=re.compile('<input type="hidden" name="op" value="(.+?)">').findall(link)[0]
@@ -1587,9 +1587,8 @@ def kingfiles(url,srt,name,thumbnail,simounao,wturl):
       form_data={'op':op,'usr_login':usr_login,'id':id,'fname':fname,'referer':referer,'method_free':method}
       link= net.http_POST(url,form_data=form_data).content.encode('latin-1','ignore')
       mensagemprogresso.update(33)
-      captcha_img = os.path.join(pastaperfil, "putcaptcha.png")
-      try:os.remove(captcha_img)
-      except: pass
+      from random import randint
+      captcha_img = os.path.join(pastacaptcha,str(randint(0, 9999999)) + ".png")
       try:
             print "Solvemedia"
             captchatype="solvemedia"
@@ -1620,6 +1619,8 @@ def kingfiles(url,srt,name,thumbnail,simounao,wturl):
       else:
             solver = InputWindow(captcha=captcha_img)
             puzzle = solver.get()
+      try:os.remove(captcha_img)
+      except: pass
       if puzzle:
             mensagemprogresso.update(66)
             op=re.compile('<input type="hidden" name="op" value="(.+?)">').findall(link)[0]
