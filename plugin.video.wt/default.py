@@ -8,7 +8,7 @@ addon_id = 'plugin.video.wt'
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.4.01'
+versao = '0.4.02'
 MainURL = 'http://www.wareztuga.tv/'
 art = '/resources/art/'
 ListMovieURL = 'movies.php'; SingleMovieURL = 'movie.php'
@@ -402,17 +402,14 @@ def unrestrict_link(linkescolha,thumbnail,name,fic,simounao,wturl):
                 req.add_header('User-Agent', user_agent)
                 streamlink = urllib2.urlopen(req).url
                 mensagemprogresso.update(100)
-                mensagemprogresso.close()
                 if simounao=='download':
+                      mensagemprogresso.close()
                       if downloadPath=='':
                             ok = mensagemok(traducao(40123),traducao(40125),traducao(40135),'')
                             selfAddon.openSettings()
                             return          
                       else:
-                            fezdown=fazerdownload(name,streamlink)
-                            if fezdown:
-                                  if selfAddon.getSetting('download-subs') == 'true': fazerdownload(moviename,fic)
-                                  else: pass
+                            fezdown=fazerdownload(name,streamlink,subtitles=fic)
                             encerrarsistema()
                 if simounao=='agora':
                       comecarvideo(fic,streamlink + '|User-Agent=' + urllib.quote(user_agent),name,thumbnail,wturl,True)
@@ -552,17 +549,14 @@ def realdebrid(urlvideo,thumbnail,moviename,fic,simounao,wturl):
                               if len(linkfinal) == 0: return False
                               print 'O link gerado e: ' + linkfinal
                               mensagemprogresso.update(100)
-                              mensagemprogresso.close()
                               if simounao=='download':
+                                    mensagemprogresso.close()
                                     if downloadPath=='':
                                           ok = mensagemok(traducao(40123),traducao(40125),traducao(40135),'')
                                           selfAddon.openSettings()
                                           return          
                                     else:
-                                          fezdown=fazerdownload(moviename,linkfinal)
-                                          if fezdown:
-                                                if selfAddon.getSetting('download-subs') == 'true': fazerdownload(moviename,fic)
-                                                else: pass
+                                          fezdown=fazerdownload(moviename,linkfinal,subtitles=fic)
                                           encerrarsistema()                              
                               if simounao=='agora':
                                     comecarvideo(fic,linkfinal,moviename,thumbnail,wturl,False)
@@ -1223,12 +1217,8 @@ def upzin(url,srt,name,thumbnail,simounao,wturl):
             sys.exit(0)
       code = re.compile('<a href="(.+?)" id="downloadBtn" class="downloadBtn">Download File</a>').findall(link)[0]
       mensagemprogresso.update(100)
-      mensagemprogresso.close()
       if simounao=='download':
-            fezdown=fazerdownload(name,code)
-            if fezdown:
-                  if selfAddon.getSetting('download-subs') == 'true': fazerdownload(name,srt)
-                  else: pass
+            fezdown=fazerdownload(name,code,subtitles=srt)
             encerrarsistema()
       elif simounao=='agora':
             comecarvideo(srt,code,name,thumbnail,wturl,False)
@@ -1300,13 +1290,8 @@ def firedrive(url,srt,name,thumbnail,simounao,wturl):
             print "Nao conseguiu obter link final. Link final e o inicial"
             put2=put1
       mensagemprogresso.update(100)
-      mensagemprogresso.close()
-      print put2
       if simounao=='download':
-            fezdown=fazerdownload(name,put2)
-            if fezdown:
-                  if selfAddon.getSetting('download-subs') == 'true': fazerdownload(name,srt)
-                  else: pass
+            fezdown=fazerdownload(name,put2,subtitles=srt)
             encerrarsistema()
       elif simounao=='agora':
             comecarvideo(srt,put2,name,thumbnail,wturl,False)
@@ -1378,12 +1363,8 @@ def sockshare(url,srt,name,thumbnail,simounao,wturl):
             print "Nao conseguiu obter link final. Link final e o inicial"
             put2=put1
       mensagemprogresso.update(100)
-      mensagemprogresso.close()
       if simounao=='download':
-            fezdown=fazerdownload(name,put2)
-            if fezdown:
-                  if selfAddon.getSetting('download-subs') == 'true': fazerdownload(name,srt)
-                  else: pass
+            fezdown=fazerdownload(name,put2,subtitles=srt)
             encerrarsistema()
       elif simounao=='agora':
             comecarvideo(srt,put2,name,thumbnail,wturl,False)
@@ -1414,10 +1395,7 @@ def bayfiles(url,srt,name,thumbnail,simounao,wturl):
             except:urlpremium=[]
             if urlpremium:
                   if simounao=='download':
-                        fezdown=fazerdownload(name,urlpremium)
-                        if fezdown:
-                              if selfAddon.getSetting('download-subs') == 'true': fazerdownload(name,srt)
-                              else: pass
+                        fezdown=fazerdownload(name,urlpremium,subtitles=srt)
                         encerrarsistema()
                   elif simounao=='agora':
                         comecarvideo(srt,urlpremium,name,thumbnail,wturl,False)
@@ -1440,10 +1418,7 @@ def bayfiles(url,srt,name,thumbnail,simounao,wturl):
                         try:funcional = matches[0] #final url mp4
                         except: return
                         if simounao=='download':
-                              fezdown=fazerdownload(name,funcional)
-                              if fezdown:
-                                    if selfAddon.getSetting('download-subs') == 'true': fazerdownload(name,srt)
-                                    else: pass
+                              fezdown=fazerdownload(name,funcional,subtitles=srt)
                               encerrarsistema()
                         elif simounao=='agora':
                               comecarvideo(srt,funcional,name,thumbnail,wturl,True)
@@ -1534,12 +1509,9 @@ def hugefiles(url,srt,name,thumbnail,simounao,wturl):
                   except: pass
 
             mensagemprogresso.update(100)
-            mensagemprogresso.close()
             if simounao=='download':
-                  fezdown=fazerdownload(name,streamurl)
-                  if fezdown:
-                        if selfAddon.getSetting('download-subs') == 'true': fazerdownload(name,srt)
-                        else: pass
+                  mensagemprogresso.close()
+                  fezdown=fazerdownload(name,streamurl,subtitles=srt)
                   encerrarsistema()
             elif simounao=='agora':
                   comecarvideo(srt,streamurl,name,thumbnail,wturl,False)
@@ -1652,15 +1624,12 @@ def kingfiles(url,srt,name,thumbnail,simounao,wturl):
                         sys.exit(0)
                   
             mensagemprogresso.update(100)
-            mensagemprogresso.close()
             if id != '':
                   try: Ninekwusercaptchacorrectback(id,"1")
                   except: pass
             if simounao=='download':
-                  fezdown=fazerdownload(name,streamurl)
-                  if fezdown:
-                        if selfAddon.getSetting('download-subs') == 'true': fazerdownload(name,srt)
-                        else: pass
+                  mensagemprogresso.close()
+                  fezdown=fazerdownload(name,streamurl,subtitles=srt)
                   encerrarsistema()
             elif simounao=='agora':
                   comecarvideo(srt,streamurl,name,thumbnail,wturl,False)
@@ -1687,12 +1656,9 @@ def videoshare(url,srt,name,thumbnail,simounao,wturl):
       link= net.http_POST(url,form_data=form_data).content.encode('latin-1','ignore')
       streamurl=re.compile('file: "(.+?)",').findall(link)[0]
       mensagemprogresso.update(100)
-      mensagemprogresso.close()
       if simounao=='download':
-            fezdown=fazerdownload(name,streamurl)
-            if fezdown:
-                  if selfAddon.getSetting('download-subs') == 'true': fazerdownload(name,srt)
-                  else: pass
+            mensagemprogresso.close()
+            fezdown=fazerdownload(name,streamurl,subtitles=srt)
             encerrarsistema()
       elif simounao=='agora':
             comecarvideo(srt,streamurl,name,thumbnail,wturl,False)
@@ -1711,7 +1677,7 @@ def comecarvideo(srt,finalurl,name,thumbnail,wturl,proteccaobay):
             ok = mensagemok(traducao(40123),traducao(40125),traducao(40135),'')
             selfAddon.openSettings()
             return
-      if selfAddon.getSetting('download-subsexterno2') == 'true': fazerdownload(name,srt)
+      if selfAddon.getSetting('download-subsexterno2') == 'true': fazerdownload2(name,srt)
       listitem = xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=thumbnail)            
       if re.search('Temp.', name):
             conteudopagina=abrir_url_cookie(wturl)
@@ -1759,11 +1725,8 @@ def comecarvideo(srt,finalurl,name,thumbnail,wturl,proteccaobay):
       listitem.setProperty('IsPlayable', 'true')
       playlist.add(finalurl, listitem)
       xbmcplugin.setResolvedUrl(int(sys.argv[1]),True,listitem)
-      dialogWait = xbmcgui.DialogProgress()
-      dialogWait.create('wareztuga.tv', traducao(40065))
-      dialogWait.close()
-      del dialogWait
       player = Player(tipo=tipo,warezid=warezid,videoname=name,thumbnail=thumbnail,proteccaobay=proteccaobay,wturl=wturl,imdbcode=imdbcode,seasonurl=seasonurl,show=show)
+      mensagemprogresso.close()
       player.play(playlist)
       
       if selfAddon.getSetting('subtitles-activate') == 'true': player.setSubtitles(srt)
@@ -1840,11 +1803,11 @@ class Player(xbmc.Player):
                               if self.tipo=='movies':
                                     opcao= xbmcgui.Dialog().yesno("wareztuga.tv", traducao(40194))
                                     if opcao:
-                                          xbmc.executebuiltin("XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('comentar'),'movies',self.warezid,str(self.wturl),'')]) + ")")
-                                          xbmc.executebuiltin("XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('votar'),'movies',self.warezid,str(self.wturl),'')]) + ")")
+                                          xbmc.executebuiltin("XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('comentar'),'movies',self.warezid,str(self.wturl),'')]) + ")")
+                                          xbmc.executebuiltin("XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('votar'),'movies',self.warezid,str(self.wturl),'')]) + ")")
                               elif self.tipo=='episodes':
                                     opcao= xbmcgui.Dialog().yesno("wareztuga.tv", traducao(40195))
-                                    if opcao: xbmc.executebuiltin("XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('comentar'),'episodes',self.warezid,str(self.wturl),'')]) + ")")
+                                    if opcao: xbmc.executebuiltin("XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('comentar'),'episodes',self.warezid,str(self.wturl),'')]) + ")")
             else: print 'Nao atingiu a marca das definicoes. Nao marcou como visto.'
 
       def onPlayBackEnded(self):              
@@ -1910,7 +1873,7 @@ def addInterrompido(name,url,mode,iconimage,interrompido,total,pasta):
       liz.setInfo( type="Video", infoLabels={ "Title": name} )
       liz.setProperty('fanart_image', "%s/fanart.jpg"%selfAddon.getAddonInfo("path"))
       cm = []
-      cm.append((traducao(40196),"XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('interrompido'),interrompido,'',str(url),'')]) + ")"))
+      cm.append((traducao(40196),"XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('interrompido'),interrompido,'',str(url),'')]) + ")"))
       cm.append((traducao(40228), 'XBMC.RunPlugin(%s?mode=21&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
       liz.addContextMenuItems(cm, replaceItems=True)
       return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=pasta,totalItems=total)
@@ -1921,7 +1884,7 @@ def addAtalho(name,url,mode,iconimage,interrompido,total,pasta):
       liz.setInfo( type="Video", infoLabels={ "Title": name} )
       liz.setProperty('fanart_image', "%s/fanart.jpg"%selfAddon.getAddonInfo("path"))
       cm = []
-      cm.append((traducao(40196),"XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('interrompido'),interrompido,'',str(url),'')]) + ")"))
+      cm.append((traducao(40196),"XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('interrompido'),interrompido,'',str(url),'')]) + ")"))
       liz.addContextMenuItems(cm, replaceItems=True)
       return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=pasta,totalItems=total)
 
@@ -1931,7 +1894,7 @@ def addDir(name,url,mode,iconimage,total,pasta):
       liz.setInfo( type="Video", infoLabels={ "Title": name} )
       liz.setProperty('fanart_image', "%s/fanart.jpg"%selfAddon.getAddonInfo("path"))
       cm = []
-      #cm.append(('Adicionar Atalho',"XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('interrompido'),'interrompido','',str(url),'')]) + ")"))
+      #cm.append(('Adicionar Atalho',"XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('interrompido'),'interrompido','',str(url),'')]) + ")"))
       liz.addContextMenuItems(cm, replaceItems=True)
       return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=pasta,totalItems=total)
 
@@ -1941,7 +1904,7 @@ def addLista(name,url,mode,iconimage,total,pasta,descricao):
       liz.setInfo( type="Video", infoLabels={ "Title": name, "overlay":6 ,"plot":descricao} )
       liz.setProperty('fanart_image', "%s/fanart.jpg"%selfAddon.getAddonInfo("path"))
       cm = []
-      #cm.append(('Adicionar Atalho',"XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('interrompido'),'interrompido','',str(url),'')]) + ")"))
+      #cm.append(('Adicionar Atalho',"XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('interrompido'),'interrompido','',str(url),'')]) + ")"))
       liz.addContextMenuItems(cm, replaceItems=True)
       return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=pasta,totalItems=total)
 
@@ -1956,7 +1919,7 @@ def addTemp(name,url,mode,iconimage,total,pasta):
             fanart="%s/fanart.jpg"%selfAddon.getAddonInfo("path")
       liz.setProperty('fanart_image', fanart)
       cm = []
-      #cm.append(('Adicionar Atalho',"XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('interrompido'),'interrompido','',str(url),'')]) + ")"))
+      #cm.append(('Adicionar Atalho',"XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('interrompido'),'interrompido','',str(url),'')]) + ")"))
       liz.addContextMenuItems(cm, replaceItems=True)
       return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=pasta,totalItems=total)
 
@@ -1986,14 +1949,14 @@ def addSerie(name,url,mode,iconimage,genre,year,cast,cadeia,plot,fanart,rating,c
       liz.setProperty('fanart_image', fanart)
       cm = []
       cm.append((traducao(40147), 'XBMC.Action(Info)'))
-      if overlay==6: cm.append((traducao(40066),"XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('visto'),'series',warezid,str(url),overlay)]) + ")"))
-      else: cm.append((traducao(40067),"XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('visto'),'series',warezid,str(url),overlay)]) + ")"))
-      if faved==0: cm.append((traducao(40075), "XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('faved'),'series',warezid,str(url),overlay)]) + ")"))
-      else: cm.append((traducao(40076), "XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('faved'),'series',warezid,str(url),overlay)]) + ")"))
+      if overlay==6: cm.append((traducao(40066),"XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('visto'),'series',warezid,str(url),overlay)]) + ")"))
+      else: cm.append((traducao(40067),"XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('visto'),'series',warezid,str(url),overlay)]) + ")"))
+      if faved==0: cm.append((traducao(40075), "XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('faved'),'series',warezid,str(url),overlay)]) + ")"))
+      else: cm.append((traducao(40076), "XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('faved'),'series',warezid,str(url),overlay)]) + ")"))
       #cm.append((traducao(40068), 'XBMC.Action(Info)'))
-      if subsc==0: cm.append((traducao(40149), "XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('subscribed'),'series',warezid,str(url),overlay)]) + ")"))
-      else: cm.append((traducao(40150), "XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('subscribed'),'series',warezid,str(url),overlay)]) + ")"))
-      cm.append((traducao(40071), "XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('comentarios'),'series',warezid,str(url),overlay)]) + ")"))
+      if subsc==0: cm.append((traducao(40149), "XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('subscribed'),'series',warezid,str(url),overlay)]) + ")"))
+      else: cm.append((traducao(40150), "XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('subscribed'),'series',warezid,str(url),overlay)]) + ")"))
+      cm.append((traducao(40071), "XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('comentarios'),'series',warezid,str(url),overlay)]) + ")"))
       cm.append((traducao(40072), "XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('comentar'),'series',warezid,str(url),overlay)]) + ")"))
       cm.append((traducao(40148), "XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('votar'),'series',warezid,str(url),overlay)]) + ")"))
       #cm.append(('Adicionar Atalho','XBMC.RunPlugin(%s?mode=22&url=%s&name=%s)' % (sys.argv[0], name,name)))
@@ -2141,8 +2104,31 @@ def vista_series():
       return
 
 ######################################################## DOWNLOAD ###############################################
-### THANKS ELDORADO (ICEFILMS) ###
-def fazerdownload(name,url):
+
+#method1
+def fazerdownload(name,url,subtitles=None):
+      vidname=name.replace('[B]','').replace('[/B]','').replace('\\','')
+      vidname = re.sub('[^-a-zA-Z0-9_.()\\\/ ]+', '',  vidname)
+      if os.path.exists(downloadPath):
+            videopath = os.path.join(downloadPath,vidname+'.mp4')
+            subspath = os.path.join(downloadPath,vidname+'.srt')
+            print subtitles
+            if os.path.isfile(videopath) is True:
+                  ok = mensagemok(traducao(40123),traducao(40124),'','')
+                  return False
+            else:
+                  import downloader
+                  downloader.download(url, videopath, 'wareztuga.tv')
+                  if subtitles!=None and selfAddon.getSetting('download-subs'):
+                        fazerdownload2(name,subtitles)
+
+      else:
+            ok = mensagemok(traducao(40123),traducao(40125),traducao(40135),'')
+            selfAddon.openSettings()
+            return False
+            
+#method2
+def fazerdownload2(name,url):
       vidname=name.replace('[B]','').replace('[/B]','').replace('\\','')
       vidname = re.sub('[^-a-zA-Z0-9_.()\\\/ ]+', '',  vidname)
       if os.path.exists(downloadPath):
@@ -2155,9 +2141,10 @@ def fazerdownload(name,url):
             selfAddon.openSettings()
             return False
       else:
-            if os.path.isfile(mypath) is True:
+            if os.path.isfile(mypath) is True and not re.search('subs/',url):
                   ok = mensagemok(traducao(40123),traducao(40124),'','')
                   return False
+            elif os.path.isfile(mypath) is True and re.search('subs/',url): return False
             else:              
                   try:
                         dp = xbmcgui.DialogProgress()

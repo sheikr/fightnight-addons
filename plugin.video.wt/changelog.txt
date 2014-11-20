@@ -1,3 +1,9 @@
+[B]v0.4.02 (20 de Novembro de 2014):[/B]
+- Novo sistema de downloads. (possibilidade de downloads simultaneos, possibilidade de navegar normalmente, resumo de download, etc).
+- Correccao de strings (PR de Leinad4Mind).
+- Corrigido pequeno freeze que existia antes do inicio do player.
+- Outros bugs corrigidos.
+
 [B]v0.4.01 (18 de Novembro de 2014):[/B]
 - Corrigido problema em que o captcha exibido nao era o correcto.
 
