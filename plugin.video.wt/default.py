@@ -8,7 +8,7 @@ addon_id = 'plugin.video.wt'
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.4.02'
+versao = '0.4.03'
 MainURL = 'http://www.wareztuga.tv/'
 art = '/resources/art/'
 ListMovieURL = 'movies.php'; SingleMovieURL = 'movie.php'
@@ -1803,11 +1803,11 @@ class Player(xbmc.Player):
                               if self.tipo=='movies':
                                     opcao= xbmcgui.Dialog().yesno("wareztuga.tv", traducao(40194))
                                     if opcao:
-                                          xbmc.executebuiltin("XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('comentar'),'movies',self.warezid,str(self.wturl),'')]) + ")")
-                                          xbmc.executebuiltin("XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('votar'),'movies',self.warezid,str(self.wturl),'')]) + ")")
+                                          xbmc.executebuiltin("XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('comentar'),'movies',self.warezid,str(self.wturl),'')]) + ")")
+                                          xbmc.executebuiltin("XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('votar'),'movies',self.warezid,str(self.wturl),'')]) + ")")
                               elif self.tipo=='episodes':
                                     opcao= xbmcgui.Dialog().yesno("wareztuga.tv", traducao(40195))
-                                    if opcao: xbmc.executebuiltin("XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('comentar'),'episodes',self.warezid,str(self.wturl),'')]) + ")")
+                                    if opcao: xbmc.executebuiltin("XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('comentar'),'episodes',self.warezid,str(self.wturl),'')]) + ")")
             else: print 'Nao atingiu a marca das definicoes. Nao marcou como visto.'
 
       def onPlayBackEnded(self):              
@@ -1873,7 +1873,7 @@ def addInterrompido(name,url,mode,iconimage,interrompido,total,pasta):
       liz.setInfo( type="Video", infoLabels={ "Title": name} )
       liz.setProperty('fanart_image', "%s/fanart.jpg"%selfAddon.getAddonInfo("path"))
       cm = []
-      cm.append((traducao(40196),"XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('interrompido'),interrompido,'',str(url),'')]) + ")"))
+      cm.append((traducao(40196),"XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('interrompido'),interrompido,'',str(url),'')]) + ")"))
       cm.append((traducao(40228), 'XBMC.RunPlugin(%s?mode=21&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
       liz.addContextMenuItems(cm, replaceItems=True)
       return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=pasta,totalItems=total)
@@ -1884,7 +1884,7 @@ def addAtalho(name,url,mode,iconimage,interrompido,total,pasta):
       liz.setInfo( type="Video", infoLabels={ "Title": name} )
       liz.setProperty('fanart_image', "%s/fanart.jpg"%selfAddon.getAddonInfo("path"))
       cm = []
-      cm.append((traducao(40196),"XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('interrompido'),interrompido,'',str(url),'')]) + ")"))
+      cm.append((traducao(40196),"XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('interrompido'),interrompido,'',str(url),'')]) + ")"))
       liz.addContextMenuItems(cm, replaceItems=True)
       return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=pasta,totalItems=total)
 
@@ -1894,7 +1894,7 @@ def addDir(name,url,mode,iconimage,total,pasta):
       liz.setInfo( type="Video", infoLabels={ "Title": name} )
       liz.setProperty('fanart_image', "%s/fanart.jpg"%selfAddon.getAddonInfo("path"))
       cm = []
-      #cm.append(('Adicionar Atalho',"XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('interrompido'),'interrompido','',str(url),'')]) + ")"))
+      #cm.append(('Adicionar Atalho',"XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('interrompido'),'interrompido','',str(url),'')]) + ")"))
       liz.addContextMenuItems(cm, replaceItems=True)
       return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=pasta,totalItems=total)
 
@@ -1904,7 +1904,7 @@ def addLista(name,url,mode,iconimage,total,pasta,descricao):
       liz.setInfo( type="Video", infoLabels={ "Title": name, "overlay":6 ,"plot":descricao} )
       liz.setProperty('fanart_image', "%s/fanart.jpg"%selfAddon.getAddonInfo("path"))
       cm = []
-      #cm.append(('Adicionar Atalho',"XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('interrompido'),'interrompido','',str(url),'')]) + ")"))
+      #cm.append(('Adicionar Atalho',"XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('interrompido'),'interrompido','',str(url),'')]) + ")"))
       liz.addContextMenuItems(cm, replaceItems=True)
       return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=pasta,totalItems=total)
 
@@ -1919,7 +1919,7 @@ def addTemp(name,url,mode,iconimage,total,pasta):
             fanart="%s/fanart.jpg"%selfAddon.getAddonInfo("path")
       liz.setProperty('fanart_image', fanart)
       cm = []
-      #cm.append(('Adicionar Atalho',"XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('interrompido'),'interrompido','',str(url),'')]) + ")"))
+      #cm.append(('Adicionar Atalho',"XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('interrompido'),'interrompido','',str(url),'')]) + ")"))
       liz.addContextMenuItems(cm, replaceItems=True)
       return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=pasta,totalItems=total)
 
@@ -1949,14 +1949,14 @@ def addSerie(name,url,mode,iconimage,genre,year,cast,cadeia,plot,fanart,rating,c
       liz.setProperty('fanart_image', fanart)
       cm = []
       cm.append((traducao(40147), 'XBMC.Action(Info)'))
-      if overlay==6: cm.append((traducao(40066),"XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('visto'),'series',warezid,str(url),overlay)]) + ")"))
-      else: cm.append((traducao(40067),"XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('visto'),'series',warezid,str(url),overlay)]) + ")"))
-      if faved==0: cm.append((traducao(40075), "XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('faved'),'series',warezid,str(url),overlay)]) + ")"))
-      else: cm.append((traducao(40076), "XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('faved'),'series',warezid,str(url),overlay)]) + ")"))
+      if overlay==6: cm.append((traducao(40066),"XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('visto'),'series',warezid,str(url),overlay)]) + ")"))
+      else: cm.append((traducao(40067),"XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('visto'),'series',warezid,str(url),overlay)]) + ")"))
+      if faved==0: cm.append((traducao(40075), "XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('faved'),'series',warezid,str(url),overlay)]) + ")"))
+      else: cm.append((traducao(40076), "XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('faved'),'series',warezid,str(url),overlay)]) + ")"))
       #cm.append((traducao(40068), 'XBMC.Action(Info)'))
-      if subsc==0: cm.append((traducao(40149), "XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('subscribed'),'series',warezid,str(url),overlay)]) + ")"))
-      else: cm.append((traducao(40150), "XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('subscribed'),'series',warezid,str(url),overlay)]) + ")"))
-      cm.append((traducao(40071), "XBMC.RunScript(" + wtpath + "/resources/lib//resources/lib/visto.py" + ", " + str([(str('comentarios'),'series',warezid,str(url),overlay)]) + ")"))
+      if subsc==0: cm.append((traducao(40149), "XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('subscribed'),'series',warezid,str(url),overlay)]) + ")"))
+      else: cm.append((traducao(40150), "XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('subscribed'),'series',warezid,str(url),overlay)]) + ")"))
+      cm.append((traducao(40071), "XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('comentarios'),'series',warezid,str(url),overlay)]) + ")"))
       cm.append((traducao(40072), "XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('comentar'),'series',warezid,str(url),overlay)]) + ")"))
       cm.append((traducao(40148), "XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('votar'),'series',warezid,str(url),overlay)]) + ")"))
       #cm.append(('Adicionar Atalho','XBMC.RunPlugin(%s?mode=22&url=%s&name=%s)' % (sys.argv[0], name,name)))

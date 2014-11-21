@@ -1,3 +1,6 @@
+[B]v0.4.03 (20 de Novembro de 2014):[/B]
+- Refix
+
 [B]v0.4.02 (20 de Novembro de 2014):[/B]
 - Novo sistema de downloads. (possibilidade de downloads simultaneos, possibilidade de navegar normalmente, resumo de download, etc).
 - Correccao de strings (PR de Leinad4Mind).
