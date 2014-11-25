@@ -13,25 +13,30 @@
 		<control type="group">
 			<visible>true</visible>
 			<control type="image">
-				<posx>180</posx>
+				<posx>90</posx>
 				<posy>70</posy>
-				<width>900</width><!--710-->
+				<width>1100</width><!--710-->
 				<height>470</height>
 				<texture>lateral-fundo.png</texture>
 			</control>
-			<control type="panel" id="500">
-				<posx>250</posx><!--90-->
+			<control type="fixedlist" id="500">
+				<posx>130</posx><!--90-->
 				<posy>138</posy>
 				<width>1200</width><!--1080-->
 				<height>485</height>
 				<onleft>2</onleft>
 				<onright>60</onright>
 				<onup>801</onup>
-				<align>center</align>
+				<pagecontrol>-</pagecontrol>
+				<scrolltime>300</scrolltime>
+				<focusposition>1</focusposition>
+				<movement>2</movement>
+				<orientation>Horizontal</orientation>
+				<!--<align>center</align>
 				<viewtype label="21371">list</viewtype>
 				<pagecontrol>60</pagecontrol>
 				<scrolltime>200</scrolltime>
-				<preloaditems>2</preloaditems>
+				<preloaditems>5</preloaditems>-->
 				<itemlayout height="258" width="258">
 					<control type="image">
 						<posx>1</posx>
@@ -61,7 +66,7 @@
 		
 		<control type="label" id="800">
 			<description>Info do Video</description>
-			<posx>180</posx>
+			<posx>200</posx>
 			<posy>450</posy>
 			<width>900</width>
 			<height>20</height>
@@ -73,8 +78,8 @@
 		</control>
 
 		<control type="button" id="801">
-            <posx>1020</posx>
-            <posy>80</posy>
+            <posx>1125</posx>
+            <posy>85</posy>
             <width>48</width>
             <height>48</height>
             <texturefocus>lateral-fechar-seleccionado.png</texturefocus>

@@ -8,7 +8,7 @@ addon_id = 'plugin.video.wt'
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.4.03'
+versao = '0.4.04'
 MainURL = 'http://www.wareztuga.tv/'
 art = '/resources/art/'
 ListMovieURL = 'movies.php'; SingleMovieURL = 'movie.php'
@@ -933,6 +933,29 @@ def resolver_servidores(url,name,download=False):
             ligacao.append('http://vshare.eu/' + vshare[0])
             ligacaopref.append('http://vshare.eu/' + vshare[0])
 
+      dropvideo=re.compile('&fh=([^"]+?)" class="dropvideo"').findall(infoservers)
+      if dropvideo:
+            titles.append("Dropvideo")
+            ligacao.append('http://dropvideo.com/embed/' + dropvideo[0])
+            ligacaopref.append('http://dropvideo.com/embed/' + dropvideo[0])
+
+      cloudzilla=re.compile('&fh=([^"]+?)" class="cloudzilla"').findall(infoservers)
+      if cloudzilla:
+            titles.append("Cloudzilla")
+            ligacao.append('http://www.cloudzilla.to/embed/' + cloudzilla[0])
+            ligacaopref.append('http://www.cloudzilla.to/embed/' + cloudzilla[0])
+
+      vidto=re.compile('&fh=([^"]+?)" class="vidto"').findall(infoservers)
+      if vidto:
+            titles.append("Vidto")
+            ligacao.append('http://vidto.me/embed-' + vidto[0] + '-980x535.html')
+            ligacaopref.append('http://vidto.me/embed-' + vidto[0] + '-980x535.html')
+
+      played=re.compile('&fh=([^"]+?)" class="played"').findall(infoservers)
+      if played:
+            titles.append("Played")
+            ligacao.append('http://played.to/embed-' + played[0] + '-980x535.html')
+            ligacaopref.append('http://played.to/embed-' + played[0] + '-980x535.html')
 
 
       if download==False: simounao='agora'
@@ -1070,7 +1093,11 @@ def vaiparaoserver(linkescolha,thumbnail,name,fic,simounao,wturl,index,titulos):
             elif re.search('profity',linkescolha): profity(linkescolha,fic,name,thumbnail,simounao,wturl)
             elif re.search('kingfiles',linkescolha): kingfiles(linkescolha,fic,name,thumbnail,simounao,wturl)
             elif re.search('vshare',linkescolha): videoshare(linkescolha,fic,name,thumbnail,simounao,wturl)
-
+            elif re.search('dropvideo',linkescolha): dropvideo(linkescolha,fic,name,thumbnail,simounao,wturl)
+            elif re.search('cloudzilla',linkescolha): dropvideo(linkescolha,fic,name,thumbnail,simounao,wturl)
+            elif re.search('vidto',linkescolha): vidto(linkescolha,fic,name,thumbnail,simounao,wturl)
+            elif re.search('played',linkescolha): played(linkescolha,fic,name,thumbnail,simounao,wturl)
+      
 def sintomecomsorte():
       categorias=[traducao(40330),traducao(40091),traducao(40092),traducao(40093),traducao(40094),traducao(40095),traducao(40096),traducao(40097),traducao(40098),traducao(40099),traducao(40100),traducao(40101),traducao(40102),traducao(40103),traducao(40104),traducao(40105),traducao(40106),traducao(40107),traducao(40108),traducao(40109),traducao(40110)]
       catnumb=['0','1','17','4','5','6','2','21','18','3','7','8','14','15','9','13','11','12','10','16','20']
@@ -1182,7 +1209,23 @@ class janelaservidores(xbmcgui.WindowXMLDialog):
                 self.criarelemento(nome,'kingfiles',i,thumb)
           elif nome=='[B][COLOR white]Video[/COLOR][COLOR blue]Share[/COLOR][/B]':
                 thumb=wtpath + art + 'vshare.png'
-                self.criarelemento(nome,'videoshare',i,thumb)                
+                self.criarelemento(nome,'videoshare',i,thumb)
+
+          elif nome=='Dropvideo':
+                thumb=wtpath + art + 'dropvideo.png'
+                self.criarelemento(nome,'videocloud',i,thumb)
+
+          elif nome=='Cloudzilla':
+                thumb=wtpath + art + 'cloudzilla.png'
+                self.criarelemento(nome,'videocloud',i,thumb)
+
+          elif nome=='Vidto':
+                thumb=wtpath + art + 'vidto.png'
+                self.criarelemento(nome,'videoclou',i,thumb)
+
+          elif nome=='Played':
+                thumb=wtpath + art + 'played.png'
+                self.criarelemento(nome,'videocloud',i,thumb)
             
     def criarelemento(self,nome,servername,i,thumb):
           listControl = self.getControl(500)
@@ -1663,6 +1706,64 @@ def videoshare(url,srt,name,thumbnail,simounao,wturl):
       elif simounao=='agora':
             comecarvideo(srt,streamurl,name,thumbnail,wturl,False)
 
+def dropvideo(url,srt,name,thumbnail,simounao,wturl):
+      if simounao=='download' and downloadPath=='':
+            ok = mensagemok(traducao(40123),traducao(40125),traducao(40135),'')
+            selfAddon.openSettings()
+            return                        
+      mensagemprogresso.create('wareztuga.tv', traducao(40054),traducao(40055))
+      mensagemprogresso.update(0)
+      link=abrir_url(url)
+
+      try:streamurl=re.compile('var vurl2 = "(.+?)"').findall(link)[0] #dropvideo
+      except: streamurl=re.compile('var vurl = "(.+?)"').findall(link)[0] #cloudzilla
+      
+      mensagemprogresso.update(100)
+      if simounao=='download':
+            mensagemprogresso.close()
+            fezdown=fazerdownload(name,streamurl,subtitles=srt)
+            encerrarsistema()
+      elif simounao=='agora':
+            comecarvideo(srt,streamurl,name,thumbnail,wturl,False)
+
+def played(url,srt,name,thumbnail,simounao,wturl):
+      if simounao=='download' and downloadPath=='':
+            ok = mensagemok(traducao(40123),traducao(40125),traducao(40135),'')
+            selfAddon.openSettings()
+            return                        
+      mensagemprogresso.create('wareztuga.tv', traducao(40054),traducao(40055))
+      mensagemprogresso.update(0)
+      link=abrir_url(url)
+      streamurl=re.compile('file: "(.+?)",').findall(link)[0]
+      mensagemprogresso.update(100)
+      if simounao=='download':
+            mensagemprogresso.close()
+            fezdown=fazerdownload(name,streamurl,subtitles=srt)
+            encerrarsistema()
+      elif simounao=='agora':
+            comecarvideo(srt,streamurl,name,thumbnail,wturl,False)
+
+
+def vidto(url,srt,name,thumbnail,simounao,wturl):
+      if simounao=='download' and downloadPath=='':
+            ok = mensagemok(traducao(40123),traducao(40125),traducao(40135),'')
+            selfAddon.openSettings()
+            return                        
+      mensagemprogresso.create('wareztuga.tv', traducao(40054),traducao(40055))
+      mensagemprogresso.update(0)
+      link=abrir_url(url)
+      jsU = JsUnpackerV2()
+      link = jsU.unpackAll(link)
+      streamurl=re.compile('file:"(.+?)"').findall(link)[-1]
+      mensagemprogresso.update(100)
+      if simounao=='download':
+            mensagemprogresso.close()
+            fezdown=fazerdownload(name,streamurl,subtitles=srt)
+            encerrarsistema()
+      elif simounao=='agora':
+            comecarvideo(srt,streamurl,name,thumbnail,wturl,False)
+
+
 
 ########################################################### PLAYER ################################################
 
@@ -1684,6 +1785,8 @@ def comecarvideo(srt,finalurl,name,thumbnail,wturl,proteccaobay):
             seasonurl=re.compile('<a href="([^"]+?)" class="slctd">').findall(conteudopagina)[0]
             serie=re.compile('<title>wareztuga.tv - .+? - (.+?): Temporada (.+?), Epis.+?io (.+?)</title>').findall(conteudopagina)[0]
             show=re.compile('<div class="thumb serie" title="(.+?)">').findall(conteudopagina)[0]
+            season=serie[1]
+            episode=serie[2]
             conteudopagina=conteudopagina.replace('(','').replace('<span>)','-')
             try:year=re.compile('<span class="year"><span> </span>(.+?)-').findall(conteudopagina)[0]
             except: year=0
@@ -1703,7 +1806,9 @@ def comecarvideo(srt,finalurl,name,thumbnail,wturl,proteccaobay):
             name=name+'-'
             conteudopagina=abrir_url_cookie(wturl)
             seasonurl=''
-            show=False
+            
+            season=False
+            episode=False
             conteudopagina=conteudopagina.replace('(','').replace('<span>)','-')
             try:year=re.compile('<span class="year"><span> </span>(.+?)-').findall(conteudopagina)[0]
             except: year=0
@@ -1711,6 +1816,7 @@ def comecarvideo(srt,finalurl,name,thumbnail,wturl,proteccaobay):
             except:nomeingles=''
             try:imdbcode=re.compile('<a href="http://www.imdb.com/title/(.+?)/').findall(conteudopagina)[0]
             except: imdbcode=''
+            show=nomeingles
             if imdbcode.startswith('tt'):
                   if selfAddon.getSetting('trakt-improve') == 'true':
                         try:
@@ -1725,7 +1831,7 @@ def comecarvideo(srt,finalurl,name,thumbnail,wturl,proteccaobay):
       listitem.setProperty('IsPlayable', 'true')
       playlist.add(finalurl, listitem)
       xbmcplugin.setResolvedUrl(int(sys.argv[1]),True,listitem)
-      player = Player(tipo=tipo,warezid=warezid,videoname=name,thumbnail=thumbnail,proteccaobay=proteccaobay,wturl=wturl,imdbcode=imdbcode,seasonurl=seasonurl,show=show)
+      player = Player(tipo=tipo,warezid=warezid,videoname=name,thumbnail=thumbnail,proteccaobay=proteccaobay,wturl=wturl,imdbcode=imdbcode,seasonurl=seasonurl,show=show,season=season,episode=episode,year=year)
       mensagemprogresso.close()
       player.play(playlist)
       
@@ -1736,7 +1842,7 @@ def comecarvideo(srt,finalurl,name,thumbnail,wturl,proteccaobay):
 
 ## THX 1CH ##
 class Player(xbmc.Player):
-      def __init__(self,tipo,warezid,videoname,thumbnail,proteccaobay,wturl,imdbcode,seasonurl,show):
+      def __init__(self,tipo,warezid,videoname,thumbnail,proteccaobay,wturl,imdbcode,seasonurl,show,season,episode,year):
             if selfAddon.getSetting("playertype") == "0": xbmc.Player(xbmc.PLAYER_CORE_AUTO)
             elif selfAddon.getSetting("playertype") == "1": xbmc.Player(xbmc.PLAYER_CORE_MPLAYER)
             elif selfAddon.getSetting("playertype") == "2": xbmc.Player(xbmc.PLAYER_CORE_DVDPLAYER)
@@ -1754,8 +1860,15 @@ class Player(xbmc.Player):
             self.wturl=wturl
             self.seasonurl=seasonurl
             self.show=show
+            self.season=season
+            self.episode=episode
+            self.year=year
             self._lastPos = 0
             self.nomeficheiro=self.tipo + '_' + self.warezid
+            if self.tipo=='episodes':
+                  self.file='%s S%sE%s.strm' % (self.show, self.season,self.episode)
+            else:
+                  self.file=self.show + ' _' + str(self.year) + '_.strm'
             self.caminhoficheiro=os.path.join(pastaperfil, self.nomeficheiro)
             self.caminhoficheiroinfo=os.path.join(pastaperfil,self.nomeficheiro + '_info')
             print "Criou o player"
@@ -1774,7 +1887,7 @@ class Player(xbmc.Player):
                               bookmark=openfile(self.caminhoficheiro)
                               opcao=xbmcgui.Dialog().yesno("wareztuga.tv", '',traducao(40173) + ' %s?' % (format_time(float(bookmark))),'', traducao(40174), traducao(40175))
                               if opcao: self.seekTime(float(bookmark))
-            if self.show != False:
+            if self.show != False and self.tipo=='episodes':
                   savefile(pastaperfil,'following.txt','"name":"%s","url":"%s"' % (self.show,self.seasonurl))
                               
       def onPlayBackStopped(self):
@@ -1796,6 +1909,25 @@ class Player(xbmc.Player):
                   if selfAddon.getSetting('watched-enable') == 'true':
                         print "A marcar como visto"
                         accaonosite(self.tipo,self.warezid,'watched')
+                        try:
+                              import json
+                              if self.tipo=='episodes':
+                                    episodeid = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params": {"filter":{"and": [{"field": "season", "operator": "is", "value": "%s"}, {"field": "episode", "operator": "is", "value": "%s"}]}, "properties": ["file"]}, "id": 1}' % (self.season, self.episode))
+                                    episodeid = unicode(episodeid, 'utf-8', errors='ignore')
+                                    episodeid = json.loads(episodeid)['result']['episodes']
+                                    episodeid = [i for i in episodeid if i['file'].endswith(self.file)][0]
+                                    episodeid = episodeid['episodeid']
+                                    while xbmc.getInfoLabel('Container.FolderPath').startswith(sys.argv[0]) or xbmc.getInfoLabel('Container.FolderPath') == '': xbmc.sleep(1000)
+                                    xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "playcount" : 1 }, "id": 1 }' % str(episodeid))
+                              elif self.tipo=='movies':
+                                    movieid = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["file"]}, "id": 1}' % (self.year, str(int(self.year)+1), str(int(self.year)-1)))
+                                    movieid = unicode(movieid, 'utf-8', errors='ignore')
+                                    movieid = json.loads(movieid)['result']['movies']
+                                    movieid = [i for i in movieid if i['file'].endswith(self.file)][0]
+                                    movieid = movieid['movieid']
+                                    while xbmc.getInfoLabel('Container.FolderPath').startswith(sys.argv[0]) or xbmc.getInfoLabel('Container.FolderPath') == '': xbmc.sleep(1000)
+                                    xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetMovieDetails", "params": {"movieid" : %s, "playcount" : 1 }, "id": 1 }' % str(movieid))
+                        except: pass
                   else: print "Marcacao automatica desactivada"
                   naopede=encerrarsistema()
                   if not naopede:
@@ -2474,6 +2606,108 @@ def load_json(data):
                   for line in sys.exc_info(): print "%s" % line
       return None
 
+class JsUnpacker:
+
+    def unpackAll(self, data):
+        sPattern = '(eval\(function\(p,a,c,k,e,d\)\{while.*?)\s*</script>'
+        return re.sub(sPattern, lambda match: self.unpack(match.group(1)), data)
+    
+    def containsPacked(self, data):
+        return 'p,a,c,k,e,d' in data
+        
+    def unpack(self, sJavascript):
+        aSplit = sJavascript.split(";',")
+        p = str(aSplit[0])
+        aSplit = aSplit[1].split(",")
+        a = int(aSplit[0])
+        c = int(aSplit[1])
+        k = aSplit[2].split(".")[0].replace("'", '').split('|')
+        e = ''
+        d = ''
+        sUnpacked = str(self.__unpack(p, a, c, k, e, d))
+        return sUnpacked.replace('\\', '')
+    
+    def __unpack(self, p, a, c, k, e, d):
+        while (c > 1):
+            c = c -1
+            if (k[c]):
+                p = re.sub('\\b' + str(self.__itoa(c, a)) +'\\b', k[c], p)
+        return p
+    
+    def __itoa(self, num, radix):
+        result = ""
+        while num > 0:
+            result = "0123456789abcdefghijklmnopqrstuvwxyz"[num % radix] + result
+            num /= radix
+        return result
+
+class JsUnpackerV2:
+
+    def unpackAll(self, data):
+        try:
+            in_data=data
+            sPattern = '(eval\\(function\\(p,a,c,k,e,d.*)'
+            enc_data=re.compile(sPattern).findall(in_data)
+            #print 'enc_data',enc_data, len(enc_data)
+            if len(enc_data)==0:
+                sPattern = '(eval\\(function\\(p,a,c,k,e,r.*)'
+                enc_data=re.compile(sPattern).findall(in_data)
+                #print 'enc_data packer...',enc_data
+
+            for enc_val in enc_data:
+                unpack_val=self.unpack(enc_val)
+                in_data=in_data.replace(enc_val,unpack_val)
+            return in_data
+        except: 
+            traceback.print_exc(file=sys.stdout)
+            return data
+        
+        
+    def containsPacked(self, data):
+        return 'p,a,c,k,e,d' in data or 'p,a,c,k,e,r' in data
+        
+    def unpack(self,sJavascript,iteration=1, totaliterations=1  ):
+
+        aSplit = sJavascript.split("rn p}('")
+
+        p1,a1,c1,k1=('','0','0','')
+        ss="p1,a1,c1,k1=(\'"+aSplit[1].split(".spli")[0]+')' 
+        exec(ss)
+        
+        k1=k1.split('|')
+        aSplit = aSplit[1].split("))'")
+        e = ''
+        d = ''#32823
+        sUnpacked1 = str(self.__unpack(p1, a1, c1, k1, e, d,iteration))
+        if iteration>=totaliterations:
+            return sUnpacked1
+        else:
+            return self.unpack(sUnpacked1,iteration+1)
+
+    def __unpack(self,p, a, c, k, e, d, iteration,v=1):
+        while (c >= 1):
+            c = c -1
+            if (k[c]):
+                aa=str(self.__itoaNew(c, a))
+                p=re.sub('\\b' + aa +'\\b', k[c], p)# THIS IS Bloody slow!
+        return p
+
+    def __itoa(self,num, radix):
+
+        result = ""
+        if num==0: return '0'
+        while num > 0:
+            result = "0123456789abcdefghijklmnopqrstuvwxyz"[num % radix] + result
+            num /= radix
+        return result
+        
+    def __itoaNew(self,cc, a):
+        aa="" if cc < a else self.__itoaNew(int(cc / a),a) 
+        cc = (cc % a)
+        bb=chr(cc + 29) if cc> 35 else str(self.__itoa(cc,36))
+        return aa+bb
+
+
 def get_params():
       param=[]
       paramstring=sys.argv[2]
@@ -2626,5 +2860,7 @@ elif mode==38: glib('subs',url,silent=True)
 elif mode==39: multifiltro()
 elif mode==40: instrucoes9kw()
 elif mode==69: pass
+
+
 
 xbmcplugin.endOfDirectory(int(sys.argv[1]))

@@ -1,3 +1,8 @@
+[B]v0.4.04 (25 de Novembro de 2014):[/B]
+- Adicionada compatibilidade com os novos servers (dropvideo,cloudzilla,vidto,played).
+- Marca como visto automaticamente a DB da biblioteca se estiver activo.
+- Outras correccoes.
+
 [B]v0.4.03 (20 de Novembro de 2014):[/B]
 - Refix
 
