@@ -2,7 +2,7 @@
 <strings>
     <!-- Meta Data -->
 	<string id="30000">Activar aviso sobre extensões desconhecidas.</string>
-	<string id="40000">Necessitas de criar uma conta no abelhas.</string>
+	<string id="40000">Necessitas criar uma conta no abelhas.</string>
 	<string id="40001">Vai a www.abelhas.pt.</string>
 	<string id="40002">A senha está incorrecta.</string>
 	<string id="40003">Username inválido.</string>
@@ -28,16 +28,16 @@
 	<string id="40023">Conta de </string>
 	<string id="40024">bloqueado</string>
 	<string id="40025">A carregar...</string>
-	<string id="40026">Ficheiro não está disponivel. Tente mais tarde.</string>
-	<string id="40027">Não disponível. Tente mais tarde</string>
+	<string id="40026">O ficheiro não está disponível. Tenta mais tarde.</string>
+	<string id="40027">Não disponível. Tenta mais tarde</string>
 	<string id="40028">Formato de ficheiro desconhecido.</string>
 	<string id="40029">Considere que o XBMC poderá</string>
 	<string id="40030">não reproduzir este tipo de ficheiro.</string>
 	<string id="40031">Pesquisa</string>
 	<string id="40032">Erro na página.</string>
-	<string id="40033">Tente novamente.</string>
+	<string id="40033">Tenta novamente.</string>
 	<string id="40034">Addon não conseguiu conectar ao servidor</string>
-	<string id="40035">de actualização. Verifique a situação.</string>
+	<string id="40035">de actualização. Verifica a situação.</string>
 	<string id="40036">Erro. Verificar origem do erro.</string>
 	<string id="40037">Amigos</string>
 	<string id="40038">Adicionar à playlist</string>
@@ -54,10 +54,10 @@
 	<string id="40049">A Criar Playlist</string>
 	<string id="40050">Criar Playlist</string>
 	<string id="30140">Legendas</string>
-	<string id="30141">As legendas podem não estar disponíveis ou fora de sincronismo.</string>
+	<string id="30141">As legendas podem não estar disponíveis ou estarem dessincronizadas.</string>
 	<string id="30142">Utilizar legendas próprias nesse caso.</string>
 	<string id="30143">Permitir Legendas</string>
 	<string id="30144">Idioma Principal</string>
 	<string id="30145">Idioma Secundário</string>
-	<string id="30146">Tempo mínimo do vidro para procurar legendas (em Minutos)</string>
+	<string id="30146">Tempo mínimo do vídeo para procurar legendas (em Minutos)</string>
 </strings>
