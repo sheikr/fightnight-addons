@@ -1,3 +1,6 @@
+[B]v0.2.00 (17 de Dezembro de 2014):[/B]
+- Adaptacao ao sucessor OKGoals.com.
+
 [B]v0.1.01 (13 de Novembro de 2014):[/B]
 - Fix url do site. (ty mafarricos)
 - Pequenas correccoes de art.

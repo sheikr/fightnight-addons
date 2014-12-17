@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-""" TVGolo
+""" OKGoals
     2014 fightnight
 """
 
@@ -18,6 +18,7 @@ traducao= selfAddon.getLocalizedString
 tvgolopath = selfAddon.getAddonInfo('path')
 menuescolha = xbmcgui.Dialog().select
 mensagemok = xbmcgui.Dialog().ok
+'''
 if selfAddon.getSetting('dns_unblock') == 'false': MainURL = 'http://www.tvgolo.mobi/'
 else:
 	try:t1 = datetime.datetime.strptime(selfAddon.getSetting("last_dns_unblock"), "%Y-%m-%d %H:%M:%S.%f")
@@ -35,7 +36,8 @@ else:
 		host = selfAddon.getSetting('last_ip')
 		
 	MainURL = 'http://' + host + '/'
-
+'''
+MainURL = 'http://www.okgoals.com/'
 
 
 def horalocal(link):
@@ -44,38 +46,36 @@ def horalocal(link):
 
 def menu_principal():
       #mensagemok(traducao(40000),traducao(40001),traducao(40002))
-      addDir(traducao(40003),MainURL + 'en',2,tvgolopath + art + 'pasta.png',1,True)
-      addDir(traducao(40004),MainURL + 'en',3,tvgolopath + art + 'pasta.png',1,True)
-      addDir(traducao(40005),MainURL + 'en',4,tvgolopath + art + 'pasta.png',1,True)
-      addDir(traducao(40006),MainURL + 'en/goal-of-the-week.php',2,tvgolopath + art + 'pasta.png',1,True)
-      addDir(traducao(40007),MainURL + 'en/previous.php',5,tvgolopath + art + 'pasta.png',1,True)
-      addDir(traducao(40008),MainURL + 'en/comedy-football.php',6,tvgolopath + art + 'pasta.png',1,True)
-      addDir(traducao(40009),MainURL + 'tv.html',9,tvgolopath + art + 'pasta.png',1,True)
+      addDir(traducao(40003),MainURL,2,tvgolopath + art + 'pasta.png',1,True)
+      addDir(traducao(40004),MainURL,3,tvgolopath + art + 'pasta.png',1,True)
+      addDir(traducao(40005),MainURL,4,tvgolopath + art + 'pasta.png',1,True)
+      #addDir(traducao(40006),MainURL + 'en/goal-of-the-week.php',2,tvgolopath + art + 'pasta.png',1,True)
+      addDir(traducao(40007),MainURL + 'seasons-archive.php',5,tvgolopath + art + 'pasta.png',1,True)
+      #addDir(traducao(40008),MainURL + 'en/comedy-football.php',6,tvgolopath + art + 'pasta.png',1,True)
+      #addDir(traducao(40009),MainURL + 'tv.html',9,tvgolopath + art + 'pasta.png',1,True)
       addDir(traducao(40010),MainURL,8,tvgolopath + art + 'pasta.png',1,True)
       xbmc.executebuiltin("Container.SetViewMode(51)")
 
 def listadeligas(url):
       link=abrir_url(url)
       link=link.replace('Portuguese</a>','').replace('English</a>','')
-      ligas=re.compile('<a href="(.+?)" target="_top"><img width=".+?" border="0" high=".+?" src="(.+?)">(.+?)</a>').findall(link)
-      for endereco,thumb,titulo in ligas: addDir(titulo,MainURL + 'en/' + endereco,2,thumb,len(ligas),True)
+      #ligas=re.compile('<a href="(.+?)" target="_top"><img width=".+?" border="0" high=".+?" src="(.+?)">(.+?)</a>').findall(link)
+      ligas=re.compile("""<li class='active'><a href='(.+?)' class="menulinks">.+?alt="(.+?)" src="(.+?)"> (.+?)</span>""").findall(link)
+      for endereco,liga,thumb,country in ligas: addDir('%s (%s)' % (liga.capitalize().title(),country.capitalize().title()),MainURL + endereco,2,thumb,len(ligas),True)
       xbmc.executebuiltin("Container.SetViewMode(51)")
 
 def semanasanteriores(url):
       link=abrir_url(url)
-      anterior=re.compile('</a>[^<]*<a href="([^"]+?)" target="_top">.+?watch previous weeks').findall(link)[0]
+      anterior=re.compile('<a href="([^"]+?)">previous weeks archive').findall(link)[0]
       anterior=anterior.replace('amp;','')
-      request(MainURL + 'en/' + anterior)
+      request(MainURL + anterior)
 
 def epocasanteriores(url):
 	link=abrir_url(url)
 	link=link.replace('amp;','')
-	anteriores=re.compile('<a href="(.+?)"><img src="(.+?)" alt="(.+?)" border="0" width="500" height="100"></a>').findall(link)
-	for endereco,thumb,titulo in anteriores:
-                endereco=endereco.replace('www.tvgolo.com','www.tvgolo.mobi')
-		if 'http://www.tvgolo.mobi/football.php' in endereco:
-			endereco = endereco.replace('http://www.tvgolo.mobi/football.php',MainURL + 'en/')
-		addDir(titulo,endereco,2,thumb,len(anteriores),True)
+	anteriores=re.compile('<a href="([^"]+?)">([^"]+?)</a><BR />').findall(link)
+	for endereco,titulo in anteriores:
+                addDir(titulo,MainURL + endereco,2,'',len(anteriores),True)
 	xbmc.executebuiltin("Container.SetViewMode(501)")
 
 def comedyfootball(url):
@@ -93,8 +93,8 @@ def programacaotv(url):
 def request(url):
       link=abrir_url(url)
       link=clean(link)
-      listagolos=re.compile('<div class="listajogos"><a href="/(.+?)"><img.+?src="(.+?)" />    (.+?)</a></div>').findall(link)
-      for endereco,thumb,titulo in listagolos: addDir(titulo,MainURL + endereco,1,thumb,len(listagolos),False)
+      listagolos=re.compile('<div class="listajogos"><a href="(.+?)"><img.+?src="(.+?)" />    (.+?)</a></div>').findall(link)
+      for endereco,thumb,titulo in listagolos: addDir(titulo,MainURL + endereco,1,MainURL + thumb,len(listagolos),False)
       if re.search('football.php', url) or re.search('page-start', link): paginas(url,link)
       xbmc.executebuiltin("Container.SetViewMode(51)")
 
@@ -105,7 +105,7 @@ def paginas(url,link):
             except: enderecopagina=re.compile('</b><a href="(.+?)">').findall(link)[0]
             valorpagina=int(re.compile('page-start_from_(.+?)_archive.+?.html').findall(enderecopagina)[0])
             pagina=int((valorpagina/30)+1)
-            addDir('[COLOR blue][B]' + traducao(40014) + '[/COLOR] [COLOR white]' + str(pagina) + ' >>[/COLOR][/B]',MainURL + 'en/' + enderecopagina,2,'',1,True)
+            addDir('[COLOR blue][B]' + traducao(40014) + '[/COLOR] [COLOR white]' + str(pagina) + ' >>[/COLOR][/B]',MainURL + enderecopagina,2,'',1,True)
       except: pass
 
 def captura(name,url):
@@ -294,7 +294,7 @@ def captura(name,url):
                          linkescolha=linkescolha.replace('amp;','')
                          link=abrir_url(linkescolha)
                          link=link.replace('\\','')
-                         if re.search('No videos found.',link): ok=mensagemok("TVGolo",'Video not found')
+                         if re.search('No videos found.',link): ok=mensagemok("OKGoals",'Video not found')
                          else:
                                titles=[]
                                ligacao=[]
@@ -371,8 +371,9 @@ def comecarvideo(titulo,url,thumb):
       listitem.setProperty('mimetype', 'video/x-msvideo')
       listitem.setProperty('IsPlayable', 'true')
       dialogWait = xbmcgui.DialogProgress()
-      dialogWait.create('TVGolo', 'A carregar')
+      dialogWait.create('OKGoals', 'A carregar')
       playlist.add(url, listitem)
+      xbmcplugin.setResolvedUrl(int(sys.argv[1]),True,listitem)
       dialogWait.close()
       del dialogWait
       xbmcPlayer = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
@@ -404,7 +405,7 @@ def pesquisa():
             encode=urllib.quote(search)
             if encode=='': pass
             else:
-                  link=abrir_url( MainURL + '/en/search.php?dosearch=yes&search_in_archives=yes&title=' + encode)
+                  link=abrir_url( MainURL + 'search.php?dosearch=yes&search_in_archives=yes&title=' + encode)
                   #horalocal(link)
                   jogos=re.compile('<div style="font-family:Arial, Helvetica, sans-serif; font-size:12px;"><a href="/(.+?)">(.+?)</a></div>').findall(link)
                   for endereco,titulo in jogos: addDir(titulo,MainURL + endereco,1,'',len(jogos),False)
@@ -428,13 +429,13 @@ def abrir_url_tommy(url,referencia):
       mensagemok('TVGolo',str(urllib2.HTTPError(e.url, e.code, "Erro na página.", e.hdrs, e.fp)))
       sys.exit(0)
     except urllib2.URLError, e:
-      mensagemok('TVGolo',"Erro na página.")
+      mensagemok('OKGoals',"Erro na página.")
       sys.exit(0)
 
 def versao_disponivel():
       try:
             link=abrir_url('http://fightnight-xbmc.googlecode.com/svn/addons/fightnight/plugin.video.tvgolo/addon.xml')
-            match=re.compile('name="TVGolo"\r\n       version="(.+?)"\r\n       provider-name="fightnight">').findall(link)[0]
+            match=re.compile('name="OKGoals"\r\n       version="(.+?)"\r\n       provider-name="fightnight">').findall(link)[0]
       except:
             ok = mensagemok('TV Golo',traducao(40026),traducao(40027),'')
             match=traducao(40028)

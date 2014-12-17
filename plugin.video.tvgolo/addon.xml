@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon id="plugin.video.tvgolo"
-       name="TVGolo"
-       version="0.1.01"
+       name="OKGoals"
+       version="0.2.00"
        provider-name="fightnight">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>
@@ -11,8 +11,8 @@
         <provides>video</provides>
     </extension>
     <extension point="xbmc.addon.metadata">
-        <summary>TVGolo</summary>
-        <description>Os golos do TVGolo agora no XBMC.</description>
+        <summary>OKGoals</summary>
+        <description>Os golos do OKGoals agora no Kodi. O sucessor do TVGolo.com</description>
         <platform>all</platform>
     </extension>
 </addon>
