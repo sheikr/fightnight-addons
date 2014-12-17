@@ -8,7 +8,7 @@ import xbmc, xbmcgui, xbmcaddon, xbmcplugin,re,sys, urllib, urllib2
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.0.06'
+versao = '0.0.07'
 addon_id = 'plugin.video.tafixe'
 MainURL = 'http://www.tafixe.com/'
 vazio= []
@@ -20,15 +20,17 @@ menuescolha = xbmcgui.Dialog().select
 mensagemok = xbmcgui.Dialog().ok
 
 def menu_principal():
-      addDir("Categorias",MainURL,3,'',1,True)
-      addDir("Últimos Vídeos",MainURL,2,'',1,True)
-      addDir("Procurar Vídeos",MainURL,5,'',1,True)
-      addLink("",'','')
-      disponivel=versao_disponivel()
-      if disponivel==versao: addLink('Última versao instalada (' + versao+ ')','','')
-      else: addDir('Instalada v' + versao + ' | Actualização v' + disponivel,MainURL,4,'',1,False)
-      addDir("Definições do Addon | [COLOR blue][B]Tá Fixe[/B][/COLOR]",MainURL,6,'',1,False)
-      xbmc.executebuiltin("Container.SetViewMode(501)")
+      #addDir("Categorias",MainURL,3,'',1,True)
+      #addDir("Últimos Vídeos",MainURL,2,'',1,True)
+      #addDir("Procurar Vídeos",MainURL,5,'',1,True)
+      addLink('Fim do addon.','','')
+      addLink('Instale o addon "Fun Videos" do repositorio','','')
+      addLink('Mafarricos para este e outros sites.','','')
+      #disponivel=versao_disponivel()
+      #if disponivel==versao: addLink('Última versao instalada (' + versao+ ')','','')
+      #else: addDir('Instalada v' + versao + ' | Actualização v' + disponivel,MainURL,4,'',1,False)
+      #addDir("Definições do Addon | [COLOR blue][B]Tá Fixe[/B][/COLOR]",MainURL,6,'',1,False)
+      #xbmc.executebuiltin("Container.SetViewMode(501)")
 
 def categorias():
       link=abrir_url(MainURL + 'category/videos/')
@@ -43,15 +45,16 @@ def request(url):
       #print link
       #listavideos=re.compile('<h1 class="title"><a href="(.+?)" title="(.+?)">.+?</a></h1>').findall(link)
       #listavideos=re.compile('<div class="thumb-wrap"><a href="(.+?)" rel="bookmark" title="(.+?)">').findall(link)
-      listavideos=re.compile('<h3 itemprop="name" class="entry-title"><a itemprop="url" href="(.+?)" rel="bookmark" title="(.+?)">.+?</a></h3>').findall(link)
+      link=re.compile('</header>(.+?)<div class="td-ss-main-sidebar">').findall(link)
+      listavideos=re.compile('<h3 itemprop="name" class="entry-.+?"><a itemprop="url" href="(.+?)" rel="bookmark" title="(.+?)">.+?</a></h3>').findall(link)
       for endereco,titulo in listavideos:
             addDir(titulo,endereco,1,'',len(listavideos),False)
       paginas(url,link)
 
 def paginas(url,link):
       try:
-            proxpagina=re.compile('[^<]*<a href="([^"]+?)">Próximo').findall(link)[0]
-            nrpagina=re.compile('page/(.+?)/').findall(proxpagina)[0]
+            proxpagina=re.compile('<a href="([^"]+?)"><i class="td-icon-menu-right">').findall(link)[0]
+            nrpagina=re.compile('/page/(.+?)/').findall(proxpagina)[0]
             addDir('[COLOR blue]Ir para a página ' + nrpagina + ' >>[/COLOR]',proxpagina,2,'',1,True)
       except:
             pass
@@ -79,7 +82,7 @@ def captura(name,url):
                   if len(youtube)==1: youtube2=str('')
                   else: youtube2=' #' + str(youtuberef)
                   titles.append('Youtube' + youtube2)
-                  ligacao.append('http://www.youtube.com/watch?v=' + codigo)
+                  ligacao.append("plugin://plugin.video.youtube/?action=play_video&videoid=" + codigo)
       if selfAddon.getSetting('infovideo') == 'true':
             try:
                   xbmc.executebuiltin("ActivateWindow(10147)")
@@ -96,7 +99,7 @@ def captura(name,url):
              linkescolha=ligacao[index]
              if linkescolha:
                    import urlresolver
-                   if re.search('youtube',linkescolha) or re.search('dailymotion',linkescolha):
+                   if re.search('dailymotion',linkescolha):
                          sources=[]
                          hosted_media = urlresolver.HostedMediaFile(url=linkescolha)
                          sources.append(hosted_media)

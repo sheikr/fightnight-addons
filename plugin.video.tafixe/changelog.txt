@@ -1,3 +1,6 @@
+[B]v0.0.07 (17 de Dezembro de 2014):[/B]
+- Fim do addon. Instale o addon "Fun Videos" do repositorio Mafarricos para este e outros sites.
+
 [B]v0.0.06 (10 de Fevereiro de 2014):[/B]
 - Correccao perante as alteracoes do site.
 
