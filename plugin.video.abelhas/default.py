@@ -9,7 +9,7 @@ net=Net()
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.1.00'
+versao = '0.1.01'
 addon_id = 'plugin.video.abelhas'
 MainURL = 'http://abelhas.pt/'
 art = '/resources/art/'
@@ -132,7 +132,7 @@ def favoritos():
       endlogin=MainURL + 'action/Friends/ShowAllFriends'
       info= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
       info=info.replace('javascript:;','/javascript:;')
-      users=re.compile('<div class="friend avatar"><a href="/(.+?)" title="(.+?)"><img alt=".+?" src="(.+?)" />').findall(info)
+      users=re.compile('<div class="friend avatar".+?<a href="/(.+?)" title="(.+?)"><img alt=".+?" src="(.+?)" />').findall(info)
       for urluser,nomeuser,thumbuser in users:
             addDir(nomeuser,MainURL + urluser,3,thumbuser,len(users),True)
       paginas(info)
@@ -196,7 +196,8 @@ def atalhos(type=False):
                   
             
 
-def pastas(url,name,formcont={},conteudo='',past=False):     
+def pastas(url,name,formcont={},conteudo='',past=False):
+      print url
       if re.search('action/SearchFiles',url):
             ref_data = {'Host': 'abelhas.pt', 'Connection': 'keep-alive', 'Referer': 'http://abelhas.pt/','Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8','User-Agent':user_agent,'Referer': 'http://abelhas.pt/'}
             endlogin=MainURL + 'action/SearchFiles'
@@ -277,7 +278,7 @@ def pastas(url,name,formcont={},conteudo='',past=False):
 
             try:
                   checker=url.split('/')[:-1]
-                  if len(checker) > 3:
+                  if len(checker) > 3 and not re.search('action/SearchFiles',url) and not re.search('abelhas.pt/action/nada',url):
                         urlbefore='/'.join(checker)
                         addDir('[COLOR blue][B]Uma pasta atrás[/B][/COLOR]',urlbefore,3,wtpath + art + 'seta.png',1,True)
             except: pass
@@ -690,16 +691,22 @@ class StopDownloading(Exception):
 ######################################################## OUTRAS FUNCOES ###############################################
 
 def caixadetexto(url,ftype=''):
+      ultpes=''
+      save=False
       if url=='pastas': title=traducao(40010) + " - Abelhas.pt"
       elif url=='password': title="Password - Abelhas.pt"
-      elif url=='pesquisa': title=traducao(40031) + " - Abelhas.pt"
+      elif url=='pesquisa':
+            title=traducao(40031) + " - Abelhas.pt"
+            ultpes=selfAddon.getSetting('ultima-pesquisa')
+            save=True
       else: title="Abelhas.pt"
-      keyb = xbmc.Keyboard(selfAddon.getSetting('ultima-pesquisa'), title)
+      keyb = xbmc.Keyboard(ultpes, title)
       keyb.doModal()
       if (keyb.isConfirmed()):
             search = keyb.getText()
             if search=='': sys.exit(0)
             encode=urllib.quote_plus(search)
+            if save==True: selfAddon.setSetting('ultima-pesquisa', search)
             if url=='pastas': pastas(MainURL + search,name)
             elif url=='password': return search
             elif url=='pesquisa':
