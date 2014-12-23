@@ -2,8 +2,7 @@
     <defaultcontrol always="true">500</defaultcontrol>
     <allowoverlay>no</allowoverlay>
 	<include>dialogeffect</include>
-	<allowoverlay>no</allowoverlay>
-    <zorder>1</zorder>
+    <zorder>10</zorder>
 
     <!--<backgroundcolor>ff000000</backgroundcolor>-->
 

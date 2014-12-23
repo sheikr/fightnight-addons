@@ -8,7 +8,7 @@ addon_id = 'plugin.video.wt'
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.4.04'
+versao = '0.4.06'
 MainURL = 'http://www.wareztuga.tv/'
 art = '/resources/art/'
 ListMovieURL = 'movies.php'; SingleMovieURL = 'movie.php'
@@ -302,6 +302,7 @@ def menu_ano(url):
       if re.search('animes',url): referencia='&mediaType=animes';modo=4
       elif re.search('series',url): referencia='&mediaType=series';modo=4
       elif re.search('movies',url): referencia='&mediaType=movies';modo=3
+      addDir("2015",MainURL + 'pagination.ajax.php?p=1&order=date&years=2015' + referencia,modo,wtpath + art + '2015.png',1,True)
       addDir("2014",MainURL + 'pagination.ajax.php?p=1&order=date&years=2014' + referencia,modo,wtpath + art + '2014.png',1,True)
       addDir("2013",MainURL + 'pagination.ajax.php?p=1&order=date&years=2013' + referencia,modo,wtpath + art + '2013.png',1,True)
       addDir("2012",MainURL + 'pagination.ajax.php?p=1&order=date&years=2012' + referencia,modo,wtpath + art + '2012.png',1,True)
@@ -325,8 +326,8 @@ def multifiltro():
       catnumb=['0','1','17','4','5','6','2','21','18','3','7','8','14','15','9','13','11','12','10','16','20']
       index = xbmcgui.Dialog().select(traducao(40331), categorias)
       if index > -1:
-            ano=['2014','2013','2012','2011','2010','2009','2008','2007','2006','2000-2005','1990-1999','1980-1989','1970-1979','1960-1969','1950-1959','1900-1949']
-            anonumb=['2014','2013','2012','2011','2010','2009','2008','2007','2006','2000','1990','1980','1970','1960','1950','1900']
+            ano=['2015','2014','2013','2012','2011','2010','2009','2008','2007','2006','2000-2005','1990-1999','1980-1989','1970-1979','1960-1969','1950-1959','1900-1949']
+            anonumb=['2015','2014','2013','2012','2011','2010','2009','2008','2007','2006','2000','1990','1980','1970','1960','1950','1900']
             index2 = xbmcgui.Dialog().select(traducao(40331), ano)
             if index2 > -1:
                   urlfinal=MainURL + 'pagination.ajax.php?p=1&order=date&years=%s&genres=%s' % (anonumb[index2],catnumb[index])
@@ -864,7 +865,7 @@ def series_exib_escolha(url,name):
 
 ################################################### SERVIDORES ######################################################
                       
-def resolver_servidores(url,name,download=False):
+def resolver_servidores(url,name,download=False,dialogselect=True):
       wturl=url
       link=abrir_url_cookie(url)
       if re.search('movie.php',url):
@@ -974,56 +975,58 @@ def resolver_servidores(url,name,download=False):
             #if selfAddon.getSetting('server-preferido-premium')=="0": extra=''
             #elif selfAddon.getSetting('server-preferido-premium')=="1": extra=' - Real-Debrid'
             #elif selfAddon.getSetting('server-preferido-premium')=="2": extra=' - Unrestrict.li'
-            if selfAddon.getSetting('server-preferido-debrid')=="true": extra=' - Real-Debrid'
-            else: extra=''
-            if selfAddon.getSetting('server-preferido') =="1": #sockshare
-                  print "Preferencial: Hugefiles" + extra
-                  resultado = handle_wait(2,"wareztuga.tv",traducao(40216) + "Hugefiles"+extra+").",segunda=traducao(40219))
+
+            #if selfAddon.getSetting('server-preferido-debrid')=="true": extra=' - Real-Debrid'
+            #else: extra=''
+            extra=''
+            if selfAddon.getSetting('server-preferido') =="1": #dropvideo
+                  print "Preferencial: Dropvideo" + extra
+                  resultado = handle_wait(2,"wareztuga.tv",traducao(40216) + "Dropvideo"+extra+").",segunda=traducao(40219))
                   if resultado:
                         for link in ligacaopref:
-                              if re.search('hugefiles',link):
+                              if re.search('dropvideo',link):
                                     premon=premiumautomatico(link,thumbnail,name,fic,simounao,wturl)
-                                    if premon=='desactivado': hugefiles(link,fic,name,thumbnail,simounao,wturl)
+                                    if premon=='desactivado': dropvideo(link,fic,name,thumbnail,simounao,wturl)
                                     parametro='sim'
                   else: parametro='cancelou'
-            elif selfAddon.getSetting('server-preferido') =="2": #bayfiles
-                  print "Preferencial: Profity" + extra
-                  resultado = handle_wait(2,"wareztuga.tv",traducao(40216) + "Profity"+extra+").",segunda=traducao(40219))
+            elif selfAddon.getSetting('server-preferido') =="2": #cloudzilla
+                  print "Preferencial: Cloudzilla" + extra
+                  resultado = handle_wait(2,"wareztuga.tv",traducao(40216) + "Cloudzilla"+extra+").",segunda=traducao(40219))
                   if resultado:
                         for link in ligacaopref:
-                              if re.search('profity',link):
+                              if re.search('cloudzilla',link):
                                     premon=premiumautomatico(link,thumbnail,name,fic,simounao,wturl)
-                                    if premon=='desactivado': profity(link,fic,name,thumbnail,simounao,wturl)
+                                    if premon=='desactivado': cloudzilla(link,fic,name,thumbnail,simounao,wturl)
                                     parametro='sim'
                   else: parametro='cancelou'
-            elif selfAddon.getSetting('server-preferido') =="3": #firedrive
-                  print "Preferencial: Kingfiles" + extra
-                  resultado = handle_wait(2,"wareztuga.tv",traducao(40216) + "Kingfiles"+extra+").",segunda=traducao(40219))
+            elif selfAddon.getSetting('server-preferido') =="3": #vidto
+                  print "Preferencial: Vidto" + extra
+                  resultado = handle_wait(2,"wareztuga.tv",traducao(40216) + "Vidto"+extra+").",segunda=traducao(40219))
                   if resultado:
                         for link in ligacaopref:
-                              if re.search('kingfiles',link):
+                              if re.search('vidto',link):
                                     premon=premiumautomatico(link,thumbnail,name,fic,simounao,wturl)
-                                    if premon=='desactivado': kingfiles(link,fic,name,thumbnail,simounao,wturl)
+                                    if premon=='desactivado': vidto(link,fic,name,thumbnail,simounao,wturl)
                                     parametro='sim'
                   else: parametro='cancelou'
 
             elif selfAddon.getSetting('server-preferido') =="4": #vshare
-                  print "Preferencial: VideoShare" + extra
-                  resultado = handle_wait(2,"wareztuga.tv",traducao(40216) + "VideoShare"+extra+").",segunda=traducao(40219))
+                  print "Preferencial: Played" + extra
+                  resultado = handle_wait(2,"wareztuga.tv",traducao(40216) + "Played"+extra+").",segunda=traducao(40219))
                   if resultado:
                         for link in ligacaopref:
-                              if re.search('videoshare',link):
+                              if re.search('played',link):
                                     premon=premiumautomatico(link,thumbnail,name,fic,simounao,wturl)
-                                    if premon=='desactivado': kingfiles(link,fic,name,thumbnail,simounao,wturl)
+                                    if premon=='desactivado': played(link,fic,name,thumbnail,simounao,wturl)
                                     parametro='sim'
                   else: parametro='cancelou'
             if parametro=='nada' or parametro=='cancelou':
                   if parametro=='nada': mensagemok('wareztuga.tv',traducao(40217),traducao(40218))
                   mensagemprogresso.close()
-                  menu_servidores(titles,ligacao,name,thumbnail,simounao,wturl,listadecomentarios) 
+                  menu_servidores(titles,ligacao,name,thumbnail,simounao,wturl,listadecomentarios,dialogselect) 
       else:
            print "Preferencial: desligado"
-           menu_servidores(titles,ligacao,name,thumbnail,simounao,wturl,listadecomentarios) 
+           menu_servidores(titles,ligacao,name,thumbnail,simounao,wturl,listadecomentarios,dialogselect)
 
 def premiumautomatico(linkescolha,thumbnail,name,fic,simounao,wturl):
       #automatico=selfAddon.getSetting('server-preferido-premium')
@@ -1047,19 +1050,22 @@ def listarcomentarios(link):
     texto='\n\n'.join(texto)
     return texto
 
-def menu_servidores(titles,ligacao,name,thumbnail,simounao,wturl,listadecomentarios):
-      #xbmc.executebuiltin("Dialog.Close(all,true)")
-      #listitem = xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage='')
-      #xbmcplugin.setResolvedUrl(int(sys.argv[1]),True,listitem)
-      #listitem = xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage='')
-      #listitem.setProperty('mimetype', 'video/x-msvideo')
-      #listitem.setProperty('IsPlayable', 'true')
-      #xbmcplugin.setResolvedUrl(int(sys.argv[1]),False,listitem)
-      #xbmc.executebuiltin('Dialog.Close(all)')
-      #time.sleep(2)
-      d = janelaservidores("serverswt.xml" , wtpath, "Default",titles=titles,ligacao=ligacao,name=name,thumbnail=thumbnail,simounao=simounao,wturl=wturl,listadecomentarios=listadecomentarios)
-      d.doModal()
-      del d
+def menu_servidores(titles,ligacao,name,thumbnail,simounao,wturl,listadecomentarios,dialogselect):
+      if len(ligacao)==2:
+            linkescolha=ligacao[index]
+            entrarnoserver(linkescolha,name,thumbnail,simounao,wturl)
+            return
+      
+      if dialogselect==True:
+            if len(ligacao)==1: ok=mensagemok('wareztuga.tv', 'Nenhum stream disponivel.');return
+            else: index = xbmcgui.Dialog().select('Escolha o servidor', titles)
+            if index > -1:
+                  linkescolha=ligacao[index]
+                  entrarnoserver(linkescolha,name,thumbnail,simounao,wturl)
+      else:
+            d = janelaservidores("serverswt.xml" , wtpath, "Default",titles=titles,ligacao=ligacao,name=name,thumbnail=thumbnail,simounao=simounao,wturl=wturl,listadecomentarios=listadecomentarios)
+            d.doModal()
+            del d
 
 def entrarnoserver(linkescolha,name,thumbnail,simounao,wturl):
       if linkescolha:
@@ -2239,6 +2245,8 @@ def vista_series():
 
 #method1
 def fazerdownload(name,url,subtitles=None):
+
+      
       vidname=name.replace('[B]','').replace('[/B]','').replace('\\','')
       vidname = re.sub('[^-a-zA-Z0-9_.()\\\/ ]+', '',  vidname)
       if os.path.exists(downloadPath):
@@ -2815,7 +2823,10 @@ elif mode==1: menu_filmes()
 elif mode==2: menu_series(url)
 elif mode==3: filmes_request(url,pesquisa)
 elif mode==4: series_request(url,pesquisa)
-elif mode==5: resolver_servidores(url,name)
+elif mode==5:
+      dialogselect=selfAddon.getSetting('dialog-select')
+      if dialogselect == "0": resolver_servidores(url,name,dialogselect=True)
+      elif dialogselect == "1": resolver_servidores(url,name,dialogselect=False)
 elif mode==6: seriestemp_request(name,url)
 elif mode==7: seriesepis_request(url,name)
 elif mode==8: conteudonotificacao(url,name)
