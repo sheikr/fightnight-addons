@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<settings>
-   <category label="Geral">
-      <setting id="infovideo" type="bool" label="Mostrar informacao relativa ao video" default="true"/>
-   </category>
-</settings>
