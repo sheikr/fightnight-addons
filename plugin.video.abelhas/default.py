@@ -9,7 +9,7 @@ net=Net()
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.1.01'
+versao = '0.1.02'
 addon_id = 'plugin.video.abelhas'
 MainURL = 'http://abelhas.pt/'
 art = '/resources/art/'
