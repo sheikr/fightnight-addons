@@ -1,3 +1,6 @@
+[B]v0.4.07 (24 de Dezembro de 2014):[/B]
+- Correccao de erro de script em alguns conteudos.
+
 [B]v0.4.06 (23 de Dezembro de 2014):[/B]
 - Refix.
 

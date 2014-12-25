@@ -8,7 +8,7 @@ addon_id = 'plugin.video.wt'
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.4.06'
+versao = '0.4.07'
 MainURL = 'http://www.wareztuga.tv/'
 art = '/resources/art/'
 ListMovieURL = 'movies.php'; SingleMovieURL = 'movie.php'
@@ -1052,7 +1052,7 @@ def listarcomentarios(link):
 
 def menu_servidores(titles,ligacao,name,thumbnail,simounao,wturl,listadecomentarios,dialogselect):
       if len(ligacao)==2:
-            linkescolha=ligacao[index]
+            linkescolha=ligacao[0]
             entrarnoserver(linkescolha,name,thumbnail,simounao,wturl)
             return
       
