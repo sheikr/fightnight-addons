@@ -31,7 +31,7 @@ def traducao(texto):
 
 #################################################### LOGIN ABELHAS #####################################################
 
-def login_abelhas(defora=None):
+def login_abelhas(defora=False):
       print "Sem cookie. A iniciar login"
       try:
             link=abrir_url(MainURL)
