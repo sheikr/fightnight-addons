@@ -31,7 +31,7 @@ def traducao(texto):
 
 #################################################### LOGIN ABELHAS #####################################################
 
-def login_abelhas():
+def login_abelhas(defora=None):
       print "Sem cookie. A iniciar login"
       try:
             link=abrir_url(MainURL)
@@ -61,7 +61,7 @@ def login_abelhas():
             elif re.search(username,logintest):
                   #xbmc.executebuiltin("XBMC.Notification(abelhas.pt,"+traducao(40004)+",'500000',"+iconpequeno.encode('utf-8')+")")
                   net.save_cookies(cookies)
-                  menu_principal(1)
+                  if not defora: menu_principal(1)
             
             elif re.search('Erro',logintest) or link=='Erro':
                   opcao= xbmcgui.Dialog().yesno('abelhas.pt', traducao(40005), "", "",traducao(40006), 'OK')
@@ -197,7 +197,6 @@ def atalhos(type=False):
             
 
 def pastas(url,name,formcont={},conteudo='',past=False):
-      print url
       if re.search('action/SearchFiles',url):
             ref_data = {'Host': 'abelhas.pt', 'Connection': 'keep-alive', 'Referer': 'http://abelhas.pt/','Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8','User-Agent':user_agent,'Referer': 'http://abelhas.pt/'}
             endlogin=MainURL + 'action/SearchFiles'
@@ -334,6 +333,142 @@ def pastas(url,name,formcont={},conteudo='',past=False):
             paginas(conteudo)
             
       xbmc.executebuiltin("Container.SetViewMode(51)")
+
+def pastas_de_fora(url,name,formcont={},conteudo='',past=False):
+	login_abelhas(True)
+	source = xbmcgui.Dialog().select
+	selectlist = []
+	urllist = []
+	formcont = {'submitSearchFiles': 'Procurar', 'FileType': 'video', 'IsGallery': 'False', 'FileName': name }
+	if re.search('action/SearchFiles',url):
+		ref_data = {'Host': 'abelhas.pt', 'Connection': 'keep-alive', 'Referer': 'http://abelhas.pt/','Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8','User-Agent':user_agent,'Referer': 'http://abelhas.pt/'}
+		endlogin=MainURL + 'action/SearchFiles'
+		conteudo= net.http_POST(endlogin,form_data=formcont,headers=ref_data).content.encode('latin-1','ignore')
+		if re.search('O ficheiro n&#227;o foi encontrado',conteudo):
+			mensagemok('Abelhas.pt','Sem resultados.')
+			sys.exit(0)
+		try:
+			filename=re.compile('<input name="FileName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+			try:ftype=re.compile('<input name="FileType" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+			except: ftype='All'
+			pagina=1
+			token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)"').findall(conteudo)[0]
+			form_d = {'IsGallery':'True','FileName':filename,'FileType':ftype,'ShowAdultContent':'True','Page':pagina,'__RequestVerificationToken':token}
+			from t0mm0.common.addon import Addon
+			addon=Addon(addon_id)
+			addon.save_data('temp.txt',form_d)
+			ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':'abelhas.pt','Origin':'http://abelhas.pt','Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
+			endlogin=MainURL + 'action/SearchFiles/Results'
+			conteudo= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
+		except: pass
+	else:
+		if conteudo=='':
+			extra='?requestedFolderMode=filesList&fileListSortType=Name&fileListAscending=True'
+			conteudo=clean(abrir_url_cookie(url + extra))
+	if re.search('ProtectedFolderChomikLogin',conteudo):
+		chomikid=re.compile('<input id="ChomikId" name="ChomikId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+		folderid=re.compile('<input id="FolderId" name="FolderId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+		foldername=re.compile('<input id="FolderName" name="FolderName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+		token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+		passwordfolder=caixadetexto('password')
+		form_d = {'ChomikId':chomikid,'FolderId':folderid,'FolderName':foldername,'Password':passwordfolder,'Remember':'true','__RequestVerificationToken':token}
+		ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':'abelhas.pt','Origin':'http://abelhas.pt','Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
+		endlogin=MainURL + 'action/Files/LoginToFolder'
+		teste= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
+		teste=urllib.unquote(teste)
+		if re.search('IsSuccess":false',teste):
+			mensagemok('Abelhas.pt',traducao(40002))
+			sys.exit(0)
+		else:
+			pastas_ref(url)
+	elif re.search('/action/UserAccess/LoginToProtectedWindow',conteudo):
+		chomikid=re.compile('<input id="TargetChomikId" name="TargetChomikId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+		chomiktype=re.compile('<input id="ChomikType" name="ChomikType" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+		sex=re.compile('<input id="Sex" name="Sex" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+		accname=re.compile('<input id="AccountName" name="AccountName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+		isadult=re.compile('<input id="AdultFilter" name="AdultFilter" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+		adultfilter=re.compile('<input id="AdultFilter" name="AdultFilter" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+		passwordfolder=caixadetexto('password')
+		form_d = {'Password':passwordfolder,'OK':'OK','RemeberMe':'true','IsAdult':isadult,'Sex':sex,'AccountName':accname,'AdultFilter':adultfilter,'ChomikType':chomiktype,'TargetChomikId':chomikid}
+		ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':'abelhas.pt','Origin':'http://abelhas.pt','Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
+		endlogin=MainURL + 'action/UserAccess/LoginToProtectedWindow'
+		teste= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
+		teste=urllib.unquote(teste)
+		if re.search('<span class="field-validation-error">A password introduzida est',teste):
+			mensagemok('Abelhas.pt',traducao(40002))
+			sys.exit(0)
+		else:
+			pastas_ref(url)
+	else:
+		try:
+			conta=re.compile('<div class="bigFileInfoRight">.+?<h3>(.+?)<span>(.+?)</span></h3>').findall(conteudo)[0]
+			nomeconta=re.compile('<input id="FriendsTargetChomikName" name="FriendsTargetChomikName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+			addLink('[COLOR blue][B]' + traducao(40023) + nomeconta + '[/B][/COLOR]: ' + conta[0] + conta[1],'',wtpath + art + 'star2.png')
+		except: pass
+		try:
+			checker=url.split('/')[:-1]
+			if len(checker) > 3 and not re.search('action/SearchFiles',url) and not re.search('abelhas.pt/action/nada',url):
+				urlbefore='/'.join(checker)
+				addDir('[COLOR blue][B]Uma pasta atrás[/B][/COLOR]',urlbefore,3,wtpath + art + 'seta.png',1,True)
+		except: pass
+		try:
+			pastas=re.compile('<div id="foldersList">(.+?)</table>').findall(conteudo)[0]
+			seleccionados=re.compile('<a href="/(.+?)".+?title="(.+?)">(.+?)</a>').findall(pastas)
+			for urlpasta,nomepasta,password in seleccionados:
+				if re.search('<span class="pass">',password): displock=' (' + traducao(40024)+')'
+				else:displock=''
+				addDir(nomepasta + displock,MainURL + urlpasta,3,wtpath + art + 'pasta.png',len(seleccionados),True)
+		except: pass
+		#contributo mafarricos com alteracoes, ty
+		items1=re.compile('<li class="fileItemContainer">\s+<p class="filename">\s+<a class="downloadAction" href=".+?">    <span class="bold">.+?</span>(.+?)</a>\s+</p>\s+<div class="thumbnail">\s+<div class="thumbnailWrapper expType" rel="Image" style=".+?">\s+<a href="(.+?)" class="thumbImg" rel="highslide" style=".+?" title="(.+?)">\s+<img src=".+?" rel=".+?" alt=".+?" style=".+?"/>\s+</a>\s+</div>\s+</div>\s+<div class="smallTab">\s+<ul>\s+<li>\s+(.+?)</li>\s+<li><span class="date">(.+?)</span></li>').findall(conteudo)         
+		for extensao,urlficheiro,tituloficheiro,tamanhoficheiro,dataficheiro in items1:
+			extensao=extensao.replace(' ','')
+			tamanhoficheiro=tamanhoficheiro.replace(' ','')
+			if extensao=='.rar' or extensao=='.RAR' or extensao == '.zip' or extensao=='.ZIP' or extensao=='.RAR' or extensao=='.7z' or extensao=='.7Z': thumb=wtpath + art + 'rar.png'
+			elif extensao=='.mp3' or extensao=='.MP3' or extensao == '.wma' or extensao=='.WMA' or extensao=='.m3u' or extensao=='.M3U' or extensao=='.flac' or extensao=='.FLAC': thumb=wtpath + art + 'musica.png'
+			elif extensao=='.jpg' or extensao == '.JPG' or extensao == '.bmp' or extensao == '.BMP' or extensao=='.gif' or extensao=='.GIF' or extensao=='.png' or extensao=='.PNG': thumb=wtpath + art + 'foto.png'
+			elif extensao=='.mkv' or extensao == '.MKV' or extensao == '.avi' or extensao == '.AVI' or extensao=='.mp4' or extensao=='.MP4' or extensao=='.3gp' or extensao=='.3GP' or extensao=='.wmv' or extensao=='.WMV': thumb=wtpath + art + 'video.png'
+			else:thumb=wtpath + art + 'file.png'
+			tamanhoparavariavel=' (' + tamanhoficheiro + ')'
+			if past==False: modo=4
+			else: modo=22
+			addCont('[B]' + tituloficheiro + '[/B]' + tamanhoparavariavel,MainURL + urlficheiro,modo,tamanhoparavariavel,thumb,len(items1),past,False)                  
+            #contributo mafarricos com alteracoes, ty
+		items2=re.compile('<ul class="borderRadius tabGradientBg">.+?<li><span>(.+?)</span></li>.+?<li><span class="date">(.+?)</span></li></ul></div>.+?<ul>            <li><a href="/(.+?)" class="downloadAction".+?<li class="fileActionsFacebookSend" data-url=".+?" data-title="(.+?)">.+?<span class="bold">.+?</span>(.+?)</a>').findall(conteudo)
+		for tamanhoficheiro,dataficheiro,urlficheiro, tituloficheiro,extensao in items2:
+			extensao=extensao.replace(' ','')
+			if extensao=='.rar' or extensao=='.RAR' or extensao == '.zip' or extensao=='.ZIP' or extensao=='.RAR' or extensao=='.7z' or extensao=='.7Z': thumb=wtpath + art + 'rar.png'
+			elif extensao=='.mp3' or extensao=='.MP3' or extensao == '.wma' or extensao=='.WMA' or extensao=='.m3u' or extensao=='.M3U' or extensao=='.flac' or extensao=='.FLAC': thumb=wtpath + art + 'musica.png'
+			elif extensao=='.jpg' or extensao == '.JPG' or extensao == '.bmp' or extensao == '.BMP' or extensao=='.gif' or extensao=='.GIF' or extensao=='.png' or extensao=='.PNG': thumb=wtpath + art + 'foto.png'
+			elif extensao=='.mkv' or extensao == '.MKV' or extensao == '.avi' or extensao == '.AVI' or extensao=='.mp4' or extensao=='.MP4' or extensao=='.3gp' or extensao=='.3GP' or extensao=='.wmv' or extensao=='.WMV': thumb=wtpath + art + 'video.png'
+			else:thumb=wtpath + art + 'file.png'
+			tamanhoparavariavel=' (' + tamanhoficheiro + ')'
+			if past==False: modo=4
+			else: modo=22
+			#addCont('[B]' + tituloficheiro + extensao + '[/B]' + tamanhoparavariavel,MainURL + urlficheiro,modo,tamanhoparavariavel,thumb,len(items2),past,False)
+			if modo==4:
+				selectlist.append('[B]' + tituloficheiro + extensao + '[/B]' + tamanhoparavariavel)
+				urllist.append(MainURL + urlficheiro)
+		if not items1:
+			if not items2:
+				conteudo=clean(conteudo)
+				#isto ta feio
+				items3=re.compile('<div class="thumbnail">.+?<a href="(.+?)".+?title="(.+?)">.+?<div class="smallTab">.+?<li>(.+?)</li>.+?<span class="date">(.+?)</span>').findall(conteudo)
+				for urlficheiro,tituloficheiro, tamanhoficheiro,dataficheiro in items3:
+					tamanhoficheiro=tamanhoficheiro.replace(' ','')
+					thumb=wtpath + art + 'file.png'
+					tamanhoparavariavel=' (' + tamanhoficheiro + ')'
+					if past==False: modo=4
+					else: modo=22
+					#addCont('[B]' + tituloficheiro + '[/B]' + tamanhoparavariavel,MainURL + urlficheiro,modo,tamanhoparavariavel,thumb,len(items2),past,False) 
+					if modo == 4:
+						selectlist.append('[B]' + tituloficheiro + '[/B]' + tamanhoparavariavel)
+						urllist.append(MainURL + urlficheiro)
+						
+		#paginas(conteudo)
+	choose=source('Link a Abrir',selectlist)
+	if choose > -1:	analyzer(urllist[choose])
+	#xbmc.executebuiltin("Container.SetViewMode(51)")
 
 def obterlistadeficheiros():
             string=[]
@@ -1067,4 +1202,5 @@ elif mode==19: atalhos(type='addfile')
 elif mode==20: atalhos(type='addfolder')
 elif mode==21: atalhos(type='remove')
 elif mode==22: pastas('/'.join(url.split('/')[:-1]),name)
+elif mode==23: pastas_de_fora(url,name)
 xbmcplugin.endOfDirectory(int(sys.argv[1]))
