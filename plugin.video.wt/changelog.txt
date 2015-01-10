@@ -1,3 +1,6 @@
+[B]v0.4.08 (10 de Janeiro de 2015):[/B]
+- Corrigido erro de captcha em alguns conteudos.
+
 [B]v0.4.07 (24 de Dezembro de 2014):[/B]
 - Correccao de erro de script em alguns conteudos.
 

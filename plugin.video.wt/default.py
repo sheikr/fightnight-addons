@@ -8,7 +8,7 @@ addon_id = 'plugin.video.wt'
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.4.07'
+versao = '0.4.08'
 MainURL = 'http://www.wareztuga.tv/'
 art = '/resources/art/'
 ListMovieURL = 'movies.php'; SingleMovieURL = 'movie.php'
@@ -428,9 +428,8 @@ def unrestrict_captcha(url,referido):
             html =  response.content                    
             try:media_id=re.compile('id="link" type="hidden" value="(.+?)" />').findall(html)[0]
             except: pass
-            noscript=re.compile('<iframe src="(.+?)"').findall(html)[0]
-            
-            check = net.http_GET(noscript).content
+            noscript=re.compile('<iframe src=".+?solvemedia.com([^"]+?)"').findall(link)[0]
+            check = net.http_GET("http://api.solvemedia.com"+ noscript).content
             hugekey=re.compile('id="adcopy_challenge" value="(.+?)">').findall(check)[0]
             captcha_headers= {'User-Agent':'Mozilla/6.0 (Macintosh; I; Intel Mac OS X 11_7_9; de-LI; rv:1.9b4) Gecko/2012010317 Firefox/10.0a4','Host':'api.solvemedia.com','Referer':response.get_url(),'Accept':'image/png,image/*;q=0.8,*/*;q=0.5'}
             open(captcha_img, 'wb').write( net.http_GET("http://api.solvemedia.com%s"%re.compile('<img src="(.+?)"').findall(check)[0] ).content)
@@ -1491,8 +1490,8 @@ def hugefiles(url,srt,name,thumbnail,simounao,wturl):
       try:
             print "Solvemedia"
             captchatype="solvemedia"
-            noscript=re.compile('<iframe src="(.+?)"').findall(link)[0]
-            check = net.http_GET(noscript).content
+            noscript=re.compile('<iframe src=".+?solvemedia.com([^"]+?)"').findall(link)[0]
+            check = net.http_GET("http://api.solvemedia.com"+ noscript).content
             hugekey=re.compile('id="adcopy_challenge" value="(.+?)">').findall(check)[0]
             captcha_headers= {'User-Agent':'Mozilla/6.0 (Macintosh; I; Intel Mac OS X 11_7_9; de-LI; rv:1.9b4) Gecko/2012010317 Firefox/10.0a4','Host':'api.solvemedia.com','Referer':url,'Accept':'image/png,image/*;q=0.8,*/*;q=0.5'}
             open(captcha_img, 'wb').write( net.http_GET("http://api.solvemedia.com%s"%re.compile('<img src="(.+?)"').findall(check)[0] ).content)
@@ -1613,10 +1612,10 @@ def kingfiles(url,srt,name,thumbnail,simounao,wturl):
       try:
             print "Solvemedia"
             captchatype="solvemedia"
-            noscript=re.compile('<iframe src="(.+?)"').findall(link)[0]
-            check = net.http_GET(noscript).content
+            noscript=re.compile('<iframe src=".+?solvemedia.com([^"]+?)"').findall(link)[0]
+            check = net.http_GET("http://api.solvemedia.com"+ noscript).content
             hugekey=re.compile('id="adcopy_challenge" value="(.+?)">').findall(check)[0]
-            captcha_headers= {'User-Agent':'Mozilla/6.0 (Macintosh; I; Intel Mac OS X 11_7_9; de-LI; rv:1.9b4) Gecko/2012010317 Firefox/10.0a4','Host':'api.solvemedia.com','Referer':url,'Accept':'image/png,image/*;q=0.8,*/*;q=0.5'}
+            captcha_headers= {'User-Agent':user_agent,'Host':'api.solvemedia.com','Referer':url,'Accept':'image/png,image/*;q=0.8,*/*;q=0.5'}
             open(captcha_img, 'wb').write( net.http_GET("http://api.solvemedia.com%s"%re.compile('<img src="(.+?)"').findall(check)[0] ).content)
       except:
             try:
