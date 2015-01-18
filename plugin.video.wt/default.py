@@ -8,7 +8,7 @@ addon_id = 'plugin.video.wt'
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.4.08'
+versao = '0.4.09'
 MainURL = 'http://www.wareztuga.tv/'
 art = '/resources/art/'
 ListMovieURL = 'movies.php'; SingleMovieURL = 'movie.php'
@@ -933,29 +933,29 @@ def resolver_servidores(url,name,download=False,dialogselect=True):
             ligacao.append('http://vshare.eu/' + vshare[0])
             ligacaopref.append('http://vshare.eu/' + vshare[0])
 
-      dropvideo=re.compile('&fh=([^"]+?)" class="dropvideo"').findall(infoservers)
-      if dropvideo:
+      dvideo=re.compile('&fh=([^"]+?)" class="dropvideo"').findall(infoservers)
+      if dvideo:
             titles.append("Dropvideo")
-            ligacao.append('http://dropvideo.com/embed/' + dropvideo[0])
-            ligacaopref.append('http://dropvideo.com/embed/' + dropvideo[0])
+            ligacao.append('http://dropvideo.com/embed/' + dvideo[0])
+            ligacaopref.append('http://dropvideo.com/embed/' + dvideo[0])
 
-      cloudzilla=re.compile('&fh=([^"]+?)" class="cloudzilla"').findall(infoservers)
-      if cloudzilla:
+      czilla=re.compile('&fh=([^"]+?)" class="cloudzilla"').findall(infoservers)
+      if czilla:
             titles.append("Cloudzilla")
-            ligacao.append('http://www.cloudzilla.to/embed/' + cloudzilla[0])
-            ligacaopref.append('http://www.cloudzilla.to/embed/' + cloudzilla[0])
+            ligacao.append('http://www.cloudzilla.to/embed/' + czilla[0])
+            ligacaopref.append('http://www.cloudzilla.to/embed/' + czilla[0])
 
-      vidto=re.compile('&fh=([^"]+?)" class="vidto"').findall(infoservers)
-      if vidto:
+      vidt=re.compile('&fh=([^"]+?)" class="vidto"').findall(infoservers)
+      if vidt:
             titles.append("Vidto")
-            ligacao.append('http://vidto.me/embed-' + vidto[0] + '-980x535.html')
-            ligacaopref.append('http://vidto.me/embed-' + vidto[0] + '-980x535.html')
+            ligacao.append('http://vidto.me/embed-' + vidt[0] + '-980x535.html')
+            ligacaopref.append('http://vidto.me/embed-' + vidt[0] + '-980x535.html')
 
-      played=re.compile('&fh=([^"]+?)" class="played"').findall(infoservers)
-      if played:
+      plyd=re.compile('&fh=([^"]+?)" class="played"').findall(infoservers)
+      if plyd:
             titles.append("Played")
-            ligacao.append('http://played.to/embed-' + played[0] + '-980x535.html')
-            ligacaopref.append('http://played.to/embed-' + played[0] + '-980x535.html')
+            ligacao.append('http://played.to/embed-' + plyd[0] + '-980x535.html')
+            ligacaopref.append('http://played.to/embed-' + plyd[0] + '-980x535.html')
 
 
       if download==False: simounao='agora'
@@ -995,7 +995,7 @@ def resolver_servidores(url,name,download=False,dialogselect=True):
                         for link in ligacaopref:
                               if re.search('cloudzilla',link):
                                     premon=premiumautomatico(link,thumbnail,name,fic,simounao,wturl)
-                                    if premon=='desactivado': cloudzilla(link,fic,name,thumbnail,simounao,wturl)
+                                    if premon=='desactivado': dropvideo(link,fic,name,thumbnail,simounao,wturl)
                                     parametro='sim'
                   else: parametro='cancelou'
             elif selfAddon.getSetting('server-preferido') =="3": #vidto

@@ -1,3 +1,7 @@
+[B]v0.4.09 (18 de Janeiro de 2015):[/B]
+- Servidor preferencial corrigido.
+- Outras correccoes.
+
 [B]v0.4.08 (10 de Janeiro de 2015):[/B]
 - Corrigido erro de captcha em alguns conteudos.
 
