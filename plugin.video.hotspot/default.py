@@ -101,9 +101,9 @@ def noswifi():
         checkurl = "http://example.com"
         html=abrir_url_cookie(checkurl)
         
-        if html.find('action="https://zon.portal.fon.com') >= 0:
+        if html.find('action="https://nos.portal.fon.com') >= 0:
             print "Info inicial: " + str(html)
-            m = re.search('action="(https://zon.[^"]+)"',html)
+            m = re.search('action="(https://nos.[^"]+)"',html)
             if(m == None):
                   mensagemok('Hotspot Connector',"Actionurl não encontrado.","Volte a tentar mais tarde.")
                   return
