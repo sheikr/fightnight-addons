@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon id="plugin.video.xbmclogviewer"
-       name="XBMC Log Viewer"
-       version="0.1.00"
+       name="Log Viewer for Kodi"
+       version="0.1.01"
        provider-name="fightnight">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/> 
@@ -10,8 +10,8 @@
         <provides>executable</provides>
     </extension>
     <extension point="xbmc.addon.metadata">
-        <summary>Show XBMC Log on GUI.</summary>
-        <description>Show XBMC Log on GUI.</description>
+        <summary>Show Kodi Log on GUI.</summary>
+        <description>Show Kodi Log on GUI.</description>
         <platform>all</platform>
     </extension>
 </addon>

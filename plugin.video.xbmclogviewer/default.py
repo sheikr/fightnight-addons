@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 
-""" XBMC Log Viewer
-    2014 fightnight"""
+""" Log Viewer for Kodi
+    2015 fightnight"""
 
 import xbmc,xbmcaddon,xbmcgui,xbmcplugin,urllib,os,re,sys
 
-versao = '0.1.00'
+versao = '0.1.01'
 addon_id = 'plugin.video.xbmclogviewer'
-selfAddon = xbmcaddon.Addon(id=addon_id)
+versionNumber = int(xbmc.getInfoLabel("System.BuildVersion" )[0:2])
+dataPath = xbmc.translatePath(xbmcaddon.Addon().getAddonInfo('profile').decode('utf-8'))
+if not os.path.exists(dataPath): os.makedirs(dataPath)
                
 def loglocation(): 
-    versionNumber = int(xbmc.getInfoLabel("System.BuildVersion" )[0:2])
     if versionNumber < 12:
         if xbmc.getCondVisibility('system.platform.osx'):
             if xbmc.getCondVisibility('system.platform.atv2'):
@@ -21,43 +22,44 @@ def loglocation():
             log_path = '/var/mobile/Library/Preferences'
         elif xbmc.getCondVisibility('system.platform.windows'):
             log_path = xbmc.translatePath('special://home')
-            log = os.path.join(log_path, 'xbmc.log')
         elif xbmc.getCondVisibility('system.platform.linux'):
             log_path = xbmc.translatePath('special://home/temp')
         else:
             log_path = xbmc.translatePath('special://logpath')
     elif versionNumber > 11:
         log_path = xbmc.translatePath('special://logpath')
-        log = os.path.join(log_path, 'xbmc.log')
-    return log_path
+        return log_path
 
-def mostrarlog():
-      try:            
-            os.remove(pathcopia)
+def mostrarlog(get=False):
+      if versionNumber < 14: filename='xbmc.log'
+      else: filename='kodi.log'
+      pathoriginal=loglocation() + filename
+      pathcopia=os.path.join(dataPath,filename)
+
+      try: os.remove(pathcopia)
       except: pass
 
       copyfile(pathoriginal, pathcopia)
-     
       conteudolog=openfile(pathcopia)
-      if selfAddon.getSetting('inverter') == 'true':
+      if xbmcaddon.Addon().getSetting('inverter') == 'true':
             inverted=conteudolog.splitlines()[::-1]
             try:
-                  nrlinhas=selfAddon.getSetting('nrlinhas')
+                  nrlinhas=xbmcaddon.Addon().getSetting('nrlinhas')
                   if nrlinhas=='1': inverted=inverted[0:100]
                   elif nrlinhas=='2': inverted=inverted[0:50]
                   elif nrlinhas=='3': inverted=inverted[0:20]
             except: pass
             conteudolog='\n'.join(inverted)
       
-      window(conteudolog)
+      if get==False:window(conteudolog)
+      else: return conteudolog
 
 def window(conteudolog):
-      
       try:
             xbmc.executebuiltin("ActivateWindow(10147)")
             window = xbmcgui.Window(10147)
             xbmc.sleep(100)
-            window.getControl(1).setLabel("XBMC Log Viewer")
+            window.getControl(1).setLabel("Log Viewer for Kodi")
             window.getControl(5).setText(conteudolog)
       except:
             pass
@@ -97,12 +99,13 @@ def addReload(name,iconimage=''):
 mode=None
 
 if sys.argv[2]=='showlog/':
-      mostrarlog()      
+      mostrarlog()
+
+elif sys.argv[2]=='getlog/':
+      mostrarlog(get=True)
 
 elif mode==None:
       print "Versao Instalada: v" + versao
-      pathoriginal=loglocation() + 'xbmc.log'
-      pathcopia=os.path.join(xbmc.translatePath(selfAddon.getAddonInfo('profile')).decode('utf-8'),'xbmc.log')
       mostrarlog()
       addReload('Recarregar Log')
                        

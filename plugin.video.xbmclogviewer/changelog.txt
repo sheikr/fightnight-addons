@@ -1,3 +1,9 @@
+[B]v0.1.01 (30 de Janeiro de 2015):[/B]
+- Alteracao do nome do addon.
+- Adicionada funcao para obter conteudo do log (plugin://plugin.video.xbmclogviewer/getlog/)
+- Suporte ao Kodi.
+- Pequenas correccoes e melhorias.
+
 [B]v0.1.00 (13 de Novembro de 2014):[/B]
 - Adicionada opcao para inverter log (linhas mais recentes primeiro).
 - Adicionada opcao para mostrar apenas as ultimas 20/50/100 linhas do log (util para despiste de erros).
