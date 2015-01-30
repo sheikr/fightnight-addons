@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 """ Hotspot Connector
-    2014 fightnight"""
+    2015 fightnight"""
 
 import xbmc,xbmcaddon,xbmcgui,xbmcplugin,urllib,urllib2,os,re,sys
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.0.06'
+versao = '0.1.00'
 addon_id = 'plugin.video.hotspot'
 art = '/resources/art/'
 user_agent = 'Mozilla/5.0 (Windows NT 6.3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.102 Safari/537.36'
@@ -20,11 +20,9 @@ noswifiPassword = selfAddon.getSetting('noswifi-password')
 wtpath = selfAddon.getAddonInfo('path').decode('utf-8')
 iconpequeno=wtpath + art + 'logo32.png'
 mensagemok = xbmcgui.Dialog().ok
-mensagemprogresso = xbmcgui.DialogProgress()
 pastaperfil = xbmc.translatePath(selfAddon.getAddonInfo('profile')).decode('utf-8')
 cookie_nos = os.path.join(pastaperfil, "cookienos.lwp")
-traducao= selfAddon.getLocalizedString #apagar
-               
+
 ################################################### MENUS PLUGIN ######################################################
 
 def menu_principal():
@@ -74,7 +72,7 @@ def ptwifi_iniciasessao():
       try:
             page=urllib2.urlopen(req).read()
             if re.search('"ERROR-FAULT"',page): mensagemok('Hotspot Connector',"Conta inválida.")
-            elif re.search('"ERRO-2"',page): mensagemok('Hotspot Connector',"Estás num hotspot ptwifi?")
+            elif re.search('"ERRO-2"',page): mensagemok('Hotspot Connector',"Está ligado a um hotspot MEO WiFi?")
             else:
                   xbmc.executebuiltin("XBMC.Notification(Hotspot Connector,Login efectuado,'10000',"+iconpequeno.encode('utf-8')+")")
                   xbmc.executebuiltin("XBMC.Container.Refresh")            
@@ -101,7 +99,7 @@ def noswifi():
         checkurl = "http://example.com"
         html=abrir_url_cookie(checkurl)
         
-        if html.find('action="https://nos.portal.fon.com') >= 0:
+        if html.find('action="https://nos.portal.fon.com') >= 0: #tks fends
             print "Info inicial: " + str(html)
             m = re.search('action="(https://nos.[^"]+)"',html)
             if(m == None):
@@ -154,26 +152,12 @@ def abrir_url_cookie(url):
             link=net.http_GET(url).content.encode('latin-1','ignore')
             return link
       except urllib2.HTTPError, e:
-            mensagemok('Hotspot Connector',str(urllib2.HTTPError(e.url, e.code, 'Erro a abrir página', e.hdrs, e.fp)),traducao(40200))
+            mensagemok('Hotspot Connector',str(urllib2.HTTPError(e.url, e.code, 'Erro a abrir página', e.hdrs, e.fp)),'')
             sys.exit(0)
       except urllib2.URLError, e:
-            mensagemok('Hotspot Connector',traducao(40199) + ' ' + 'Erro a abrir página')
+            mensagemok('Hotspot Connector','Erro a abrir página')
             sys.exit(0)
-            
-def entrarnovamente(opcoes):
-      if opcoes==1: selfAddon.openSettings()
-      addDir('Entrar novamente',MainURL,28,wtpath + art + 'refresh.png',1,True)
-      addDir('Alterar definições',MainURL,20,wtpath + art + 'defs.png',1,True)
-      
-def versao_disponivel():
-      try:
-            link=abrir_url('http://fightnight-xbmc.googlecode.com/svn/addons/wareztuga/plugin.video.wt/addon.xml')
-            match=re.compile('name="wareztuga.tv"\r\n       version="(.+?)"\r\n       provider-name="wareztuga">').findall(link)[0]
-      except:
-            ok = mensagemok('wareztuga.tv',traducao(40184),traducao(40185),'')
-            match=traducao(40186)
-      return match
-
+                  
 def get_params():
       param=[]
       paramstring=sys.argv[2]
@@ -190,11 +174,6 @@ def get_params():
                   if (len(splitparams))==2:
                         param[splitparams[0]]=splitparams[1]                 
       return param
-
-def clean(text):
-      command={'\r':'','\n':'','\t':'','\xC0':'À','\xC1':'Á','\xC2':'Â','\xC3':'Ã','\xC7':'Ç','\xC8':'È','\xC9':'É','\xCA':'Ê','\xCC':'Ì','\xCD':'Í','\xCE':'Î','\xD2':'Ò','\xD3':'Ó','\xD4':'Ô','\xDA':'Ú','\xDB':'Û','\xE0':'à','\xE1':'á','\xE2':'â','\xE3':'ã','\xE7':'ç','\xE8':'è','\xE9':'é','\xEA':'ê','\xEC':'ì','\xED':'í','\xEE':'î','\xF3':'ó','\xF5':'õ','\xFA':'ú'}
-      regex = re.compile("|".join(map(re.escape, command.keys())))
-      return regex.sub(lambda mo: command[mo.group(0)], text)
             
 params=get_params()
 url=None
