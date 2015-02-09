@@ -8,7 +8,7 @@ addon_id = 'plugin.video.wt'
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.4.09'
+versao = '0.4.10'
 MainURL = 'http://www.wareztuga.tv/'
 art = '/resources/art/'
 ListMovieURL = 'movies.php'; SingleMovieURL = 'movie.php'
@@ -911,7 +911,7 @@ def resolver_servidores(url,name,download=False,dialogselect=True):
 
       huge=re.compile('http://hugefiles.net/(.+?)" class="hugefiles"').findall(infoservers)
       if huge:
-            titles.append("[B][COLOR lime]Huge[/COLOR][COLOR green]files[/COLOR][/B]")
+            titles.append("HugeFiles")
             ligacao.append('http://hugefiles.net/' + huge[0])
             ligacaopref.append('http://hugefiles.net/' + huge[0])
 
@@ -923,7 +923,7 @@ def resolver_servidores(url,name,download=False,dialogselect=True):
 
       king=re.compile('kingfiles.net/(.+?)" class="kingfiles"').findall(infoservers)
       if king:
-            titles.append("[B][COLOR white]Kingfiles[/COLOR][/B]")
+            titles.append("KingFiles")
             ligacao.append('http://www.kingfiles.net/' + king[0])
             ligacaopref.append('http://www.kingfiles.net/' + king[0])
 
@@ -1490,11 +1490,13 @@ def hugefiles(url,srt,name,thumbnail,simounao,wturl):
       try:
             print "Solvemedia"
             captchatype="solvemedia"
-            noscript=re.compile('<iframe src=".+?solvemedia.com([^"]+?)"').findall(link)[0]
+            noscript=re.compile('<iframe src=".+?solvemedia.com([^"]+?)"').findall(link)[0].replace('noscript','script')
             check = net.http_GET("http://api.solvemedia.com"+ noscript).content
-            hugekey=re.compile('id="adcopy_challenge" value="(.+?)">').findall(check)[0]
+            tempkey=str(re.compile("ckey:.+?'(.+?)',").findall(check)[0])
+            check = net.http_GET("http://api.solvemedia.com/papi/_challenge.js?k=" + tempkey).content
+            hugekey=str(re.compile('"chid".+?"(.+?)",').findall(check)[0])
             captcha_headers= {'User-Agent':'Mozilla/6.0 (Macintosh; I; Intel Mac OS X 11_7_9; de-LI; rv:1.9b4) Gecko/2012010317 Firefox/10.0a4','Host':'api.solvemedia.com','Referer':url,'Accept':'image/png,image/*;q=0.8,*/*;q=0.5'}
-            open(captcha_img, 'wb').write( net.http_GET("http://api.solvemedia.com%s"%re.compile('<img src="(.+?)"').findall(check)[0] ).content)
+            open(captcha_img, 'wb').write( net.http_GET("http://api.solvemedia.com/papi/media?c=" + hugekey).content)
       except:
             try:
                   print "Recaptcha"
@@ -1506,7 +1508,6 @@ def hugefiles(url,srt,name,thumbnail,simounao,wturl):
                   open(captcha_img, 'wb').write(net.http_GET('http://www.google.com/recaptcha/api/image?c='+hugekey.group(1)).content)
             except:
                   mensagemok('wareztuga.tv','Erro a obter captcha.')
-                  print link
                   sys.exit(0)
 
 
@@ -1536,9 +1537,7 @@ def hugefiles(url,srt,name,thumbnail,simounao,wturl):
                   form_data={'op':op,'usr_login':usr_login,'rand':rand,'id':id,'fname':fname,'referer':referer,'ctype':ctype,'adcopy_response':puzzle,'adcopy_challenge':hugekey,'method_free':method}
             elif captchatype=="recaptcha":
                   form_data={'op':op,'usr_login':usr_login,'rand':rand,'id':id,'fname':fname,'referer':referer,'ctype':ctype,'recaptcha_challenge_field':hugekey.group(1),'recaptcha_response_field':puzzle,'method_free':method}
-
             link= net.http_POST(url,form_data=form_data).content.encode('latin-1','ignore')
-            
             try:streamurl=re.compile('var fileUrl = "(.+?)"').findall(link)[0]
             except:
                   if id != '': 
@@ -1612,11 +1611,13 @@ def kingfiles(url,srt,name,thumbnail,simounao,wturl):
       try:
             print "Solvemedia"
             captchatype="solvemedia"
-            noscript=re.compile('<iframe src=".+?solvemedia.com([^"]+?)"').findall(link)[0]
+            noscript=re.compile('<iframe src=".+?solvemedia.com([^"]+?)"').findall(link)[0].replace('noscript','script')
             check = net.http_GET("http://api.solvemedia.com"+ noscript).content
-            hugekey=re.compile('id="adcopy_challenge" value="(.+?)">').findall(check)[0]
-            captcha_headers= {'User-Agent':user_agent,'Host':'api.solvemedia.com','Referer':url,'Accept':'image/png,image/*;q=0.8,*/*;q=0.5'}
-            open(captcha_img, 'wb').write( net.http_GET("http://api.solvemedia.com%s"%re.compile('<img src="(.+?)"').findall(check)[0] ).content)
+            tempkey=str(re.compile("ckey:.+?'(.+?)',").findall(check)[0])
+            check = net.http_GET("http://api.solvemedia.com/papi/_challenge.js?k=" + tempkey).content
+            hugekey=str(re.compile('"chid".+?"(.+?)",').findall(check)[0])
+            captcha_headers= {'User-Agent':'Mozilla/6.0 (Macintosh; I; Intel Mac OS X 11_7_9; de-LI; rv:1.9b4) Gecko/2012010317 Firefox/10.0a4','Host':'api.solvemedia.com','Referer':url,'Accept':'image/png,image/*;q=0.8,*/*;q=0.5'}
+            open(captcha_img, 'wb').write( net.http_GET("http://api.solvemedia.com/papi/media?c=" + hugekey).content)
       except:
             try:
                   print "Recaptcha"
