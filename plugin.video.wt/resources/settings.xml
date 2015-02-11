@@ -20,10 +20,10 @@
    </category>
    <category label="Player">
       <setting label="30033" type="lsep" />
-      <setting id="dialog-select" type="enum" values="Dialog Select|Janela Personalizada" label="Tipo de janela de servidor" default="0"/>
-      <setting id="server-preferido" type="enum" values="Off|Dropvideo|Cloudzilla|Vidto|Played" label="30040" default="0"/>
+      <setting id="dialog-select" type="enum" values="Dialog Select|Janela Personalizada" label="Tipo de janela de servidor" default="0" visible="false"/>
+      <setting id="server-preferido" type="enum" values="Off|Dropvideo|Cloudzilla|Vidto|Played" label="30040" default="0" visible="false"/>
 
-      <setting id="server-preferido-premium" type="enum" values="Off|Real-Debrid|Unrestrict.li" label="30043" enable="!eq(-1,0)" default="0" visible="false"/>
+      <setting id="server-preferido-premium" type="enum" values="Off|Real-Debrid" label="30043" enable="!eq(-1,0)" default="0" visible="false"/>
 
       <setting id="server-preferido-debrid" type="bool" label="30045" default="false" visible="false"/>
       <setting id="API-9kw" type="text" label="9KW API Key Resolvedor de Captchas" default=""/>	  
@@ -57,13 +57,12 @@
       <setting id="service_run" type="text" default="1970-01-01 23:59:00.000000" visible="false"/>
 
    </category>
-<!--
    <category label="30028">
       <setting label="30029" type="lsep" />
       <setting id="realdebrid-enable2" type="bool" label="30030" default="false"/>
       <setting id="realdebrid-username2" type="text" label="30031" default="" enable="!eq(-1,false)"/>
       <setting id="realdebrid-password2" type="text" label="30032" default="" option="hidden" enable="!eq(-2,false)"/>
-      <setting id="realdebrid-prefer" type="bool" label="yayaya" default="false" enable="!eq(-3,false)" visible="false"/>
+      <setting id="realdebrid-prefer" type="bool" label="Entrar automaticamente em Real-Debrid" default="false" enable="!eq(-3,false)" visible="false"/>
       <setting id="realdebrid-usernamecheck2" type="text" label="Real-Debrid Username" default="" visible="false"/>
       <setting id="realdebrid-passwordcheck2" type="text" label="Real-Debrid Password" default="" visible="false"/>
       <setting id="unrestrict-enable" type="bool" label="30042" default="false" visible="false"/>
@@ -72,7 +71,7 @@
       <setting id="unrestrict-usernamecheck2" type="text" label="Unrestrict.li Free Username" default="" visible="false"/>
       <setting id="unrestrict-passwordcheck2" type="text" label="Unrestrict.li Free Password" default="" visible="false"/>
    </category>
--->
+
    <category label="30020">
       <setting label="30026" type="lsep" />
       <setting id="englishmetadata10" type="bool" label="30016" default="false"/>

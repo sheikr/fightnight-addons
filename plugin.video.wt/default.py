@@ -8,7 +8,7 @@ addon_id = 'plugin.video.wt'
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.4.10'
+versao = '0.4.11'
 MainURL = 'http://www.wareztuga.tv/'
 art = '/resources/art/'
 ListMovieURL = 'movies.php'; SingleMovieURL = 'movie.php'
@@ -503,11 +503,10 @@ class InputWindow(xbmcgui.WindowDialog):# Cheers to Bastardsmkr code already don
 #################################################### REAL DEBRID #################################################
 
 def realdebrid(urlvideo,thumbnail,moviename,fic,simounao,wturl):
+      print "Modo RealDebrid"
       if cookie_rd is not None and os.path.exists(cookie_rd):
             if selfAddon.getSetting('realdebrid-username2') != selfAddon.getSetting('realdebrid-usernamecheck2') or selfAddon.getSetting('realdebrid-password2') != selfAddon.getSetting('realdebrid-passwordcheck2'): realdebrid_login(urlvideo,thumbnail,moviename,fic,simounao,wturl)
             else:
-                  mensagemprogresso.create('wareztuga.tv', traducao(40054),traducao(40055))       
-                  mensagemprogresso.update(0)
                   cj = cookielib.LWPCookieJar()
                   cj.load(cookie_rd)
                   verificarconta = 'https://real-debrid.com/api/account.php'
@@ -865,6 +864,8 @@ def series_exib_escolha(url,name):
 ################################################### SERVIDORES ######################################################
                       
 def resolver_servidores(url,name,download=False,dialogselect=True):
+      if selfAddon.getSetting('realdebrid-enable2') == 'true': rdaccount=True
+      else: rdaccount=False
       wturl=url
       link=abrir_url_cookie(url)
       if re.search('movie.php',url):
@@ -884,78 +885,76 @@ def resolver_servidores(url,name,download=False,dialogselect=True):
       link2=link2.replace('?wareztuga=1','wareztuga=1')
       #listadecomentarios=listarcomentarios(link)
       listadecomentarios=''
-      titles = []; ligacao = []; ligacaopref = []
+      titles = []; ligacao = []
       infoservers=clean(abrir_url_cookie(MainURL + 'getFilehosts.ajax.php?mediaID=' + warezid + '&mediaType=' + tipo))
       tempobf=''
+      '''
       socks=re.compile('http://www.sockshare.com/file/(.+?)" class="vidmega"').findall(infoservers)
       if socks:
             titles.append("[B][COLOR white]Sockshare[/COLOR][/B]")
             ligacao.append('http://www.sockshare.com/file/' + socks[0])
-            ligacaopref.append('http://www.sockshare.com/file/' + socks[0])
       bayf=re.compile('http://bayfiles.net/file/(.+?)" class="bayfiles"').findall(infoservers)
       if bayf:
             titles.append("[B][COLOR orange]Bay[/COLOR][COLOR white]Files[/COLOR][/B]" + tempobf)
             ligacao.append('http://bayfiles.net/file/' + bayf[0])
-            ligacaopref.append('http://bayfiles.net/file/' + bayf[0])
       putl=re.compile('http://www.putlocker.com/file/(.+?)" class="putlocker"').findall(infoservers)
       putl+=re.compile('http://www.firedrive.com/file/(.+?)" class="putlocker"').findall(infoservers)
       if putl:
             titles.append("[B][COLOR blue]Firedrive[/B]")
             ligacao.append('http://www.firedrive.com/file/' + putl[0])
-            ligacaopref.append('http://www.firedrive.com/file/' + putl[0])
       upz=re.compile('http://www.upzin.com/(.+?)" class="upzin"').findall(infoservers)
       if upz:
             titles.append("[B][COLOR white]Upzin[/COLOR][/B]")
             ligacao.append('http://www.upzin.com/' + upz[0])
-            ligacaopref.append('http://www.upzin.com/' + upz[0])
-
-      huge=re.compile('http://hugefiles.net/(.+?)" class="hugefiles"').findall(infoservers)
-      if huge:
-            titles.append("HugeFiles")
-            ligacao.append('http://hugefiles.net/' + huge[0])
-            ligacaopref.append('http://hugefiles.net/' + huge[0])
-
+            
       prof=re.compile('profity.org/(.+?)" class="profity"').findall(infoservers)
       if prof:
             titles.append("[B][COLOR white]Profity[/COLOR][/B]")
             ligacao.append('http://profity.org/' + prof[0])
-            ligacaopref.append('http://profity.org/' + prof[0])
-
-      king=re.compile('kingfiles.net/(.+?)" class="kingfiles"').findall(infoservers)
-      if king:
-            titles.append("KingFiles")
-            ligacao.append('http://www.kingfiles.net/' + king[0])
-            ligacaopref.append('http://www.kingfiles.net/' + king[0])
 
       vshare=re.compile('vshare.eu/(.+?)" class="vshare"').findall(infoservers)
       if vshare:
             titles.append("[B][COLOR white]Video[/COLOR][COLOR blue]Share[/COLOR][/B]")
             ligacao.append('http://vshare.eu/' + vshare[0])
-            ligacaopref.append('http://vshare.eu/' + vshare[0])
+      '''
+      
+      huge=re.compile('http://hugefiles.net/(.+?)" class="hugefiles"').findall(infoservers)
+      if huge:
+            urlserver = 'http://hugefiles.net/' + huge[0]
+            titles.append("HugeFiles")
+            ligacao.append(urlserver)
+            if rdaccount==True:
+                  titles.append("HugeFiles - RealDebrid")
+                  ligacao.append(urlserver)
+
+      king=re.compile('kingfiles.net/(.+?)" class="kingfiles"').findall(infoservers)
+      if king:
+            urlserver = 'http://www.kingfiles.net/' + king[0]
+            titles.append("KingFiles")
+            ligacao.append(urlserver)
+            if rdaccount==True:
+                  titles.append("KingFiles - RealDebrid")
+                  ligacao.append(urlserver)
 
       dvideo=re.compile('&fh=([^"]+?)" class="dropvideo"').findall(infoservers)
       if dvideo:
             titles.append("Dropvideo")
             ligacao.append('http://dropvideo.com/embed/' + dvideo[0])
-            ligacaopref.append('http://dropvideo.com/embed/' + dvideo[0])
 
       czilla=re.compile('&fh=([^"]+?)" class="cloudzilla"').findall(infoservers)
       if czilla:
             titles.append("Cloudzilla")
             ligacao.append('http://www.cloudzilla.to/embed/' + czilla[0])
-            ligacaopref.append('http://www.cloudzilla.to/embed/' + czilla[0])
 
       vidt=re.compile('&fh=([^"]+?)" class="vidto"').findall(infoservers)
       if vidt:
             titles.append("Vidto")
             ligacao.append('http://vidto.me/embed-' + vidt[0] + '-980x535.html')
-            ligacaopref.append('http://vidto.me/embed-' + vidt[0] + '-980x535.html')
 
       plyd=re.compile('&fh=([^"]+?)" class="played"').findall(infoservers)
       if plyd:
             titles.append("Played")
             ligacao.append('http://played.to/embed-' + plyd[0] + '-980x535.html')
-            ligacaopref.append('http://played.to/embed-' + plyd[0] + '-980x535.html')
 
 
       if download==False: simounao='agora'
@@ -968,75 +967,8 @@ def resolver_servidores(url,name,download=False,dialogselect=True):
       except:info=''
       titles.append(imdbrate + wtrate + info)
       ligacao.append('informacaodovideo')
-      if selfAddon.getSetting('server-preferido') !="0":
-            parametro='nada'
-            fic=legendas(wturl)
-            #if selfAddon.getSetting('server-preferido-premium')=="0": extra=''
-            #elif selfAddon.getSetting('server-preferido-premium')=="1": extra=' - Real-Debrid'
-            #elif selfAddon.getSetting('server-preferido-premium')=="2": extra=' - Unrestrict.li'
-
-            #if selfAddon.getSetting('server-preferido-debrid')=="true": extra=' - Real-Debrid'
-            #else: extra=''
-            extra=''
-            if selfAddon.getSetting('server-preferido') =="1": #dropvideo
-                  print "Preferencial: Dropvideo" + extra
-                  resultado = handle_wait(2,"wareztuga.tv",traducao(40216) + "Dropvideo"+extra+").",segunda=traducao(40219))
-                  if resultado:
-                        for link in ligacaopref:
-                              if re.search('dropvideo',link):
-                                    premon=premiumautomatico(link,thumbnail,name,fic,simounao,wturl)
-                                    if premon=='desactivado': dropvideo(link,fic,name,thumbnail,simounao,wturl)
-                                    parametro='sim'
-                  else: parametro='cancelou'
-            elif selfAddon.getSetting('server-preferido') =="2": #cloudzilla
-                  print "Preferencial: Cloudzilla" + extra
-                  resultado = handle_wait(2,"wareztuga.tv",traducao(40216) + "Cloudzilla"+extra+").",segunda=traducao(40219))
-                  if resultado:
-                        for link in ligacaopref:
-                              if re.search('cloudzilla',link):
-                                    premon=premiumautomatico(link,thumbnail,name,fic,simounao,wturl)
-                                    if premon=='desactivado': dropvideo(link,fic,name,thumbnail,simounao,wturl)
-                                    parametro='sim'
-                  else: parametro='cancelou'
-            elif selfAddon.getSetting('server-preferido') =="3": #vidto
-                  print "Preferencial: Vidto" + extra
-                  resultado = handle_wait(2,"wareztuga.tv",traducao(40216) + "Vidto"+extra+").",segunda=traducao(40219))
-                  if resultado:
-                        for link in ligacaopref:
-                              if re.search('vidto',link):
-                                    premon=premiumautomatico(link,thumbnail,name,fic,simounao,wturl)
-                                    if premon=='desactivado': vidto(link,fic,name,thumbnail,simounao,wturl)
-                                    parametro='sim'
-                  else: parametro='cancelou'
-
-            elif selfAddon.getSetting('server-preferido') =="4": #vshare
-                  print "Preferencial: Played" + extra
-                  resultado = handle_wait(2,"wareztuga.tv",traducao(40216) + "Played"+extra+").",segunda=traducao(40219))
-                  if resultado:
-                        for link in ligacaopref:
-                              if re.search('played',link):
-                                    premon=premiumautomatico(link,thumbnail,name,fic,simounao,wturl)
-                                    if premon=='desactivado': played(link,fic,name,thumbnail,simounao,wturl)
-                                    parametro='sim'
-                  else: parametro='cancelou'
-            if parametro=='nada' or parametro=='cancelou':
-                  if parametro=='nada': mensagemok('wareztuga.tv',traducao(40217),traducao(40218))
-                  mensagemprogresso.close()
-                  menu_servidores(titles,ligacao,name,thumbnail,simounao,wturl,listadecomentarios,dialogselect) 
-      else:
-           print "Preferencial: desligado"
-           menu_servidores(titles,ligacao,name,thumbnail,simounao,wturl,listadecomentarios,dialogselect)
-
-def premiumautomatico(linkescolha,thumbnail,name,fic,simounao,wturl):
-      #automatico=selfAddon.getSetting('server-preferido-premium')
-      #if automatico == "0": return 'desactivado'
-      #elif automatico == "1": realdebrid(linkescolha,thumbnail,name,fic,simounao,wturl)
-      #elif automatico == "2":
-      #      unrestrict_login()
-      #      unrestrict_link(linkescolha,thumbnail,name,fic,simounao,wturl)
-      #else: return 'desactivado'
-      if selfAddon.getSetting('server-preferido-debrid') == 'true': realdebrid(linkescolha,thumbnail,name,fic,simounao,wturl)
-      else: return 'desactivado'
+      print "Preferencial: desligado"
+      menu_servidores(titles,ligacao,name,thumbnail,simounao,wturl,listadecomentarios,dialogselect)
       
 def listarcomentarios(link):
     comentarios=re.compile('<div class="comment-user"><div class="username"><span>(.+?)</span>.+?<div class="comment-date"><span>(.+?)</span></div></div><div class="comment-number">.+?</div></div></div><div class="clear"></div><div class="comment-body">(.+?)<div class="comment-separator"></div>').findall(link)
@@ -1051,44 +983,38 @@ def listarcomentarios(link):
 
 def menu_servidores(titles,ligacao,name,thumbnail,simounao,wturl,listadecomentarios,dialogselect):
       if len(ligacao)==2:
-            linkescolha=ligacao[0]
-            entrarnoserver(linkescolha,name,thumbnail,simounao,wturl)
+            index=0
+            linkescolha=ligacao[index]
+            vaiparaoserver(linkescolha,thumbnail,name,simounao,wturl,index,titles)
             return
       
-      if dialogselect==True:
-            if len(ligacao)==1: ok=mensagemok('wareztuga.tv', 'Nenhum stream disponivel.');return
-            else: index = xbmcgui.Dialog().select('Escolha o servidor', titles)
+      #if dialogselect==True:
+      if len(ligacao)==1: ok=mensagemok('wareztuga.tv', 'Nenhum stream disponivel.')
+      else:
+            index = xbmcgui.Dialog().select('Escolha o servidor', titles)
             if index > -1:
                   linkescolha=ligacao[index]
-                  entrarnoserver(linkescolha,name,thumbnail,simounao,wturl)
-      else:
-            d = janelaservidores("serverswt.xml" , wtpath, "Default",titles=titles,ligacao=ligacao,name=name,thumbnail=thumbnail,simounao=simounao,wturl=wturl,listadecomentarios=listadecomentarios)
-            d.doModal()
-            del d
+                  vaiparaoserver(linkescolha,thumbnail,name,simounao,wturl,index,titles)
+      #else:
+      #      d = janelaservidores("serverswt.xml" , wtpath, "Default",titles=titles,ligacao=ligacao,name=name,thumbnail=thumbnail,simounao=simounao,wturl=wturl,listadecomentarios=listadecomentarios)
+      #      d.doModal()
+      #      del d
 
 def entrarnoserver(linkescolha,name,thumbnail,simounao,wturl):
-      if linkescolha:
-            fic=legendas(wturl)
-            titulos=['Normal']
-            if selfAddon.getSetting('realdebrid-enable2') == 'true': titulos.append('Real-Debrid')
-            #if selfAddon.getSetting('unrestrict-enable') == 'true': titulos.append('Unrestrict.li')
-            if len(titulos)==1:
-                  index=0
-                  vaiparaoserver(linkescolha,thumbnail,name,fic,simounao,wturl,index,titulos)
-            elif len(titulos)==2:
-                  opcao=xbmcgui.Dialog().yesno("wareztuga.tv", traducao(40052),"","",titulos[0],titulos[1])
-                  if opcao: index=1
-                  else: index=0
-                  vaiparaoserver(linkescolha,thumbnail,name,fic,simounao,wturl,index,titulos)
-            else:
-                  index = xbmcgui.Dialog().select(traducao(40052), titulos)
-                  if index > -1: vaiparaoserver(linkescolha,thumbnail,name,fic,simounao,wturl,index,titulos)
-
-def vaiparaoserver(linkescolha,thumbnail,name,fic,simounao,wturl,index,titulos):
-      if titulos[index]=='Real-Debrid': realdebrid(linkescolha,thumbnail,name,fic,simounao,wturl)
-      #elif titulos[index]=='Unrestrict.li':
-      #      unrestrict_login()
-      #      unrestrict_link(linkescolha,thumbnail,name,fic,simounao,wturl)
+      index=0
+      titulos=['Normal']
+      vaiparaoserver(linkescolha,thumbnail,name,simounao,wturl,index,titulos)
+      
+def vaiparaoserver(linkescolha,thumbnail,name,simounao,wturl,index,titulos):
+      if simounao=='download' and downloadPath=='':
+            ok = mensagemok(traducao(40123),traducao(40125),traducao(40135),'')
+            selfAddon.openSettings()
+            return
+      mensagemprogresso.create('wareztuga.tv', traducao(40054),traducao(40055))
+      mensagemprogresso.update(0)
+      fic=legendas(wturl)
+      
+      if re.search('RealDebrid',titulos[index]): realdebrid(linkescolha,thumbnail,name,fic,simounao,wturl)
       else:
             if re.search('bayfiles', linkescolha): bayfiles(linkescolha,fic,name,thumbnail,simounao,wturl)
             elif re.search('upzin',linkescolha): upzin(linkescolha,fic,name,thumbnail,simounao,wturl)
@@ -1102,6 +1028,7 @@ def vaiparaoserver(linkescolha,thumbnail,name,fic,simounao,wturl,index,titulos):
             elif re.search('cloudzilla',linkescolha): dropvideo(linkescolha,fic,name,thumbnail,simounao,wturl)
             elif re.search('vidto',linkescolha): vidto(linkescolha,fic,name,thumbnail,simounao,wturl)
             elif re.search('played',linkescolha): played(linkescolha,fic,name,thumbnail,simounao,wturl)
+            else: mensagemprogresso.close()
       
 def sintomecomsorte():
       categorias=[traducao(40330),traducao(40091),traducao(40092),traducao(40093),traducao(40094),traducao(40095),traducao(40096),traducao(40097),traducao(40098),traducao(40099),traducao(40100),traducao(40101),traducao(40102),traducao(40103),traducao(40104),traducao(40105),traducao(40106),traducao(40107),traducao(40108),traducao(40109),traducao(40110)]
@@ -1240,11 +1167,6 @@ class janelaservidores(xbmcgui.WindowXMLDialog):
           listControl.addItem(item)
              
 def upzin(url,srt,name,thumbnail,simounao,wturl):
-      if simounao=='download' and downloadPath=='':
-            ok = mensagemok(traducao(40123),traducao(40125),traducao(40135),'')
-            selfAddon.openSettings()
-            return                        
-      mensagemprogresso.create('wareztuga.tv', traducao(40054),traducao(40055))       
       mensagemprogresso.update(50)
       link1 = abrir_url(url)
       try:
@@ -1271,12 +1193,7 @@ def upzin(url,srt,name,thumbnail,simounao,wturl):
       elif simounao=='agora':
             comecarvideo(srt,code,name,thumbnail,wturl,False)
                             
-def firedrive(url,srt,name,thumbnail,simounao,wturl):
-      if simounao=='download' and downloadPath=='':
-            ok = mensagemok(traducao(40123),traducao(40125),traducao(40135),'')
-            selfAddon.openSettings()
-            return                        
-      mensagemprogresso.create('wareztuga.tv', traducao(40054),traducao(40055))       
+def firedrive(url,srt,name,thumbnail,simounao,wturl):      
       mensagemprogresso.update(33)
       link1 = abrir_url(url)
       link2 = redirect(url)
@@ -1344,12 +1261,7 @@ def firedrive(url,srt,name,thumbnail,simounao,wturl):
       elif simounao=='agora':
             comecarvideo(srt,put2,name,thumbnail,wturl,False)
 
-def sockshare(url,srt,name,thumbnail,simounao,wturl):
-      if simounao=='download' and downloadPath=='':
-            ok = mensagemok(traducao(40123),traducao(40125),traducao(40135),'')
-            selfAddon.openSettings()
-            return                        
-      mensagemprogresso.create('wareztuga.tv', traducao(40054),traducao(40055))
+def sockshare(url,srt,name,thumbnail,simounao,wturl):      
       mensagemprogresso.update(33)
       link1 = abrir_url(url)
       link2 = redirect(url)
@@ -1418,10 +1330,6 @@ def sockshare(url,srt,name,thumbnail,simounao,wturl):
             comecarvideo(srt,put2,name,thumbnail,wturl,False)
 
 def bayfiles(url,srt,name,thumbnail,simounao,wturl):
-      if simounao=='download' and downloadPath=='':
-            ok = mensagemok(traducao(40123),traducao(40125),traducao(40135),'')
-            selfAddon.openSettings()
-            return
       link=abrir_url(url)
       try:
             try:
@@ -1471,12 +1379,7 @@ def bayfiles(url,srt,name,thumbnail,simounao,wturl):
                         elif simounao=='agora':
                               comecarvideo(srt,funcional,name,thumbnail,wturl,True)
 
-def hugefiles(url,srt,name,thumbnail,simounao,wturl):
-      if simounao=='download' and downloadPath=='':
-            ok = mensagemok(traducao(40123),traducao(40125),traducao(40135),'')
-            selfAddon.openSettings()
-            return                        
-      mensagemprogresso.create('wareztuga.tv', traducao(40054),traducao(40055))
+def hugefiles(url,srt,name,thumbnail,simounao,wturl):      
       mensagemprogresso.update(33)
       from t0mm0.common.net import Net
       net = Net()
@@ -1545,7 +1448,6 @@ def hugefiles(url,srt,name,thumbnail,simounao,wturl):
                         except: pass
                   opcao=xbmcgui.Dialog().yesno(traducao(40123),traducao(40348),'Tentar novamente?')
                   if opcao:
-                        mensagemprogresso.close()
                         hugefiles(url,srt,name,thumbnail,simounao,wturl)
                         return
                   else:
@@ -1584,13 +1486,7 @@ def profity(url,srt,name,thumbnail,simounao,wturl):
             #redirect(streamurlwcook)
       comecarvideo(srt,streamurlwcook,name,thumbnail,wturl,True)
       
-def kingfiles(url,srt,name,thumbnail,simounao,wturl):
-      if simounao=='download' and downloadPath=='':
-            ok = mensagemok(traducao(40123),traducao(40125),traducao(40135),'')
-            selfAddon.openSettings()
-            return                        
-      mensagemprogresso.create('wareztuga.tv', traducao(40054),traducao(40055))
-      mensagemprogresso.update(0)
+def kingfiles(url,srt,name,thumbnail,simounao,wturl):      
       from t0mm0.common.net import Net
       net = Net()
       link=abrir_url(url)
@@ -1666,7 +1562,6 @@ def kingfiles(url,srt,name,thumbnail,simounao,wturl):
                         except: pass
                   opcao=xbmcgui.Dialog().yesno(traducao(40123),traducao(40348),'Tentar novamente?')
                   if opcao:
-                        mensagemprogresso.close()
                         kingfiles(url,srt,name,thumbnail,simounao,wturl)
                         return
                   else:
@@ -1685,13 +1580,7 @@ def kingfiles(url,srt,name,thumbnail,simounao,wturl):
 
       else:mensagemprogresso.close()
 
-def videoshare(url,srt,name,thumbnail,simounao,wturl):
-      if simounao=='download' and downloadPath=='':
-            ok = mensagemok(traducao(40123),traducao(40125),traducao(40135),'')
-            selfAddon.openSettings()
-            return                        
-      mensagemprogresso.create('wareztuga.tv', traducao(40054),traducao(40055))
-      mensagemprogresso.update(0)
+def videoshare(url,srt,name,thumbnail,simounao,wturl):      
       from t0mm0.common.net import Net
       net = Net()
       link=abrir_url(url)
@@ -1712,13 +1601,7 @@ def videoshare(url,srt,name,thumbnail,simounao,wturl):
       elif simounao=='agora':
             comecarvideo(srt,streamurl,name,thumbnail,wturl,False)
 
-def dropvideo(url,srt,name,thumbnail,simounao,wturl):
-      if simounao=='download' and downloadPath=='':
-            ok = mensagemok(traducao(40123),traducao(40125),traducao(40135),'')
-            selfAddon.openSettings()
-            return                        
-      mensagemprogresso.create('wareztuga.tv', traducao(40054),traducao(40055))
-      mensagemprogresso.update(0)
+def dropvideo(url,srt,name,thumbnail,simounao,wturl):      
       link=abrir_url(url)
 
       try:streamurl=re.compile('var vurl2 = "(.+?)"').findall(link)[0] #dropvideo
@@ -1733,12 +1616,6 @@ def dropvideo(url,srt,name,thumbnail,simounao,wturl):
             comecarvideo(srt,streamurl,name,thumbnail,wturl,False)
 
 def played(url,srt,name,thumbnail,simounao,wturl):
-      if simounao=='download' and downloadPath=='':
-            ok = mensagemok(traducao(40123),traducao(40125),traducao(40135),'')
-            selfAddon.openSettings()
-            return                        
-      mensagemprogresso.create('wareztuga.tv', traducao(40054),traducao(40055))
-      mensagemprogresso.update(0)
       link=abrir_url(url)
       streamurl=re.compile('file: "(.+?)",').findall(link)[0]
       mensagemprogresso.update(100)
@@ -1751,12 +1628,6 @@ def played(url,srt,name,thumbnail,simounao,wturl):
 
 
 def vidto(url,srt,name,thumbnail,simounao,wturl):
-      if simounao=='download' and downloadPath=='':
-            ok = mensagemok(traducao(40123),traducao(40125),traducao(40135),'')
-            selfAddon.openSettings()
-            return                        
-      mensagemprogresso.create('wareztuga.tv', traducao(40054),traducao(40055))
-      mensagemprogresso.update(0)
       link=abrir_url(url)
       jsU = JsUnpackerV2()
       link = jsU.unpackAll(link)
@@ -1835,6 +1706,7 @@ def comecarvideo(srt,finalurl,name,thumbnail,wturl,proteccaobay):
             tipo='movies'
       listitem.setProperty('mimetype', 'video/x-msvideo')
       listitem.setProperty('IsPlayable', 'true')
+      
       playlist.add(finalurl, listitem)
       xbmcplugin.setResolvedUrl(int(sys.argv[1]),True,listitem)
       player = Player(tipo=tipo,warezid=warezid,videoname=name,thumbnail=thumbnail,proteccaobay=proteccaobay,wturl=wturl,imdbcode=imdbcode,seasonurl=seasonurl,show=show,season=season,episode=episode,year=year)
