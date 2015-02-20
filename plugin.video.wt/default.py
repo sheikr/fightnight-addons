@@ -3,18 +3,18 @@
 """ wareztuga.tv
     2014 fightnight"""
 
-import xbmc,xbmcaddon,xbmcgui,xbmcplugin,cookielib,urllib,urllib2,os,re,sys
+import xbmc,xbmcaddon,xbmcgui,xbmcplugin,cookielib,urllib,urllib2,os,re,sys,socket
 addon_id = 'plugin.video.wt'
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.4.11'
+versao = '0.4.12'
 MainURL = 'http://www.wareztuga.tv/'
 art = '/resources/art/'
 ListMovieURL = 'movies.php'; SingleMovieURL = 'movie.php'
 ListSerieURL = 'series.php'; SingleSerieURL = 'serie.php'
 AccountItemURL = 'account.php'
-user_agent = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'
+user_agent = 'Mozilla/5.0 (Windows NT 6.3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.115 Safari/537.36'
 selfAddon = xbmcaddon.Addon(id=addon_id)
 wtpath = selfAddon.getAddonInfo('path').decode('utf-8')
 iconpequeno=wtpath + art + 'logo32.png'
@@ -1379,7 +1379,7 @@ def bayfiles(url,srt,name,thumbnail,simounao,wturl):
                         elif simounao=='agora':
                               comecarvideo(srt,funcional,name,thumbnail,wturl,True)
 
-def hugefiles(url,srt,name,thumbnail,simounao,wturl):      
+def hugefiles(url,srt,name,thumbnail,simounao,wturl):
       mensagemprogresso.update(33)
       from t0mm0.common.net import Net
       net = Net()
@@ -1390,29 +1390,8 @@ def hugefiles(url,srt,name,thumbnail,simounao,wturl):
             sys.exit(0)
       from random import randint
       captcha_img = os.path.join(pastacaptcha,str(randint(0, 9999999))+ ".png")
-      try:
-            print "Solvemedia"
-            captchatype="solvemedia"
-            noscript=re.compile('<iframe src=".+?solvemedia.com([^"]+?)"').findall(link)[0].replace('noscript','script')
-            check = net.http_GET("http://api.solvemedia.com"+ noscript).content
-            tempkey=str(re.compile("ckey:.+?'(.+?)',").findall(check)[0])
-            check = net.http_GET("http://api.solvemedia.com/papi/_challenge.js?k=" + tempkey).content
-            hugekey=str(re.compile('"chid".+?"(.+?)",').findall(check)[0])
-            captcha_headers= {'User-Agent':'Mozilla/6.0 (Macintosh; I; Intel Mac OS X 11_7_9; de-LI; rv:1.9b4) Gecko/2012010317 Firefox/10.0a4','Host':'api.solvemedia.com','Referer':url,'Accept':'image/png,image/*;q=0.8,*/*;q=0.5'}
-            open(captcha_img, 'wb').write( net.http_GET("http://api.solvemedia.com/papi/media?c=" + hugekey).content)
-      except:
-            try:
-                  print "Recaptcha"
-                  captchatype="recaptcha"
-                  headers={'Referer': url}
-                  noscript=re.compile('src=".+?recaptcha/api/([^"]+?)">').findall(link)[0]
-                  check = net.http_GET('http://www.google.com/recaptcha/api/' + noscript,headers=headers).content
-                  hugekey = re.search("challenge \: \\'(.+?)\\'", check)
-                  open(captcha_img, 'wb').write(net.http_GET('http://www.google.com/recaptcha/api/image?c='+hugekey.group(1)).content)
-            except:
-                  mensagemok('wareztuga.tv','Erro a obter captcha.')
-                  sys.exit(0)
 
+      captchatype,hugekey=obter_captcha(url,link,captcha_img)
 
       try: solved,id = solvevia9kw(captcha_img)
       except:
@@ -1437,7 +1416,16 @@ def hugefiles(url,srt,name,thumbnail,simounao,wturl):
             method=re.compile('name="method_free".+?value="(.+?)"').findall(link)[0]
             
             if captchatype=="solvemedia":
-                  form_data={'op':op,'usr_login':usr_login,'rand':rand,'id':id,'fname':fname,'referer':referer,'ctype':ctype,'adcopy_response':puzzle,'adcopy_challenge':hugekey,'method_free':method}
+                  verify_data={'adcopy_response':puzzle,'k':vk,'l':vl,'t':vt,'s':vs,'magic':vm,'adcopy_challenge':vc}
+                  headers={'User-Agent':user_agent,'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8','Referer':noscripturl}
+                  link= net.http_POST('http://api.solvemedia.com/papi/' + vp,form_data=verify_data,headers=headers).content.encode('latin-1','ignore')
+            
+                  redirecturl=re.compile('URL=(.+?)"').findall(link)[0]
+                  conteudo=net.http_GET(redirecturl).content
+                  if re.search('&error=1',conteudo) or re.search('Try again',conteudo):form_data={}
+                  else:
+                        hugekey=re.compile('<textarea.+?>(.+?)<').findall(conteudo)[0]
+                        form_data={'op':op,'usr_login':usr_login,'rand':rand,'id':id,'fname':fname,'referer':referer,'ctype':ctype,'adcopy_response':puzzle,'adcopy_challenge':hugekey,'method_free':method}
             elif captchatype=="recaptcha":
                   form_data={'op':op,'usr_login':usr_login,'rand':rand,'id':id,'fname':fname,'referer':referer,'ctype':ctype,'recaptcha_challenge_field':hugekey.group(1),'recaptcha_response_field':puzzle,'method_free':method}
             link= net.http_POST(url,form_data=form_data).content.encode('latin-1','ignore')
@@ -1502,31 +1490,12 @@ def kingfiles(url,srt,name,thumbnail,simounao,wturl):
       form_data={'op':op,'usr_login':usr_login,'id':id,'fname':fname,'referer':referer,'method_free':method}
       link= net.http_POST(url,form_data=form_data).content.encode('latin-1','ignore')
       mensagemprogresso.update(33)
+      
       from random import randint
       captcha_img = os.path.join(pastacaptcha,str(randint(0, 9999999)) + ".png")
-      try:
-            print "Solvemedia"
-            captchatype="solvemedia"
-            noscript=re.compile('<iframe src=".+?solvemedia.com([^"]+?)"').findall(link)[0].replace('noscript','script')
-            check = net.http_GET("http://api.solvemedia.com"+ noscript).content
-            tempkey=str(re.compile("ckey:.+?'(.+?)',").findall(check)[0])
-            check = net.http_GET("http://api.solvemedia.com/papi/_challenge.js?k=" + tempkey).content
-            hugekey=str(re.compile('"chid".+?"(.+?)",').findall(check)[0])
-            captcha_headers= {'User-Agent':'Mozilla/6.0 (Macintosh; I; Intel Mac OS X 11_7_9; de-LI; rv:1.9b4) Gecko/2012010317 Firefox/10.0a4','Host':'api.solvemedia.com','Referer':url,'Accept':'image/png,image/*;q=0.8,*/*;q=0.5'}
-            open(captcha_img, 'wb').write( net.http_GET("http://api.solvemedia.com/papi/media?c=" + hugekey).content)
-      except:
-            try:
-                  print "Recaptcha"
-                  captchatype="recaptcha"
-                  headers={'Referer': url}
-                  noscript=re.compile('src=".+?recaptcha/api/([^"]+?)">').findall(link)[0]
-                  check = net.http_GET('http://www.google.com/recaptcha/api/' + noscript,headers=headers).content
-                  hugekey = re.search("challenge \: \\'(.+?)\\'", check)
-                  open(captcha_img, 'wb').write(net.http_GET('http://www.google.com/recaptcha/api/image?c='+hugekey.group(1)).content)
-            except:
-                  mensagemok('wareztuga.tv','Erro a obter captcha.')
-                  sys.exit(0)
 
+      captchatype=obter_captcha(url,link,captcha_img)
+      
       try: solved,id = solvevia9kw(captcha_img)
       except:
             solved = ''
@@ -1544,13 +1513,23 @@ def kingfiles(url,srt,name,thumbnail,simounao,wturl):
             rand=re.compile('<input type="hidden" name="rand" value="(.+?)">').findall(link)[0]
             id=re.compile('<input type="hidden" name="id" value="(.+?)">').findall(link)[0]
             #fname=re.compile('<input type="hidden" name="fname" value="(.+?)">').findall(link)[0]
-            downdirect=re.compile('<input type="hidden" name="down_direct" value="1">').findall(link)[0]
+            downdirect=re.compile('<input type="hidden" name="down_direct" value="(.+?)">').findall(link)[0]
             referer=''
             method=''
             methodpremium=''
 
             if captchatype=="solvemedia":
-                  form_data={'op':op,'rand':rand,'id':id,'fname':fname,'referer':referer,'adcopy_response':puzzle,'adcopy_challenge':hugekey,'method_free':method,'method_premium':methodpremium,'down_direct':downdirect}
+                  verify_data={'adcopy_response':puzzle,'k':vk,'l':vl,'t':vt,'s':vs,'magic':vm,'adcopy_challenge':vc}
+                  headers={'User-Agent':user_agent,'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8','Referer':noscripturl}
+                  link= net.http_POST('http://api.solvemedia.com/papi/' + vp,form_data=verify_data,headers=headers).content.encode('latin-1','ignore')
+            
+                  redirecturl=re.compile('URL=(.+?)"').findall(link)[0]
+                  conteudo=net.http_GET(redirecturl).content
+                  if re.search('&error=1',conteudo) or re.search('Try again',conteudo):form_data={}
+                  else:
+                        hugekey=re.compile('<textarea.+?>(.+?)<').findall(conteudo)[0]
+                        form_data={'op':op,'rand':rand,'id':id,'referer':url,'adcopy_response':"manual_challenge",'adcopy_challenge':hugekey,'method_free':' ','method_premium':methodpremium,'down_direct':downdirect}
+                        
             elif captchatype=="recaptcha":
                   form_data={'op':op,'rand':rand,'id':id,'fname':fname,'referer':referer,'recaptcha_challenge_field':hugekey.group(1),'recaptcha_response_field':puzzle,'method_free':method,'method_premium':methodpremium,'down_direct':downdirect}
             
@@ -1640,7 +1619,42 @@ def vidto(url,srt,name,thumbnail,simounao,wturl):
       elif simounao=='agora':
             comecarvideo(srt,streamurl,name,thumbnail,wturl,False)
 
-
+def obter_captcha(url,link,captcha_img):
+      from t0mm0.common.net import Net
+      net = Net()
+      try:
+            print "Solvemedia"
+            captchatype="solvemedia"
+            noscript=re.compile('<iframe src=".+?solvemedia.com([^"]+?)"').findall(link)[0]
+            global noscripturl,vk,vl,vt,vs,vm,vc,vp,vk
+            noscripturl="http://api.solvemedia.com"+ noscript
+            headers={'User-Agent':user_agent,'Referer':url}
+            check = net.http_GET(noscripturl,headers=headers).content
+            urlimagem=str(re.compile('<img src="(.+?)"').findall(check)[0])
+            vk=re.compile('<input type=hidden name="k" value="(.+?)"').findall(check)[0]
+            vl=re.compile('<input type=hidden name="l" value="(.+?)"').findall(check)[0]
+            vt=re.compile('<input type=hidden name="t" value="(.+?)"').findall(check)[0]
+            vs=re.compile('<input type=hidden name="s" value="(.+?)"').findall(check)[0]
+            vm=re.compile('<input type=hidden name="magic" value="(.+?)"').findall(check)[0]
+            vc=re.compile('<input type=hidden name="adcopy_challenge".+?value="(.+?)">').findall(check)[0]
+            vp=re.compile('<form method="post" action="(.+?)"').findall(check)[0]
+            open(captcha_img, 'wb').write( net.http_GET("http://api.solvemedia.com"+urlimagem,headers=headers).content)
+            return captchatype,False
+      except:
+            try:
+                  print "Recaptcha"
+                  captchatype="recaptcha"
+                  headers={'Referer': url}
+                  noscript=re.compile('src=".+?recaptcha/api/([^"]+?)">').findall(link)[0]
+                  check = net.http_GET('http://www.google.com/recaptcha/api/' + noscript,headers=headers).content
+                  hugekey = re.search("challenge \: \\'(.+?)\\'", check)
+                  open(captcha_img, 'wb').write(net.http_GET('http://www.google.com/recaptcha/api/image?c='+hugekey.group(1)).content)
+                  return captchatype,hugekey
+            except:
+                  mensagemok('wareztuga.tv','Erro a obter captcha.')
+                  sys.exit(0)
+                  return False,False
+      
 
 ########################################################### PLAYER ################################################
 
@@ -2358,6 +2372,9 @@ def abrir_url(url):
       except urllib2.URLError, e:
             mensagemok('wareztuga.tv',traducao(40199) + ' ' + traducao(40200))
             sys.exit(0)
+      except socket.timeout as e:
+            mensagemok('wareztuga.tv','Timeout da página.','Tente novamente.')
+            sys.exit(0)
 
 def abrir_url_cookie(url):
       #print "A fazer request com cookie de: " + url
@@ -2373,6 +2390,9 @@ def abrir_url_cookie(url):
             sys.exit(0)
       except urllib2.URLError, e:
             mensagemok('wareztuga.tv',traducao(40199) + ' ' + traducao(40200))
+            sys.exit(0)
+      except socket.timeout as e:
+            mensagemok('wareztuga.tv','Timeout da página.','Tente novamente.')
             sys.exit(0)
            
 def accaonosite(tipo,warezid,metodo):
