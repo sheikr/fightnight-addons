@@ -8,7 +8,7 @@ addon_id = 'plugin.video.wt'
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.4.12'
+versao = '0.4.13'
 MainURL = 'http://www.wareztuga.tv/'
 art = '/resources/art/'
 ListMovieURL = 'movies.php'; SingleMovieURL = 'movie.php'
@@ -221,11 +221,14 @@ def glib(name,url,silent=False):
                   if silent==False: mensagemprogresso.update(0, 'A criar lista (página %s de %s)' % (i,ultimapagina),'A espera varia consoante o número de séries subscritas.')
                   conteudo=re.compile("""<div id=".+?" class=".+?"><a href="serie.php(.+?)" title="(.+?)">""").findall(link)
                   for urlserie,nomeingles in conteudo:
-                        nomeingles=nomeingles.replace('[B]','').replace('[/B]','').replace('\\','').replace('</div><div class="officialSubs">','')
-                        nomeingles = re.sub('[^-a-zA-Z0-9_.()\\\/ ]+', '',  nomeingles)
-                        pastaserie=os.path.join(seriespath,nomeingles)
                         urlbase=MainURL + SingleSerieURL + urlserie
                         link=abrir_url_cookie(urlbase)
+                        try:year=re.compile('<span class="year"><span> </span>(.+?)-').findall(conteudopagina)[0]
+                        except: year=0 
+                        nomeingles=nomeingles.replace('[B]','').replace('[/B]','').replace('\\','').replace('</div><div class="officialSubs">','')
+                        nomeingles = re.sub('[^-a-zA-Z0-9_.()\\\/ ]+', '',  nomeingles)# + '(%s)' % (str(year))
+                        pastaserie=os.path.join(seriespath,nomeingles)
+                        
                         numerowt=re.compile('<div class="episodes-number"><span>(.+?)</span>').findall(clean(link))[0]
                         numerobiblio=openfile('epnr.txt',pastaficheiro=os.path.join(seriespath,nomeingles))
                         if numerowt!=numerobiblio:
@@ -1414,7 +1417,6 @@ def hugefiles(url,srt,name,thumbnail,simounao,wturl):
             referer=''
             ctype=re.compile('<input type="hidden" name="ctype" value="(.+?)">').findall(link)[0]
             method=re.compile('name="method_free".+?value="(.+?)"').findall(link)[0]
-            
             if captchatype=="solvemedia":
                   verify_data={'adcopy_response':puzzle,'k':vk,'l':vl,'t':vt,'s':vs,'magic':vm,'adcopy_challenge':vc}
                   headers={'User-Agent':user_agent,'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8','Referer':noscripturl}
@@ -1422,6 +1424,7 @@ def hugefiles(url,srt,name,thumbnail,simounao,wturl):
             
                   redirecturl=re.compile('URL=(.+?)"').findall(link)[0]
                   conteudo=net.http_GET(redirecturl).content
+                  print conteudo
                   if re.search('&error=1',conteudo) or re.search('Try again',conteudo):form_data={}
                   else:
                         hugekey=re.compile('<textarea.+?>(.+?)<').findall(conteudo)[0]
@@ -1494,7 +1497,7 @@ def kingfiles(url,srt,name,thumbnail,simounao,wturl):
       from random import randint
       captcha_img = os.path.join(pastacaptcha,str(randint(0, 9999999)) + ".png")
 
-      captchatype=obter_captcha(url,link,captcha_img)
+      captchatype,hugekey=obter_captcha(url,link,captcha_img)
       
       try: solved,id = solvevia9kw(captcha_img)
       except:
@@ -1517,7 +1520,6 @@ def kingfiles(url,srt,name,thumbnail,simounao,wturl):
             referer=''
             method=''
             methodpremium=''
-
             if captchatype=="solvemedia":
                   verify_data={'adcopy_response':puzzle,'k':vk,'l':vl,'t':vt,'s':vs,'magic':vm,'adcopy_challenge':vc}
                   headers={'User-Agent':user_agent,'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8','Referer':noscripturl}
@@ -1729,8 +1731,8 @@ def comecarvideo(srt,finalurl,name,thumbnail,wturl,proteccaobay):
       
       if selfAddon.getSetting('subtitles-activate') == 'true': player.setSubtitles(srt)
       while player._playbackLock:
-            player._trackPosition()
             xbmc.sleep(5000)
+            player._trackPosition()
 
 ## THX 1CH ##
 class Player(xbmc.Player):
@@ -1801,25 +1803,26 @@ class Player(xbmc.Player):
                   if selfAddon.getSetting('watched-enable') == 'true':
                         print "A marcar como visto"
                         accaonosite(self.tipo,self.warezid,'watched')
-                        try:
-                              import json
-                              if self.tipo=='episodes':
-                                    episodeid = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params": {"filter":{"and": [{"field": "season", "operator": "is", "value": "%s"}, {"field": "episode", "operator": "is", "value": "%s"}]}, "properties": ["file"]}, "id": 1}' % (self.season, self.episode))
-                                    episodeid = unicode(episodeid, 'utf-8', errors='ignore')
-                                    episodeid = json.loads(episodeid)['result']['episodes']
-                                    episodeid = [i for i in episodeid if i['file'].endswith(self.file)][0]
-                                    episodeid = episodeid['episodeid']
-                                    while xbmc.getInfoLabel('Container.FolderPath').startswith(sys.argv[0]) or xbmc.getInfoLabel('Container.FolderPath') == '': xbmc.sleep(1000)
-                                    xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "playcount" : 1 }, "id": 1 }' % str(episodeid))
-                              elif self.tipo=='movies':
-                                    movieid = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["file"]}, "id": 1}' % (self.year, str(int(self.year)+1), str(int(self.year)-1)))
-                                    movieid = unicode(movieid, 'utf-8', errors='ignore')
-                                    movieid = json.loads(movieid)['result']['movies']
-                                    movieid = [i for i in movieid if i['file'].endswith(self.file)][0]
-                                    movieid = movieid['movieid']
-                                    while xbmc.getInfoLabel('Container.FolderPath').startswith(sys.argv[0]) or xbmc.getInfoLabel('Container.FolderPath') == '': xbmc.sleep(1000)
-                                    xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetMovieDetails", "params": {"movieid" : %s, "playcount" : 1 }, "id": 1 }' % str(movieid))
-                        except: pass
+                        if xbmcaddon.Addon().getSetting("lib-serieson") == 'true':
+                              try:
+                                    import json
+                                    if self.tipo=='episodes':
+                                          episodeid = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params": {"filter":{"and": [{"field": "season", "operator": "is", "value": "%s"}, {"field": "episode", "operator": "is", "value": "%s"}]}, "properties": ["file"]}, "id": 1}' % (self.season, self.episode))
+                                          episodeid = unicode(episodeid, 'utf-8', errors='ignore')
+                                          episodeid = json.loads(episodeid)['result']['episodes']
+                                          episodeid = [i for i in episodeid if i['file'].endswith(self.file)][0]
+                                          episodeid = episodeid['episodeid']
+                                          while xbmc.getInfoLabel('Container.FolderPath').startswith(sys.argv[0]) or xbmc.getInfoLabel('Container.FolderPath') == '': xbmc.sleep(1000)
+                                          xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "playcount" : 1 }, "id": 1 }' % str(episodeid))
+                                    elif self.tipo=='movies':
+                                          movieid = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["file"]}, "id": 1}' % (self.year, str(int(self.year)+1), str(int(self.year)-1)))
+                                          movieid = unicode(movieid, 'utf-8', errors='ignore')
+                                          movieid = json.loads(movieid)['result']['movies']
+                                          movieid = [i for i in movieid if i['file'].endswith(self.file)][0]
+                                          movieid = movieid['movieid']
+                                          while xbmc.getInfoLabel('Container.FolderPath').startswith(sys.argv[0]) or xbmc.getInfoLabel('Container.FolderPath') == '': xbmc.sleep(1000)
+                                          xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetMovieDetails", "params": {"movieid" : %s, "playcount" : 1 }, "id": 1 }' % str(movieid))
+                              except: pass
                   else: print "Marcacao automatica desactivada"
                   naopede=encerrarsistema()
                   if not naopede:
@@ -2374,7 +2377,7 @@ def abrir_url(url):
             sys.exit(0)
       except socket.timeout as e:
             mensagemok('wareztuga.tv','Timeout da página.','Tente novamente.')
-            sys.exit(0)
+            #sys.exit(0)
 
 def abrir_url_cookie(url):
       #print "A fazer request com cookie de: " + url
@@ -2393,10 +2396,11 @@ def abrir_url_cookie(url):
             sys.exit(0)
       except socket.timeout as e:
             mensagemok('wareztuga.tv','Timeout da página.','Tente novamente.')
-            sys.exit(0)
+            #sys.exit(0)
            
 def accaonosite(tipo,warezid,metodo):
       url=MainURL + 'fave.ajax.php?mediaType=' + tipo + '&mediaID=' + warezid + '&action=' + metodo
+      print "Vai marcar como visto: " + url
       abrir_url_cookie(url)
       xbmc.executebuiltin("XBMC.Notification(wareztuga.tv," + traducao(40116) + ",'10000',"+iconpequeno.encode('utf-8')+")")
       xbmc.executebuiltin("XBMC.Container.Refresh")

@@ -1,3 +1,7 @@
+[B]v0.4.13 (22 de Fevereiro de 2015):[/B]
+- Correccoes no captcha.
+- Outras correccoes.
+
 [B]v0.4.12 (20 de Fevereiro de 2015):[/B]
 - Correccoes no captcha (mais rapido, mais facil).
 - Proteccao em caso de timeout.

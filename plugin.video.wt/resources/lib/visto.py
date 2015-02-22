@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import xbmc, xbmcaddon, xbmcgui, xbmcplugin, cookielib,urllib, urllib2,re,sys
+import xbmc, xbmcaddon, xbmcgui, xbmcplugin, cookielib,urllib, urllib2,re,sys,socket
 
 MainURL = 'http://www.wareztuga.tv/'
 addon_id = 'plugin.video.wt'
@@ -40,6 +40,10 @@ def abrir_url_cookie(url,parametros=None):
       except urllib2.URLError, e:
             mensagemok('wareztuga.tv',traducao(40199) + ' ' + traducao(40200))
             sys.exit(0)
+      except socket.timeout as e:
+            mensagemok('wareztuga.tv','Timeout da página.','Tente novamente.')
+            sys.exit(0)
+
 
 def lersinopse():
     mensagemprogresso.create('wareztuga.tv','A carregar...')
@@ -95,12 +99,23 @@ def lersinopse():
 
 
 def abrir_url(url):
-    req = urllib2.Request(url)
-    req.add_header('User-Agent', user_agent)
-    response = urllib2.urlopen(req)
-    link=response.read()
-    response.close()
-    return link
+      #print "A fazer request de: " + url
+      try:
+            req = urllib2.Request(url)
+            req.add_header('User-Agent', user_agent)
+            response = urllib2.urlopen(req)
+            link=response.read()
+            response.close()
+            return link
+      except urllib2.HTTPError, e:
+            mensagemok('wareztuga.tv',str(urllib2.HTTPError(e.url, e.code, traducao(40199), e.hdrs, e.fp)),traducao(40200))
+            sys.exit(0)
+      except urllib2.URLError, e:
+            mensagemok('wareztuga.tv',traducao(40199) + ' ' + traducao(40200))
+            sys.exit(0)
+      except socket.timeout as e:
+            mensagemok('wareztuga.tv','Timeout da página.','Tente novamente.')
+            #sys.exit(0)
 
 def traducao(texto):
       return traducaoma(texto).encode('utf-8')
