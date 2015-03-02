@@ -8,7 +8,7 @@ addon_id = 'plugin.video.wt'
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.4.13'
+versao = '0.4.14'
 MainURL = 'http://www.wareztuga.tv/'
 art = '/resources/art/'
 ListMovieURL = 'movies.php'; SingleMovieURL = 'movie.php'
@@ -17,6 +17,8 @@ AccountItemURL = 'account.php'
 user_agent = 'Mozilla/5.0 (Windows NT 6.3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.115 Safari/537.36'
 selfAddon = xbmcaddon.Addon(id=addon_id)
 wtpath = selfAddon.getAddonInfo('path').decode('utf-8')
+if selfAddon.getSetting('marcadores'): marcadores=True
+else: marcadores=False
 iconpequeno=wtpath + art + 'logo32.png'
 traducaoma= selfAddon.getLocalizedString
 mensagemok = xbmcgui.Dialog().ok
@@ -32,6 +34,7 @@ username = urllib.quote(selfAddon.getSetting('wareztuga-username'))
 password = urllib.quote(selfAddon.getSetting('wareztuga-password'))
 usernameunli=selfAddon.getSetting('unrestrict-username')
 passwordunli = selfAddon.getSetting('unrestrict-password')
+streaminfo={}
 if not os.path.exists(pastacaptcha):
       os.makedirs(pastacaptcha)
 
@@ -334,8 +337,6 @@ def multifiltro():
             index2 = xbmcgui.Dialog().select(traducao(40331), ano)
             if index2 > -1:
                   urlfinal=MainURL + 'pagination.ajax.php?p=1&order=date&years=%s&genres=%s' % (anonumb[index2],catnumb[index])
-                  print urlfinal
-                  print url
                   if re.search('animes',url): series_request(urlfinal + '&mediaType=animes',False)
                   elif re.search('series',url): series_request(urlfinal + '&mediaType=series',False)
                   elif re.search('movies',url): filmes_request(urlfinal + '&mediaType=movies',False)
@@ -1388,9 +1389,11 @@ def hugefiles(url,srt,name,thumbnail,simounao,wturl):
       net = Net()
       #stupid timeout,retry
       link=abrir_url(url)
-      if re.search('/404.html',link):
-            mensagemok('wareztuga.tv','Ficheiro não disponível.')
-            sys.exit(0)
+      try:
+            if re.search('/404.html',link):
+                  mensagemok('wareztuga.tv','Ficheiro não disponível.')
+                  sys.exit(0)
+      except: return
       from random import randint
       captcha_img = os.path.join(pastacaptcha,str(randint(0, 9999999))+ ".png")
 
@@ -1424,7 +1427,6 @@ def hugefiles(url,srt,name,thumbnail,simounao,wturl):
             
                   redirecturl=re.compile('URL=(.+?)"').findall(link)[0]
                   conteudo=net.http_GET(redirecturl).content
-                  print conteudo
                   if re.search('&error=1',conteudo) or re.search('Try again',conteudo):form_data={}
                   else:
                         hugekey=re.compile('<textarea.+?>(.+?)<').findall(conteudo)[0]
@@ -1481,9 +1483,11 @@ def kingfiles(url,srt,name,thumbnail,simounao,wturl):
       from t0mm0.common.net import Net
       net = Net()
       link=abrir_url(url)
-      if re.search('/404.html',link):
-            mensagemok('wareztuga.tv','Ficheiro não disponível.')
-            sys.exit(0)
+      try:
+            if re.search('/404.html',link):
+                  mensagemok('wareztuga.tv','Ficheiro não disponível.')
+                  sys.exit(0)
+      except: return
       op=re.compile('<input type="hidden" name="op" value="(.+?)">').findall(link)[0]
       fname=re.compile('<input type="hidden" name="fname" value="(.+?)">').findall(link)[0]
       usr_login=''
@@ -1661,7 +1665,6 @@ def obter_captcha(url,link,captcha_img):
 ########################################################### PLAYER ################################################
 
 def comecarvideo(srt,finalurl,name,thumbnail,wturl,proteccaobay):
-      import socket
       socket.setdefaulttimeout(1000)
       playlist = xbmc.PlayList(1)
       playlist.clear()
@@ -1725,7 +1728,10 @@ def comecarvideo(srt,finalurl,name,thumbnail,wturl,proteccaobay):
       
       playlist.add(finalurl, listitem)
       xbmcplugin.setResolvedUrl(int(sys.argv[1]),True,listitem)
-      player = Player(tipo=tipo,warezid=warezid,videoname=name,thumbnail=thumbnail,proteccaobay=proteccaobay,wturl=wturl,imdbcode=imdbcode,seasonurl=seasonurl,show=show,season=season,episode=episode,year=year)
+      global streaminfo
+      streaminfo={'tipo':tipo,'warezid':warezid,'videoname':name,'thumbnail':thumbnail,'proteccaobay':proteccaobay,'wturl':wturl,'imdbcode':imdbcode,'seasonurl':seasonurl,'show':show,'season':season,'episode':episode,'year':year}
+      
+      player = Player()
       mensagemprogresso.close()
       player.play(playlist)
       
@@ -1736,53 +1742,39 @@ def comecarvideo(srt,finalurl,name,thumbnail,wturl,proteccaobay):
 
 ## THX 1CH ##
 class Player(xbmc.Player):
-      def __init__(self,tipo,warezid,videoname,thumbnail,proteccaobay,wturl,imdbcode,seasonurl,show,season,episode,year):
-            if selfAddon.getSetting("playertype") == "0": xbmc.Player(xbmc.PLAYER_CORE_AUTO)
-            elif selfAddon.getSetting("playertype") == "1": xbmc.Player(xbmc.PLAYER_CORE_MPLAYER)
-            elif selfAddon.getSetting("playertype") == "2": xbmc.Player(xbmc.PLAYER_CORE_DVDPLAYER)
-            elif selfAddon.getSetting("playertype") == "3": xbmc.Player(xbmc.PLAYER_CORE_PAPLAYER)
-            else: xbmc.Player(xbmc.PLAYER_CORE_AUTO)
+      def __init__(self):
             self._playbackLock = True
             self._refInfo = True
             self._totalTime = 999999
-            self.tipo = tipo
-            self.warezid = warezid
-            self.videoname = videoname
-            self.thumbnail = thumbnail
-            self.proteccaobay = proteccaobay
-            self.imdbcode = imdbcode
-            self.wturl=wturl
-            self.seasonurl=seasonurl
-            self.show=show
-            self.season=season
-            self.episode=episode
-            self.year=year
             self._lastPos = 0
-            self.nomeficheiro=self.tipo + '_' + self.warezid
-            if self.tipo=='episodes':
-                  self.file='%s S%sE%s.strm' % (self.show, self.season,self.episode)
+            self.nomeficheiro= '%s_%s' % (streaminfo['tipo'],streaminfo['warezid'])
+
+            if streaminfo['tipo'] == 'episodes':
+                  self.file='%s S%sE%s.strm' % (streaminfo['show'], streaminfo['season'],streaminfo['episode'])
             else:
-                  self.file=self.show + ' _' + str(self.year) + '_.strm'
+                  self.file='%s _%s_.strm' % (streaminfo['show'],streaminfo['year'])
             self.caminhoficheiro=os.path.join(pastaperfil, self.nomeficheiro)
             self.caminhoficheiroinfo=os.path.join(pastaperfil,self.nomeficheiro + '_info')
             print "Criou o player"
             
       def onPlayBackStarted(self):
             print "Comecou o player"
-            self._totalTime = self.getTotalTime()
-            #if self.tipo=='episodes':
-            ##      xbmcJsonRequest({"jsonrpc": "2.0", "id": 1, "method": "VideoLibrary.SetTVShowDetails", "params": {"imdbnumber": self.imdbcode}})
-            #elif self.tipo=='movies':
-            #      xbmcJsonRequest({"jsonrpc": "2.0", "id": 1, "method": "VideoLibrary.SetMovieDetails", "params": {"imdbnumber": self.imdbcode}})
-            if selfAddon.getSetting('marcadores') == 'true':
-                  if self.proteccaobay == False:                  
+            if marcadores==True:
+                  if streaminfo['proteccaobay'] == False:                  
                         if os.path.exists(self.caminhoficheiro):
                               print "Existe um marcador. A perguntar."
                               bookmark=openfile(self.caminhoficheiro)
                               opcao=xbmcgui.Dialog().yesno("wareztuga.tv", '',traducao(40173) + ' %s?' % (format_time(float(bookmark))),'', traducao(40174), traducao(40175))
                               if opcao: self.seekTime(float(bookmark))
-            if self.show != False and self.tipo=='episodes':
-                  savefile(pastaperfil,'following.txt','"name":"%s","url":"%s"' % (self.show,self.seasonurl))
+            if streaminfo['show'] != False and streaminfo['tipo']=='episodes':
+                  savefile(pastaperfil,'following.txt','"name":"%s","url":"%s"' % (streaminfo['show'],streaminfo['seasonurl']))
+            self._totalTime = self.getTotalTime()
+            print "Tempo total: " + str(self._totalTime)
+            if int(self._totalTime)==0:
+                  print "Diz que é 0.. vamos la tentar outra vez."
+                  xbmc.sleep(5000)
+                  self._totalTime = self.getTotalTime()
+                  print "Tempo total (segundo try): " + str(self._totalTime)
                               
       def onPlayBackStopped(self):
             print "Parou o player"
@@ -1794,28 +1786,28 @@ class Player(xbmc.Player):
             xbmc.sleep(5001)
             if playedTime == 0 and self._totalTime == 999999: raise PlaybackFailed('XBMC falhou a comecar o playback')
             elif ((playedTime/self._totalTime) > min_watched_percent):
-                  if selfAddon.getSetting('marcadores') == 'true':
-                        if self.proteccaobay == False:
+                  if marcadores==True:
+                        if streaminfo['proteccaobay'] == False:
                               try:os.remove(self.caminhoficheiro)
                               except: pass
                               try:os.remove(self.caminhoficheiroinfo)
                               except: pass
                   if selfAddon.getSetting('watched-enable') == 'true':
                         print "A marcar como visto"
-                        accaonosite(self.tipo,self.warezid,'watched')
+                        accaonosite(streaminfo['tipo'],streaminfo['warezid'],'watched')
                         if xbmcaddon.Addon().getSetting("lib-serieson") == 'true':
                               try:
                                     import json
-                                    if self.tipo=='episodes':
-                                          episodeid = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params": {"filter":{"and": [{"field": "season", "operator": "is", "value": "%s"}, {"field": "episode", "operator": "is", "value": "%s"}]}, "properties": ["file"]}, "id": 1}' % (self.season, self.episode))
+                                    if streaminfo['tipo']=='episodes':
+                                          episodeid = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params": {"filter":{"and": [{"field": "season", "operator": "is", "value": "%s"}, {"field": "episode", "operator": "is", "value": "%s"}]}, "properties": ["file"]}, "id": 1}' % (streaminfo['season'], streaminfo['episode']))
                                           episodeid = unicode(episodeid, 'utf-8', errors='ignore')
                                           episodeid = json.loads(episodeid)['result']['episodes']
                                           episodeid = [i for i in episodeid if i['file'].endswith(self.file)][0]
                                           episodeid = episodeid['episodeid']
                                           while xbmc.getInfoLabel('Container.FolderPath').startswith(sys.argv[0]) or xbmc.getInfoLabel('Container.FolderPath') == '': xbmc.sleep(1000)
                                           xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "playcount" : 1 }, "id": 1 }' % str(episodeid))
-                                    elif self.tipo=='movies':
-                                          movieid = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["file"]}, "id": 1}' % (self.year, str(int(self.year)+1), str(int(self.year)-1)))
+                                    elif streaminfo['tipo']=='movies':
+                                          movieid = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["file"]}, "id": 1}' % (streaminfo['year'], str(int(streaminfo['year'])+1), str(int(streaminfo['year'])-1)))
                                           movieid = unicode(movieid, 'utf-8', errors='ignore')
                                           movieid = json.loads(movieid)['result']['movies']
                                           movieid = [i for i in movieid if i['file'].endswith(self.file)][0]
@@ -1827,14 +1819,14 @@ class Player(xbmc.Player):
                   naopede=encerrarsistema()
                   if not naopede:
                         if selfAddon.getSetting('opiniaonofim') == 'true':
-                              if self.tipo=='movies':
+                              if streaminfo['tipo']=='movies':
                                     opcao= xbmcgui.Dialog().yesno("wareztuga.tv", traducao(40194))
                                     if opcao:
-                                          xbmc.executebuiltin("XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('comentar'),'movies',self.warezid,str(self.wturl),'')]) + ")")
-                                          xbmc.executebuiltin("XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('votar'),'movies',self.warezid,str(self.wturl),'')]) + ")")
-                              elif self.tipo=='episodes':
+                                          xbmc.executebuiltin("XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('comentar'),'movies',streaminfo['warezid'],str(streaminfo['wturl']),'')]) + ")")
+                                          xbmc.executebuiltin("XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('votar'),'movies',streaminfo['warezid'],str(streaminfo['wturl']),'')]) + ")")
+                              elif streaminfo['tipo']=='episodes':
                                     opcao= xbmcgui.Dialog().yesno("wareztuga.tv", traducao(40195))
-                                    if opcao: xbmc.executebuiltin("XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('comentar'),'episodes',self.warezid,str(self.wturl),'')]) + ")")
+                                    if opcao: xbmc.executebuiltin("XBMC.RunScript(" + wtpath + "/resources/lib/visto.py" + ", " + str([(str('comentar'),'episodes',streaminfo['warezid'],str(streaminfo['wturl']),'')]) + ")")
             else: print 'Nao atingiu a marca das definicoes. Nao marcou como visto.'
 
       def onPlayBackEnded(self):              
@@ -1844,11 +1836,11 @@ class Player(xbmc.Player):
       def _trackPosition(self):
             try: self._lastPos = self.getTime()
             except: print 'Erro quando estava a tentar definir o tempo de playback'
-            if selfAddon.getSetting('marcadores') == 'true':
-                  if self.proteccaobay == False:
+            if marcadores==True:
+                  if streaminfo['proteccaobay'] == False:
                         if (self._lastPos>15):
                               if self._refInfo == True:
-                                    savefile(pastaperfil,self.nomeficheiro + '_info',self.videoname + 'T-' + self.thumbnail + '-T-' + self.wturl + '-')
+                                    savefile(pastaperfil,self.nomeficheiro + '_info','%sT-%s-T-%s-' % (streaminfo['videoname'],streaminfo['thumbnail'],streaminfo['wturl']))
                                     self._refInfo = False
                               savefile(pastaperfil,self.nomeficheiro,str(self._lastPos))
 
@@ -2141,7 +2133,6 @@ def fazerdownload(name,url,subtitles=None):
       if os.path.exists(downloadPath):
             videopath = os.path.join(downloadPath,vidname+'.mp4')
             subspath = os.path.join(downloadPath,vidname+'.srt')
-            print subtitles
             if os.path.isfile(videopath) is True:
                   ok = mensagemok(traducao(40123),traducao(40124),'','')
                   return False
@@ -2400,7 +2391,7 @@ def abrir_url_cookie(url):
            
 def accaonosite(tipo,warezid,metodo):
       url=MainURL + 'fave.ajax.php?mediaType=' + tipo + '&mediaID=' + warezid + '&action=' + metodo
-      print "Vai marcar como visto: " + url
+      #print "Vai marcar como visto: " + url
       abrir_url_cookie(url)
       xbmc.executebuiltin("XBMC.Notification(wareztuga.tv," + traducao(40116) + ",'10000',"+iconpequeno.encode('utf-8')+")")
       xbmc.executebuiltin("XBMC.Container.Refresh")

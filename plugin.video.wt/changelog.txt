@@ -1,3 +1,8 @@
+[B]v0.4.14 (2 de Marco de 2015):[/B]
+- Fix a um bug raro em que por vezes nao marcava automaticamente como visto e mantinha o marcador.
+- Melhorias internas no sistema do player.
+- Outras correccoes.
+
 [B]v0.4.13 (22 de Fevereiro de 2015):[/B]
 - Correccoes no captcha.
 - Outras correccoes.
