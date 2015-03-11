@@ -8,7 +8,7 @@ import xbmc, xbmcgui, xbmcaddon, xbmcplugin,os,re,sys, urllib, urllib2,datetime,
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.1.01'
+versao = '0.2.01'
 addon_id = 'plugin.video.tvgolo'
 vazio= []
 art = '/resources/art/'
@@ -47,6 +47,7 @@ def horalocal(link):
 def menu_principal():
       #mensagemok(traducao(40000),traducao(40001),traducao(40002))
       addDir(traducao(40003),MainURL,2,tvgolopath + art + 'pasta.png',1,True)
+      addDir('Últimos Liga Portuguesa','http://www.goalsoftheworld.tk/goals-in-Portugal.html',10,tvgolopath + art + 'pasta.png',1,True)
       addDir(traducao(40004),MainURL,3,tvgolopath + art + 'pasta.png',1,True)
       addDir(traducao(40005),MainURL,4,tvgolopath + art + 'pasta.png',1,True)
       #addDir(traducao(40006),MainURL + 'en/goal-of-the-week.php',2,tvgolopath + art + 'pasta.png',1,True)
@@ -54,6 +55,21 @@ def menu_principal():
       #addDir(traducao(40008),MainURL + 'en/comedy-football.php',6,tvgolopath + art + 'pasta.png',1,True)
       #addDir(traducao(40009),MainURL + 'tv.html',9,tvgolopath + art + 'pasta.png',1,True)
       addDir(traducao(40010),MainURL,8,tvgolopath + art + 'pasta.png',1,True)
+      xbmc.executebuiltin("Container.SetViewMode(51)")
+
+def ligaportuguesa(url):
+      link=clean(abrir_url(url))
+      conteudos= re.compile("""class='linkgoal sapo' id='(.+?)'><h3.+?><img.+?src='(.+?)'.+?>(.+?)</h3>""").findall(link)
+      from random import randint
+      #print conteudos
+      for endereco,thumb,titulo in conteudos:
+            
+            addDir(titulo,'http://www.goalsoftheworld.tk/getcontent.php?rand=%s&id_results=%s' % (str(randint(1, 100)),endereco),1,thumb,len(conteudos),False)
+      #try:
+      #      next=re.compile('<a href="([^"]+?)" class="numlinks">next</a>').findall(link)[0]
+      #      nrpagina=''.join(next.split('goals_of_the_world_')[1].split('_goal_')[0])
+      #      addDir('[COLOR blue][B]' + traducao(40014) + '[/COLOR] [COLOR white]' + str(nrpagina) + ' >>[/COLOR][/B]',next,10,'',1,True)
+      #except: pass
       xbmc.executebuiltin("Container.SetViewMode(51)")
 
 def listadeligas(url):
@@ -75,7 +91,7 @@ def epocasanteriores(url):
 	link=link.replace('amp;','')
 	anteriores=re.compile('<a href="([^"]+?)">([^"]+?)</a><BR />').findall(link)
 	for endereco,titulo in anteriores:
-                addDir(titulo,MainURL + endereco,2,'',len(anteriores),True)
+              addDir(titulo,MainURL + endereco,2,'',len(anteriores),True)
 	xbmc.executebuiltin("Container.SetViewMode(501)")
 
 def comedyfootball(url):
@@ -109,15 +125,17 @@ def paginas(url,link):
       except: pass
 
 def captura(name,url):
-      tvgolourl=url
       link=abrir_url(url)
       linkoriginal = link
-      link=clean(link)
-      #ty tfouto
-      link=link.replace('<div style="float:left;"><iframe','').replace('"contentjogos">','"contentjogos"></iframe>')
-      ij=link.find('"contentjogos">')
-      link=link[ij:]
-      #ty tfouto
+      if re.search('okgoals',url):
+            goals=True
+            link=clean(link)
+            #ty tfouto
+            link=link.replace('<div style="float:left;"><iframe','').replace('"contentjogos">','"contentjogos"></iframe>')
+            ij=link.find('"contentjogos">')
+            link=link[ij:]
+            #ty tfouto
+      else: goals=False
       titles=[]; ligacao=[]
       aliezref=int(0)
       aliez=re.compile('<iframe.+?src="http://emb.aliez.tv/(.+?)"').findall(link)
@@ -190,14 +208,14 @@ def captura(name,url):
                   titles.append('Playwire' + golo)
                   ligacao.append('http://cdn.playwire.com/v2/%s/config/%s.json' % (publisher,codigo))
             
-      playwire_v2=re.compile('http://config.playwire.com/(.+?)/videos/v2/(.+?)/player.json').findall(link)
+      playwire_v2=re.compile('http://config.playwire.com/(.+?)/videos/v2/(.+?).json').findall(link)
       if playwire_v2:
           for publisher,codigo in playwire_v2:
                   golo=findgolo(link,codigo)
                   golo=cleangolo(golo).replace('<','')
                   if golo: golo=' (%s)' % (golo)
                   titles.append('Playwire' + golo)
-                  ligacao.append('http://config.playwire.com/%s/videos/v2/%s/player.json' % (publisher,codigo))               
+                  ligacao.append('http://config.playwire.com/%s/videos/v2/%s.json' % (publisher,codigo))
                   
       #rutube http://www.tvgolo.com/match-showfull-1376242370---02
       rutuberef=int(0)
@@ -212,12 +230,20 @@ def captura(name,url):
                   titles.append("Rutube" + golo)
                   ligacao.append(codigo)
       saporef=int(0)
-      sapo=re.compile('src="http://videos.sapo.pt/playhtml.+?file=(.+?)/1&"',re.DOTALL|re.M).findall(link)
+      sapo=re.compile('src=".+?videos.sapo.pt/playhtml.+?file=(.+?)/1&"',re.DOTALL|re.M).findall(link)
+      if not sapo: sapo=re.compile('src=".+?videos.sapo.pt/playhtml.+?file=(.+?)/1"',re.DOTALL|re.M).findall(link)
       if sapo:
             for endereco in sapo:
-                  golo=findgolo(link,endereco)
-                  golo=cleangolo(golo).replace('<','')
-                  if golo: golo=' (%s)' % (golo)
+                  
+
+                  if goals==True:
+                        golo=findgolo(link,endereco)
+                        golo=cleangolo(golo).replace('<','')
+                        if golo: golo=' (%s)' % (golo)
+                  else:
+                        saporef=int(saporef + 1)
+                        if len(sapo)==1: golo=str('')
+                        else: golo=' #' + str(saporef)
                   titles.append('Videos Sapo' + golo)
                   ligacao.append(endereco)
       videaref=int(0)
@@ -274,7 +300,8 @@ def captura(name,url):
                                streamurl=redirect('http://config.playwire.com/videos/v2/%s/player.json'%videoid).replace('player.json','manifest.f4m')
                          else:
                                link=abrir_url(linkescolha)
-                               streamurl=re.compile('"src":"(.+?)"').findall(link)[0]
+                               try:streamurl=re.compile('"src":"(.+?)"').findall(link)[0]
+                               except:streamurl=re.compile('"f4m":"(.+?)"').findall(link)[0]
                          if re.search('.f4m',streamurl):
                                titles=[]
                                ligacao=[]
@@ -400,7 +427,7 @@ def pesquisa():
       keyb = xbmc.Keyboard('', traducao(40020))
       keyb.doModal()
       if (keyb.isConfirmed()):
-            mensagemok(traducao(40000),traducao(40021))
+            mensagemok(traducao(40000),traducao(40021),'Não inclui liga PT.')
             search = keyb.getText()
             encode=urllib.quote(search)
             if encode=='': pass
@@ -511,5 +538,6 @@ elif mode==6: comedyfootball(url)
 elif mode==7: ok = mensagemok(traducao(40000),traducao(40022),traducao(40023),traducao(40024))
 elif mode==8: pesquisa()
 elif mode==9: programacaotv(url)
-  
+elif mode==10: ligaportuguesa(url)
+
 xbmcplugin.endOfDirectory(int(sys.argv[1]))
