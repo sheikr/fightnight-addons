@@ -156,7 +156,7 @@ class VeetleViews:
         #Play a stream with the given channel id
         channelId = queryUrl[len(URL_VIEW_CHANNEL):].strip()
         if len(channelId)==32: #embed id
-            try: channelId=self.abrir_url('http://fightnightaddons.x10.mx/tools/veet.php?id=%s' % (channelId)).replace(' ','')
+            try: channelId=self.abrir_url('http://fightnightaddons.esy.es/tools/veet.php?id=%s' % (channelId)).replace(' ','')
             except: pass
         
         channelStreamUrl = self.dataSource.loadChannelStreamUrl(channelId)
