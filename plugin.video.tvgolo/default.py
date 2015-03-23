@@ -38,7 +38,15 @@ else:
 	MainURL = 'http://' + host + '/'
 '''
 MainURL = 'http://www.okgoals.com/'
-
+pt = tvgolopath+art+'pt.png'
+lupa = tvgolopath+art+'lupa.png'
+liga = tvgolopath+art+'liga.png'
+ulgolos = tvgolopath+art+'ulgolos.png'
+#Caso prefiras este comenta o 2
+#ugolosl = tvgolopath+art+'ugolosl.png'
+ugolosl2 = tvgolopath+art+'ugolosl2.png'
+semana = tvgolopath+art+'semana.png'
+epoca = tvgolopath+art+'epoca.png'
 
 def horalocal(link):
       hora=re.compile('<div class="clock">Local Time: (.+?)</div>').findall(link)[0]
@@ -46,25 +54,25 @@ def horalocal(link):
 
 def menu_principal():
       #mensagemok(traducao(40000),traducao(40001),traducao(40002))
-      addDir(traducao(40003),MainURL,2,tvgolopath + art + 'pasta.png',1,True)
-      addDir('Últimos Liga Portuguesa','http://www.goalsoftheworld.tk/goals-in-Portugal.html',10,tvgolopath + art + 'pasta.png',1,True)
-      addDir(traducao(40004),MainURL,3,tvgolopath + art + 'pasta.png',1,True)
-      addDir(traducao(40005),MainURL,4,tvgolopath + art + 'pasta.png',1,True)
+      addDir(traducao(40003),MainURL,2,ulgolos,1,True)
+      addDir('Últimos Liga Portuguesa','http://www.goalsoftheworld.tk/goals-in-Portugal.html',10,liga,1,True)
+      addDir(traducao(40004),MainURL,3,ugolosl2,1,True)
+      addDir(traducao(40005),MainURL,4,semana,1,True)
       #addDir(traducao(40006),MainURL + 'en/goal-of-the-week.php',2,tvgolopath + art + 'pasta.png',1,True)
-      addDir(traducao(40007),MainURL + 'seasons-archive.php',5,tvgolopath + art + 'pasta.png',1,True)
+      addDir(traducao(40007),MainURL + 'seasons-archive.php',5,epoca,1,True)
       #addDir(traducao(40008),MainURL + 'en/comedy-football.php',6,tvgolopath + art + 'pasta.png',1,True)
       #addDir(traducao(40009),MainURL + 'tv.html',9,tvgolopath + art + 'pasta.png',1,True)
-      addDir(traducao(40010),MainURL,8,tvgolopath + art + 'pasta.png',1,True)
+      addDir(traducao(40010),MainURL,8,lupa,1,True)
       xbmc.executebuiltin("Container.SetViewMode(51)")
 
 def ligaportuguesa(url):
       link=clean(abrir_url(url))
-      conteudos= re.compile("""class='linkgoal sapo' id='(.+?)'><h3.+?><img.+?src='(.+?)'.+?>(.+?)</h3>""").findall(link)
+      conteudos= re.compile("""class='linkgoal sapo' id='(.+?)'><h3.+?><img.+?src='.+?'.+?><span.+?>(.+?)</span></h3>""").findall(link)
       from random import randint
       #print conteudos
-      for endereco,thumb,titulo in conteudos:
+      for endereco,titulo in conteudos:
             
-            addDir(titulo,'http://www.goalsoftheworld.tk/getcontent.php?rand=%s&id_results=%s' % (str(randint(1, 100)),endereco),1,thumb,len(conteudos),False)
+            addDir(titulo,'http://www.goalsoftheworld.tk/getcontent.php?rand=%s&id_results=%s' % (str(randint(1, 100)),endereco),1,pt,len(conteudos),False)
       #try:
       #      next=re.compile('<a href="([^"]+?)" class="numlinks">next</a>').findall(link)[0]
       #      nrpagina=''.join(next.split('goals_of_the_world_')[1].split('_goal_')[0])
@@ -76,8 +84,8 @@ def listadeligas(url):
       link=abrir_url(url)
       link=link.replace('Portuguese</a>','').replace('English</a>','')
       #ligas=re.compile('<a href="(.+?)" target="_top"><img width=".+?" border="0" high=".+?" src="(.+?)">(.+?)</a>').findall(link)
-      ligas=re.compile("""<li class='active'><a href='(.+?)' class="menulinks">.+?alt="(.+?)" src="(.+?)"> (.+?)</span>""").findall(link)
-      for endereco,liga,thumb,country in ligas: addDir('%s (%s)' % (liga.capitalize().title(),country.capitalize().title()),MainURL + endereco,2,thumb,len(ligas),True)
+      ligas=re.compile("""<li class='active'><a href='(.+?)' class="menulinks">.+?alt="(.+?)" src="http://www.okgoals.com/images/(.+?)"> (.+?)</span>""").findall(link)
+      for endereco,liga,thumb,country in ligas: addDir('%s (%s)' % (liga.capitalize().title(),country.capitalize().title()),MainURL + endereco,2,tvgolopath+art+thumb,len(ligas),True)
       xbmc.executebuiltin("Container.SetViewMode(51)")
 
 def semanasanteriores(url):
@@ -109,8 +117,8 @@ def programacaotv(url):
 def request(url):
       link=abrir_url(url)
       link=clean(link)
-      listagolos=re.compile('<div class="listajogos"><a href="(.+?)"><img.+?src="(.+?)" />    (.+?)</a></div>').findall(link)
-      for endereco,thumb,titulo in listagolos: addDir(titulo,MainURL + endereco,1,MainURL + thumb,len(listagolos),False)
+      listagolos=re.compile('<div class="listajogos"><a href="(.+?)"><img.+?src="images/(.+?)\..+?" />    (.+?)</a></div>').findall(link)
+      for endereco,thumb,titulo in listagolos: addDir(titulo,MainURL + endereco,1,tvgolopath+art+thumb+'.png',len(listagolos),False)
       if re.search('football.php', url) or re.search('page-start', link): paginas(url,link)
       xbmc.executebuiltin("Container.SetViewMode(51)")
 
