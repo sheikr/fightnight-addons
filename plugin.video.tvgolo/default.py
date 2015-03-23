@@ -4,11 +4,11 @@
     2014 fightnight
 """
 
-import xbmc, xbmcgui, xbmcaddon, xbmcplugin,os,re,sys, urllib, urllib2,datetime,time
+import xbmc, xbmcgui, xbmcaddon, xbmcplugin,os,re,sys, urllib, urllib2
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.2.01'
+versao = '0.2.02'
 addon_id = 'plugin.video.tvgolo'
 vazio= []
 art = '/resources/art/'
@@ -18,72 +18,32 @@ traducao= selfAddon.getLocalizedString
 tvgolopath = selfAddon.getAddonInfo('path')
 menuescolha = xbmcgui.Dialog().select
 mensagemok = xbmcgui.Dialog().ok
-'''
-if selfAddon.getSetting('dns_unblock') == 'false': MainURL = 'http://www.tvgolo.mobi/'
-else:
-	try:t1 = datetime.datetime.strptime(selfAddon.getSetting("last_dns_unblock"), "%Y-%m-%d %H:%M:%S.%f")
-	except:t1 = datetime.datetime.fromtimestamp(time.mktime(time.strptime(selfAddon.getSetting("last_dns_unblock"), "%Y-%m-%d %H:%M:%S.%f")))
-	t2 = datetime.datetime.now()
-	update = abs(t2 - t1) > datetime.timedelta(hours=2)
-	if update:
-		import socket
-		try:
-			host = socket.getaddrinfo('tvgolo.mobi',80)[0][-1][0]
-		except: host = 'www.tvgolo.mobi'
-		selfAddon.setSetting('last_dns_unblock',value=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
-		selfAddon.setSetting('last_ip',host)
-	else:
-		host = selfAddon.getSetting('last_ip')
-		
-	MainURL = 'http://' + host + '/'
-'''
 MainURL = 'http://www.okgoals.com/'
-pt = tvgolopath+art+'pt.png'
-lupa = tvgolopath+art+'lupa.png'
-liga = tvgolopath+art+'liga.png'
-ulgolos = tvgolopath+art+'ulgolos.png'
-#Caso prefiras este comenta o 2
-#ugolosl = tvgolopath+art+'ugolosl.png'
-ugolosl2 = tvgolopath+art+'ugolosl2.png'
-semana = tvgolopath+art+'semana.png'
-epoca = tvgolopath+art+'epoca.png'
 
 def horalocal(link):
       hora=re.compile('<div class="clock">Local Time: (.+?)</div>').findall(link)[0]
       addLink('[B]'+traducao(40025)+'[/B]' + hora,MainURL,'')
 
 def menu_principal():
-      #mensagemok(traducao(40000),traducao(40001),traducao(40002))
-      addDir(traducao(40003),MainURL,2,ulgolos,1,True)
-      addDir('Últimos Liga Portuguesa','http://www.goalsoftheworld.tk/goals-in-Portugal.html',10,liga,1,True)
-      addDir(traducao(40004),MainURL,3,ugolosl2,1,True)
-      addDir(traducao(40005),MainURL,4,semana,1,True)
-      #addDir(traducao(40006),MainURL + 'en/goal-of-the-week.php',2,tvgolopath + art + 'pasta.png',1,True)
-      addDir(traducao(40007),MainURL + 'seasons-archive.php',5,epoca,1,True)
-      #addDir(traducao(40008),MainURL + 'en/comedy-football.php',6,tvgolopath + art + 'pasta.png',1,True)
-      #addDir(traducao(40009),MainURL + 'tv.html',9,tvgolopath + art + 'pasta.png',1,True)
-      addDir(traducao(40010),MainURL,8,lupa,1,True)
+      addDir(traducao(40003),MainURL,2,tvgolopath+art+'ulgolos.png',1,True)
+      addDir('Últimos Liga Portuguesa','http://www.goalsoftheworld.tk/goals-in-Portugal.html',10,tvgolopath+art+'liga.png',1,True)
+      addDir(traducao(40004),MainURL,3,tvgolopath+art+'ugolosl2.png',1,True)
+      addDir(traducao(40005),MainURL,4,tvgolopath+art+'semana.png',1,True)
+      addDir(traducao(40007),MainURL + 'seasons-archive.php',5,tvgolopath+art+'epoca.png',1,True)
+      addDir(traducao(40010),MainURL,8,tvgolopath+art+'lupa.png',1,True)
       xbmc.executebuiltin("Container.SetViewMode(51)")
 
 def ligaportuguesa(url):
       link=clean(abrir_url(url))
       conteudos= re.compile("""class='linkgoal sapo' id='(.+?)'><h3.+?><img.+?src='.+?'.+?><span.+?>(.+?)</span></h3>""").findall(link)
       from random import randint
-      #print conteudos
       for endereco,titulo in conteudos:
-            
-            addDir(titulo,'http://www.goalsoftheworld.tk/getcontent.php?rand=%s&id_results=%s' % (str(randint(1, 100)),endereco),1,pt,len(conteudos),False)
-      #try:
-      #      next=re.compile('<a href="([^"]+?)" class="numlinks">next</a>').findall(link)[0]
-      #      nrpagina=''.join(next.split('goals_of_the_world_')[1].split('_goal_')[0])
-      #      addDir('[COLOR blue][B]' + traducao(40014) + '[/COLOR] [COLOR white]' + str(nrpagina) + ' >>[/COLOR][/B]',next,10,'',1,True)
-      #except: pass
+            addDir(titulo,'http://www.goalsoftheworld.tk/getcontent.php?rand=%s&id_results=%s' % (str(randint(1, 100)),endereco),1,tvgolopath+art+'pt.png',len(conteudos),False)
       xbmc.executebuiltin("Container.SetViewMode(51)")
 
 def listadeligas(url):
       link=abrir_url(url)
       link=link.replace('Portuguese</a>','').replace('English</a>','')
-      #ligas=re.compile('<a href="(.+?)" target="_top"><img width=".+?" border="0" high=".+?" src="(.+?)">(.+?)</a>').findall(link)
       ligas=re.compile("""<li class='active'><a href='(.+?)' class="menulinks">.+?alt="(.+?)" src="http://www.okgoals.com/images/(.+?)"> (.+?)</span>""").findall(link)
       for endereco,liga,thumb,country in ligas: addDir('%s (%s)' % (liga.capitalize().title(),country.capitalize().title()),MainURL + endereco,2,tvgolopath+art+thumb,len(ligas),True)
       xbmc.executebuiltin("Container.SetViewMode(51)")
@@ -129,7 +89,7 @@ def paginas(url,link):
             except: enderecopagina=re.compile('</b><a href="(.+?)">').findall(link)[0]
             valorpagina=int(re.compile('page-start_from_(.+?)_archive.+?.html').findall(enderecopagina)[0])
             pagina=int((valorpagina/30)+1)
-            addDir('[COLOR blue][B]' + traducao(40014) + '[/COLOR] [COLOR white]' + str(pagina) + ' >>[/COLOR][/B]',MainURL + enderecopagina,2,'',1,True)
+            addDir('[COLOR blue][B]%s %s >[/COLOR][/B]' % (traducao(40014),pagina),MainURL + enderecopagina,2,tvgolopath+art+'proxima.png',1,True)
       except: pass
 
 def captura(name,url):
@@ -241,6 +201,7 @@ def captura(name,url):
       sapo=re.compile('src=".+?videos.sapo.pt/playhtml.+?file=(.+?)/1&"',re.DOTALL|re.M).findall(link)
       if not sapo: sapo=re.compile('src=".+?videos.sapo.pt/playhtml.+?file=(.+?)/1"',re.DOTALL|re.M).findall(link)
       if sapo:
+            print sapo
             for endereco in sapo:
                   
 
@@ -296,12 +257,12 @@ def captura(name,url):
                          link=abrir_url('http://rutube.ru/api/play/options/' + linkescolha)
                          try:streamurl=re.compile('"m3u8": "(.+?)"').findall(link)[0]
                          except:streamurl=re.compile('"default": "(.+?)"').findall(link)[0]
-                         comecarvideo(name,streamurl,'')
+                         comecarvideo(name,streamurl)
                    elif re.search('Aliez',servidor):
                          linkescolha=linkescolha.replace('amp;','')
                          link=abrir_url(linkescolha)
                          streamurl=re.compile("file.+?'(.+?)'").findall(link)[0]
-                         comecarvideo(name,streamurl,'')
+                         comecarvideo(name,streamurl)
                    elif re.search('Playwire',servidor):
                          if re.search('configopener',linkescolha):
                                videoid=''.join(linkescolha.split('/')[-1:]).replace('.json','')
@@ -324,7 +285,7 @@ def captura(name,url):
                                if index > -1: streamurl='%s/%s' % (baseurl,ligacao[index])
                                else: return
                          streamurl=streamurl.replace('rtmp://streaming.playwire.com/','http://cdn.playwire.com/').replace('mp4:','')
-                         comecarvideo(name,streamurl,'')
+                         comecarvideo(name,streamurl)
                    elif re.search('VK',servidor):
                          linkescolha=linkescolha.replace('amp;','')
                          link=abrir_url(linkescolha)
@@ -362,27 +323,27 @@ def captura(name,url):
                                else: index = menuescolha("Qualidade", titles)
                                if index > -1:
                                      linkescolha=ligacao[index]
-                                     comecarvideo(name,linkescolha,'')                        
-                   elif re.search('Sapo',servidor): comecarvideo(name,linkescolha,'')
+                                     comecarvideo(name,linkescolha)
+                   elif re.search('Sapo',servidor): comecarvideo(name,linkescolha)
                    elif re.search('Facebook',servidor):
                          link=abrir_url(linkescolha)
                          params = re.compile('"params","([\w\%\-\.\\\]+)').findall(link)[0]
                          html = urllib.unquote(params.replace('\u0025', '%')).decode('utf-8')
                          html = html.replace('\\', '')
                          streamurl = re.compile('(?:hd_src|sd_src)\":\"([\w\-\.\_\/\&\=\:\?]+)').findall(html)[0]
-                         comecarvideo(name,streamurl,'')
+                         comecarvideo(name,streamurl)
                    elif re.search('Kiwi',servidor):
                          link=urllib.unquote(abrir_url('http://v.kiwi.kz/v2/'+linkescolha))
                          streamurl=re.compile('&url=(.+?)&poster').findall(link)[0]
-                         comecarvideo(name,streamurl,'')
+                         comecarvideo(name,streamurl)
                    elif re.search('videa',linkescolha):
                          referencia=re.compile('flvplayer.swf.+?v=(.+?)"').findall(linkescolha)[0]
                          link=abrir_url('http://videa.hu/flvplayer_get_video_xml.php?v='+ referencia)
                          streamurl=re.compile('<version quality="standard" video_url="(.+?)"').findall(link)[0]
-                         comecarvideo(name,streamurl,'')
+                         comecarvideo(name,streamurl)
                    elif re.search('Youtube',servidor):
                          streamurl='plugin://plugin.video.youtube/?action=play_video&videoid='+codigo
-                         comecarvideo(name,streamurl,'')
+                         comecarvideo(name,streamurl)
                          
                    elif re.search('dailymotion',linkescolha):
                          import urlresolver
@@ -396,21 +357,17 @@ def captura(name,url):
                                            okcheck = xbmcgui.Dialog().ok
                                            okcheck(traducao(40000),traducao(40019))
                                            return
-                                     else: comecarvideo(name,linkescolha,'')
+                                     else: comecarvideo(name,linkescolha)
 
-def comecarvideo(titulo,url,thumb):
+def comecarvideo(titulo,url):
       playlist = xbmc.PlayList(1)
       playlist.clear()
-      listitem = xbmcgui.ListItem(titulo, iconImage="DefaultVideo.png", thumbnailImage=tvgolopath + 'icon.png')
+      listitem = xbmcgui.ListItem(titulo, iconImage="DefaultVideo.png", thumbnailImage=thumb)
       listitem.setInfo("Video", {"Title":titulo})
       listitem.setProperty('mimetype', 'video/x-msvideo')
       listitem.setProperty('IsPlayable', 'true')
-      dialogWait = xbmcgui.DialogProgress()
-      dialogWait.create('OKGoals', 'A carregar')
       playlist.add(url, listitem)
       xbmcplugin.setResolvedUrl(int(sys.argv[1]),True,listitem)
-      dialogWait.close()
-      del dialogWait
       xbmcPlayer = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
       xbmcPlayer.play(playlist)
 
@@ -424,7 +381,7 @@ def addLink(name,url,iconimage):
       return ok
 
 def addDir(name,url,mode,iconimage,total,pasta):
-      u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)
+      u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&thumb="+urllib.quote_plus(iconimage)
       ok=True; liz=xbmcgui.ListItem(name, iconImage="DefaultFolder.png", thumbnailImage=iconimage)
       liz.setInfo( type="Video", infoLabels={ "Title": name } )
       liz.setProperty('fanart_image', os.path.join(tvgolopath,'fanart.jpg'))
@@ -452,29 +409,6 @@ def abrir_url(url):
       link=response.read()
       response.close()
       return link
-
-def abrir_url_tommy(url,referencia):
-    print "A fazer request tommy de: " + url
-    from t0mm0.common.net import Net
-    net = Net()
-    try:
-        link = net.http_GET(url,referencia).content
-        return link
-    except urllib2.HTTPError, e:
-      mensagemok('TVGolo',str(urllib2.HTTPError(e.url, e.code, "Erro na página.", e.hdrs, e.fp)))
-      sys.exit(0)
-    except urllib2.URLError, e:
-      mensagemok('OKGoals',"Erro na página.")
-      sys.exit(0)
-
-def versao_disponivel():
-      try:
-            link=abrir_url('http://fightnight-xbmc.googlecode.com/svn/addons/fightnight/plugin.video.tvgolo/addon.xml')
-            match=re.compile('name="OKGoals"\r\n       version="(.+?)"\r\n       provider-name="fightnight">').findall(link)[0]
-      except:
-            ok = mensagemok('TV Golo',traducao(40026),traducao(40027),'')
-            match=traducao(40028)
-      return match
 
 def redirect(url):
       req = urllib2.Request(url)
@@ -525,16 +459,15 @@ params=get_params()
 url=None
 name=None
 mode=None
+thumb=None
 try: url=urllib.unquote_plus(params["url"])
 except: pass
 try: name=urllib.unquote_plus(params["name"])
 except: pass
 try: mode=int(params["mode"])
 except: pass
-
-print "Mode: "+str(mode)
-print "URL: "+str(url)
-print "Name: "+str(name)
+try: thumb=urllib.unquote_plus(params["thumb"])
+except: pass
 
 if mode==None or url==None or len(url)<1: print "Versao Instalada: v" + versao; menu_principal()
 elif mode==1: captura(name,url)
