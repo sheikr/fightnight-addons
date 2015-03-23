@@ -201,10 +201,7 @@ def captura(name,url):
       sapo=re.compile('src=".+?videos.sapo.pt/playhtml.+?file=(.+?)/1&"',re.DOTALL|re.M).findall(link)
       if not sapo: sapo=re.compile('src=".+?videos.sapo.pt/playhtml.+?file=(.+?)/1"',re.DOTALL|re.M).findall(link)
       if sapo:
-            print sapo
             for endereco in sapo:
-                  
-
                   if goals==True:
                         golo=findgolo(link,endereco)
                         golo=cleangolo(golo).replace('<','')
