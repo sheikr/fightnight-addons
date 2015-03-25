@@ -73,9 +73,9 @@ def login_abelhas(defora=False):
 def menu_principal(ligacao):
       if ligacao==1:
             conteudo=clean(abrir_url_cookie('http://abelhas.pt/action/Help'))
-            pontos=re.compile('href="/Points.aspx" title="Pontos" rel="nofollow".+?</a><strong>(.+?)</strong>').findall(conteudo)[0]
-            mensagens=re.compile('href="/action/PrivateMessage" id="topbarMessage".+?</a><strong>(.+?)</strong>').findall(conteudo)[0]
-            transf=re.compile('Transfe.+?ncia.+?<strong>(.+?)</strong>').findall(conteudo)[0]
+            #pontos=re.compile('href="/Points.aspx" title="Pontos" rel="nofollow".+?</a><strong>(.+?)</strong>').findall(conteudo)[0]
+            #mensagens=re.compile('href="/action/PrivateMessage" id="topbarMessage".+?</a><strong>(.+?)</strong>').findall(conteudo)[0]
+            #transf=re.compile('Transfe.+?ncia.+?<strong>(.+?)</strong>').findall(conteudo)[0]
             addDir(traducao(40007),MainURL,1,wtpath + art + 'pasta.png',1,True)
             addDir(traducao(40008),MainURL,2,wtpath + art + 'pasta.png',2,True)
             addDir(traducao(40009),MainURL + username,3,wtpath + art + 'pasta.png',2,True)
@@ -85,8 +85,8 @@ def menu_principal(ligacao):
             addDir(traducao(40011),'pesquisa',7,wtpath + art + 'pasta.png',3,True)
       elif ligacao==0:
             addDir(traducao(40015),MainURL,6,wtpath + art + 'pasta.png',1,True)
-      if ligacao==1: addLink("[COLOR blue][B]%s:[/B][/COLOR] %s  [COLOR blue][B]%s:[/B][/COLOR] %s" % (traducao(40012),mensagens,traducao(40014),pontos),'',wtpath + art + 'pasta.png')
-      addDir("[COLOR blue][B]%s[/B][/COLOR] | abelhas.pt" % (traducao(40018)),MainURL,8,wtpath + art + 'pasta.png',6,True)
+      #if ligacao==1: #addLink("[COLOR blue][B]%s:[/B][/COLOR] %s  [COLOR blue][B]%s:[/B][/COLOR] %s" % (traducao(40012),mensagens,traducao(40014),pontos),'',wtpath + art + 'pasta.png')
+      #addDir("[COLOR blue][B]%s[/B][/COLOR] | abelhas.pt" % (traducao(40018)),MainURL,8,wtpath + art + 'pasta.png',6,True)
       xbmc.executebuiltin("Container.SetViewMode(51)")
 
 def entrarnovamente(opcoes):
@@ -205,8 +205,11 @@ def pastas(url,name,formcont={},conteudo='',past=False):
                   mensagemok('Abelhas.pt','Sem resultados.')
                   sys.exit(0)
             try:
+                  #filename=re.compile('<input id="FileName" name="FileName" type="text" value="(.+?)" class="valid">').findall(conteudo)[0]
                   filename=re.compile('<input name="FileName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+                  #try:ftype=re.compile('<select class="input-validation-error mySelectBoxClass" id="FileType" name="FileType" style="position: absolute; opacity: 0; font-size: 13px; height: 31px;"><option selected="selected" value="(.+?)">').findall(conteudo)[0]
                   try:ftype=re.compile('<input name="FileType" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+                  
                   except: ftype='All'
                   #pagina=re.compile('<input name="Page" type="hidden" value="(.+?)" />').findall(conteudo)[0]
 
@@ -228,7 +231,9 @@ def pastas(url,name,formcont={},conteudo='',past=False):
                   conteudo=clean(abrir_url_cookie(url + extra))
 
       if re.search('ProtectedFolderChomikLogin',conteudo):
+            #chomikid=re.compile('<input type="hidden" name="ChomikId" value="(.+?)">').findall(conteudo)[0]
             chomikid=re.compile('<input id="ChomikId" name="ChomikId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+            #folderid=re.compile('<input name="folderId" type="hidden" value="(.+?)">').findall(conteudo)[0]
             folderid=re.compile('<input id="FolderId" name="FolderId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
             foldername=re.compile('<input id="FolderName" name="FolderName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
             token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)" />').findall(conteudo)[0]
@@ -236,6 +241,7 @@ def pastas(url,name,formcont={},conteudo='',past=False):
             
             
             
+            #form_d = {'ChomikId':chomikid,'FolderId':folderid,'Password':passwordfolder,'Remember':'true','__RequestVerificationToken':token}
             form_d = {'ChomikId':chomikid,'FolderId':folderid,'FolderName':foldername,'Password':passwordfolder,'Remember':'true','__RequestVerificationToken':token}
             ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':'abelhas.pt','Origin':'http://abelhas.pt','Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
             endlogin=MainURL + 'action/Files/LoginToFolder'
@@ -247,9 +253,10 @@ def pastas(url,name,formcont={},conteudo='',past=False):
             else:
                   pastas_ref(url)
       elif re.search('/action/UserAccess/LoginToProtectedWindow',conteudo):
-            chomikid=re.compile('<input id="TargetChomikId" name="TargetChomikId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+            #chomikid=re.compile('<input id="TargetChomikId" name="TargetChomikId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
             chomiktype=re.compile('<input id="ChomikType" name="ChomikType" type="hidden" value="(.+?)" />').findall(conteudo)[0]
             sex=re.compile('<input id="Sex" name="Sex" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+            #accname=re.compile('<input id="__accno" name="__accno" type="hidden" value="(.+?)" />').findall(conteudo)[0]
             accname=re.compile('<input id="AccountName" name="AccountName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
             isadult=re.compile('<input id="AdultFilter" name="AdultFilter" type="hidden" value="(.+?)" />').findall(conteudo)[0]
             adultfilter=re.compile('<input id="AdultFilter" name="AdultFilter" type="hidden" value="(.+?)" />').findall(conteudo)[0]
@@ -258,6 +265,7 @@ def pastas(url,name,formcont={},conteudo='',past=False):
             
             
       
+            #form_d = {'Password':passwordfolder,'OK':'OK','RemeberMe':'true','AccountName':accname,'TargetChomikId':chomikid}
             form_d = {'Password':passwordfolder,'OK':'OK','RemeberMe':'true','IsAdult':isadult,'Sex':sex,'AccountName':accname,'AdultFilter':adultfilter,'ChomikType':chomiktype,'TargetChomikId':chomikid}
             ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':'abelhas.pt','Origin':'http://abelhas.pt','Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
             endlogin=MainURL + 'action/UserAccess/LoginToProtectedWindow'
@@ -283,16 +291,17 @@ def pastas(url,name,formcont={},conteudo='',past=False):
             except: pass
 
             try:
-                  pastas=re.compile('<div id="foldersList">(.+?)</table>').findall(conteudo)[0]
-                  seleccionados=re.compile('<a href="/(.+?)".+?title="(.+?)">(.+?)</a>').findall(pastas)
+                  pastas=re.compile('<div id="foldersList">(.+?)</table>.+?').findall(conteudo)
+                  seleccionados=re.compile('<a href="/(.+?)".+?title="(.+?)">(.+?)</a>').findall(pastas[0])
                   for urlpasta,nomepasta,password in seleccionados:
+                        
                         if re.search('<span class="pass">',password): displock=' (' + traducao(40024)+')'
                         else:displock=''
-                        addDir(nomepasta + displock,MainURL + urlpasta,3,wtpath + art + 'pasta.png',len(seleccionados),True)
+                        addDir('[COLOR white]' + nomepasta + '[/COLOR]' + displock,MainURL + urlpasta,3,wtpath + art + 'pasta.png',len(seleccionados),True)
             except: pass
             #contributo mafarricos com alteracoes, ty
-            items1=re.compile('<li class="fileItemContainer">\s+<p class="filename">\s+<a class="downloadAction" href=".+?">    <span class="bold">.+?</span>(.+?)</a>\s+</p>\s+<div class="thumbnail">\s+<div class="thumbnailWrapper expType" rel="Image" style=".+?">\s+<a href="(.+?)" class="thumbImg" rel="highslide" style=".+?" title="(.+?)">\s+<img src=".+?" rel=".+?" alt=".+?" style=".+?"/>\s+</a>\s+</div>\s+</div>\s+<div class="smallTab">\s+<ul>\s+<li>\s+(.+?)</li>\s+<li><span class="date">(.+?)</span></li>').findall(conteudo)         
-            for extensao,urlficheiro,tituloficheiro,tamanhoficheiro,dataficheiro in items1:
+            items1=re.compile('<a class="expanderHeader downloadAction" href="(.+?)" title="(.+?)">.+?</span>(.+?)</a>.+?<li><span>(.+?)</span></li>.+?<span class="downloadsCounter">.+?<li>(.+?)</li>').findall(conteudo)
+            for urlficheiro,tituloficheiro,extensao,tamanhoficheiro,dataficheiro in items1:
                   extensao=extensao.replace(' ','')
                   tamanhoficheiro=tamanhoficheiro.replace(' ','')
                   if extensao=='.rar' or extensao=='.RAR' or extensao == '.zip' or extensao=='.ZIP' or extensao=='.RAR' or extensao=='.7z' or extensao=='.7Z': thumb=wtpath + art + 'rar.png'
@@ -303,32 +312,34 @@ def pastas(url,name,formcont={},conteudo='',past=False):
                   tamanhoparavariavel=' (' + tamanhoficheiro + ')'
                   if past==False: modo=4
                   else: modo=22
-                  addCont('[B]' + tituloficheiro + '[/B]' + tamanhoparavariavel,MainURL + urlficheiro,modo,tamanhoparavariavel,thumb,len(items1),past,False)                  
+                  addCont('[B][COLOR orange]' + tituloficheiro +'[/COLOR][COLOR white]' + extensao + '[/COLOR][/B]' + '[COLOR darkgreen]' + tamanhoparavariavel + '[/COLOR]',MainURL + urlficheiro,modo,tamanhoparavariavel,thumb,len(items1),past,False)                  
             #contributo mafarricos com alteracoes, ty
-            items2=re.compile('<ul class="borderRadius tabGradientBg">.+?<li><span>(.+?)</span></li>.+?<li><span class="date">(.+?)</span></li></ul></div>.+?<ul>            <li><a href="/(.+?)" class="downloadAction".+?<li class="fileActionsFacebookSend" data-url=".+?" data-title="(.+?)">.+?<span class="bold">.+?</span>(.+?)</a>').findall(conteudo)
-            for tamanhoficheiro,dataficheiro,urlficheiro, tituloficheiro,extensao in items2:
+            items2=re.compile('<a class="downloadAction" href="(.+?)">\s+<span class="bold">(.+?)</span>(.+?)</a>.+?<li>(.+?)</li>.+?<li><span class="date">(.+?)</span></li>').findall(conteudo)
+            for urlficheiro,tituloficheiro,extensao,tamanhoficheiro,dataficheiro in items2:
                   extensao=extensao.replace(' ','')
-                  if extensao=='.rar' or extensao=='.RAR' or extensao == '.zip' or extensao=='.ZIP' or extensao=='.RAR' or extensao=='.7z' or extensao=='.7Z': thumb=wtpath + art + 'rar.png'
-                  elif extensao=='.mp3' or extensao=='.MP3' or extensao == '.wma' or extensao=='.WMA' or extensao=='.m3u' or extensao=='.M3U' or extensao=='.flac' or extensao=='.FLAC': thumb=wtpath + art + 'musica.png'
+                  if extensao=='.rar' or extensao=='.RAR' or extensao == '.zip' or extensao=='.ZIP' or extensao=='.7z' or extensao=='.7Z': thumb=wtpath + art + 'rar.png'
+                  elif extensao=='.mp3' or extensao=='.MP3' or extensao=='.ogg' or extensao=='.OGG' or extensao=='.aac' or extensao=='.AAC' or extensao == '.wma' or extensao=='.WMA' or extensao=='.m3u' or extensao=='.M3U' or extensao=='.flac' or extensao=='.FLAC': thumb=wtpath + art + 'musica.png'
                   elif extensao=='.jpg' or extensao == '.JPG' or extensao == '.bmp' or extensao == '.BMP' or extensao=='.gif' or extensao=='.GIF' or extensao=='.png' or extensao=='.PNG': thumb=wtpath + art + 'foto.png'
-                  elif extensao=='.mkv' or extensao == '.MKV' or extensao == '.avi' or extensao == '.AVI' or extensao=='.mp4' or extensao=='.MP4' or extensao=='.3gp' or extensao=='.3GP' or extensao=='.wmv' or extensao=='.WMV': thumb=wtpath + art + 'video.png'
+                  elif extensao=='.mkv' or extensao == '.MKV' or extensao == '.ogm' or extensao == '.OGM' or extensao == '.avi' or extensao == '.AVI' or extensao=='.mp4' or extensao=='.MP4' or extensao=='.3gp' or extensao=='.3GP' or extensao=='.wmv' or extensao=='.WMV' or extensao=='.mpg' or extensao=='.MPG': thumb=wtpath + art + 'video.png'
                   else:thumb=wtpath + art + 'file.png'
                   tamanhoparavariavel=' (' + tamanhoficheiro + ')'
                   if past==False: modo=4
                   else: modo=22
-                  addCont('[B]' + tituloficheiro + extensao + '[/B]' + tamanhoparavariavel,MainURL + urlficheiro,modo,tamanhoparavariavel,thumb,len(items2),past,False)
+                  addCont('[B][COLOR orange]' + tituloficheiro +'[/COLOR][COLOR white]' + extensao + '[/COLOR][/B]' + '[COLOR darkgreen]' + tamanhoparavariavel + '[/COLOR]',MainURL + urlficheiro,modo,tamanhoparavariavel,thumb,len(items2),past,False)
             if not items1:
                   if not items2:
                         conteudo=clean(conteudo)
                         #isto ta feio
-                        items3=re.compile('<div class="thumbnail">.+?<a href="(.+?)".+?title="(.+?)">.+?<div class="smallTab">.+?<li>(.+?)</li>.+?<span class="date">(.+?)</span>').findall(conteudo)
-                        for urlficheiro,tituloficheiro, tamanhoficheiro,dataficheiro in items3:
+                        items3=re.compile('<li class="fileItemContainer">.+?<span class="bold">.+?</span>(.+?)</a>.+?<div class="thumbnail">.+?<a href="(.+?)".+?title="(.+?)">\s+<img.+?<div class="smallTab">.+?<li>(.+?)</li>.+?<span class="date">(.+?)</span>').findall(conteudo)
+                        for extensao,urlficheiro,tituloficheiro,tamanhoficheiro,dataficheiro in items3:
                               tamanhoficheiro=tamanhoficheiro.replace(' ','')
+                              extensao=extensao.replace(' ','')
+                              tituloficheiro=tituloficheiro.replace(str(extensao),'')
                               thumb=wtpath + art + 'file.png'
                               tamanhoparavariavel=' (' + tamanhoficheiro + ')'
                               if past==False: modo=4
                               else: modo=22
-                              addCont('[B]' + tituloficheiro + '[/B]' + tamanhoparavariavel,MainURL + urlficheiro,modo,tamanhoparavariavel,thumb,len(items2),past,False)
+                              addCont('[B][COLOR orange]' + tituloficheiro +'[/COLOR][COLOR white]' + extensao + '[/COLOR][/B]' + '[COLOR darkgreen]' + tamanhoparavariavel + '[/COLOR]',MainURL + urlficheiro,modo,tamanhoparavariavel,thumb,len(items2),past,False)
                               
             paginas(conteudo)
             
@@ -421,26 +432,26 @@ def pastas_de_fora(url,name,formcont={},conteudo='',past=False):
 		except: pass
 		#contributo mafarricos com alteracoes, ty
 		items1=re.compile('<li class="fileItemContainer">\s+<p class="filename">\s+<a class="downloadAction" href=".+?">    <span class="bold">.+?</span>(.+?)</a>\s+</p>\s+<div class="thumbnail">\s+<div class="thumbnailWrapper expType" rel="Image" style=".+?">\s+<a href="(.+?)" class="thumbImg" rel="highslide" style=".+?" title="(.+?)">\s+<img src=".+?" rel=".+?" alt=".+?" style=".+?"/>\s+</a>\s+</div>\s+</div>\s+<div class="smallTab">\s+<ul>\s+<li>\s+(.+?)</li>\s+<li><span class="date">(.+?)</span></li>').findall(conteudo)         
-		for extensao,urlficheiro,tituloficheiro,tamanhoficheiro,dataficheiro in items1:
+		for urlficheiro,tituloficheiro,extensao,tamanhoficheiro,dataficheiro in items1:
 			extensao=extensao.replace(' ','')
 			tamanhoficheiro=tamanhoficheiro.replace(' ','')
-			if extensao=='.rar' or extensao=='.RAR' or extensao == '.zip' or extensao=='.ZIP' or extensao=='.RAR' or extensao=='.7z' or extensao=='.7Z': thumb=wtpath + art + 'rar.png'
-			elif extensao=='.mp3' or extensao=='.MP3' or extensao == '.wma' or extensao=='.WMA' or extensao=='.m3u' or extensao=='.M3U' or extensao=='.flac' or extensao=='.FLAC': thumb=wtpath + art + 'musica.png'
+			if extensao=='.rar' or extensao=='.RAR' or extensao == '.zip' or extensao=='.ZIP' or extensao=='.7z' or extensao=='.7Z': thumb=wtpath + art + 'rar.png'
+			elif extensao=='.mp3' or extensao=='.MP3' or extensao=='.ogg' or extensao=='.OGG' or extensao=='.aac' or extensao=='.AAC' or extensao == '.wma' or extensao=='.WMA' or extensao=='.m3u' or extensao=='.M3U' or extensao=='.flac' or extensao=='.FLAC': thumb=wtpath + art + 'musica.png'
 			elif extensao=='.jpg' or extensao == '.JPG' or extensao == '.bmp' or extensao == '.BMP' or extensao=='.gif' or extensao=='.GIF' or extensao=='.png' or extensao=='.PNG': thumb=wtpath + art + 'foto.png'
-			elif extensao=='.mkv' or extensao == '.MKV' or extensao == '.avi' or extensao == '.AVI' or extensao=='.mp4' or extensao=='.MP4' or extensao=='.3gp' or extensao=='.3GP' or extensao=='.wmv' or extensao=='.WMV': thumb=wtpath + art + 'video.png'
+			elif extensao=='.mkv' or extensao == '.MKV' or extensao == '.ogm' or extensao == '.OGM' or extensao == '.avi' or extensao == '.AVI' or extensao=='.mp4' or extensao=='.MP4' or extensao=='.3gp' or extensao=='.3GP' or extensao=='.wmv' or extensao=='.WMV' or extensao=='.mpg' or extensao=='.MPG': thumb=wtpath + art + 'video.png'
 			else:thumb=wtpath + art + 'file.png'
 			tamanhoparavariavel=' (' + tamanhoficheiro + ')'
 			if past==False: modo=4
 			else: modo=22
 			addCont('[B]' + tituloficheiro + '[/B]' + tamanhoparavariavel,MainURL + urlficheiro,modo,tamanhoparavariavel,thumb,len(items1),past,False)                  
-            #contributo mafarricos com alteracoes, ty
-		items2=re.compile('<ul class="borderRadius tabGradientBg">.+?<li><span>(.+?)</span></li>.+?<li><span class="date">(.+?)</span></li></ul></div>.+?<ul>            <li><a href="/(.+?)" class="downloadAction".+?<li class="fileActionsFacebookSend" data-url=".+?" data-title="(.+?)">.+?<span class="bold">.+?</span>(.+?)</a>').findall(conteudo)
-		for tamanhoficheiro,dataficheiro,urlficheiro, tituloficheiro,extensao in items2:
+		#contributo mafarricos com alteracoes, ty
+		items2=re.compile('<a class="downloadAction" href="(.+?)">\s+<span class="bold">(.+?)</span>(.+?)</a>.+?<li>(.+?)</li>.+?<li><span class="date">(.+?)</span></li>').findall(conteudo)
+		for urlficheiro,tituloficheiro,extensao,tamanhoficheiro,dataficheiro in items2:
 			extensao=extensao.replace(' ','')
-			if extensao=='.rar' or extensao=='.RAR' or extensao == '.zip' or extensao=='.ZIP' or extensao=='.RAR' or extensao=='.7z' or extensao=='.7Z': thumb=wtpath + art + 'rar.png'
-			elif extensao=='.mp3' or extensao=='.MP3' or extensao == '.wma' or extensao=='.WMA' or extensao=='.m3u' or extensao=='.M3U' or extensao=='.flac' or extensao=='.FLAC': thumb=wtpath + art + 'musica.png'
+			if extensao=='.rar' or extensao=='.RAR' or extensao == '.zip' or extensao=='.ZIP' or extensao=='.7z' or extensao=='.7Z': thumb=wtpath + art + 'rar.png'
+			elif extensao=='.mp3' or extensao=='.MP3' or extensao=='.ogg' or extensao=='.OGG' or extensao=='.aac' or extensao=='.AAC' or extensao == '.wma' or extensao=='.WMA' or extensao=='.m3u' or extensao=='.M3U' or extensao=='.flac' or extensao=='.FLAC': thumb=wtpath + art + 'musica.png'
 			elif extensao=='.jpg' or extensao == '.JPG' or extensao == '.bmp' or extensao == '.BMP' or extensao=='.gif' or extensao=='.GIF' or extensao=='.png' or extensao=='.PNG': thumb=wtpath + art + 'foto.png'
-			elif extensao=='.mkv' or extensao == '.MKV' or extensao == '.avi' or extensao == '.AVI' or extensao=='.mp4' or extensao=='.MP4' or extensao=='.3gp' or extensao=='.3GP' or extensao=='.wmv' or extensao=='.WMV': thumb=wtpath + art + 'video.png'
+			elif extensao=='.mkv' or extensao == '.MKV' or extensao == '.ogm' or extensao == '.OGM' or extensao == '.avi' or extensao == '.AVI' or extensao=='.mp4' or extensao=='.MP4' or extensao=='.3gp' or extensao=='.3GP' or extensao=='.wmv' or extensao=='.WMV' or extensao=='.mpg' or extensao=='.MPG': thumb=wtpath + art + 'video.png'
 			else:thumb=wtpath + art + 'file.png'
 			tamanhoparavariavel=' (' + tamanhoficheiro + ')'
 			if past==False: modo=4
@@ -453,8 +464,8 @@ def pastas_de_fora(url,name,formcont={},conteudo='',past=False):
 			if not items2:
 				conteudo=clean(conteudo)
 				#isto ta feio
-				items3=re.compile('<div class="thumbnail">.+?<a href="(.+?)".+?title="(.+?)">.+?<div class="smallTab">.+?<li>(.+?)</li>.+?<span class="date">(.+?)</span>').findall(conteudo)
-				for urlficheiro,tituloficheiro, tamanhoficheiro,dataficheiro in items3:
+				items3=re.compile('<li class="fileItemContainer">.+?<span class="bold">.+?</span>(.+?)</a>.+?<div class="thumbnail">.+?<a href="(.+?)".+?title="(.+?)">\s+<img.+?<div class="smallTab">.+?<li>(.+?)</li>.+?<span class="date">(.+?)</span>').findall(conteudo)
+				for extensao,urlficheiro,tituloficheiro,tamanhoficheiro,dataficheiro in items3:
 					tamanhoficheiro=tamanhoficheiro.replace(' ','')
 					thumb=wtpath + art + 'file.png'
 					tamanhoparavariavel=' (' + tamanhoficheiro + ')'
@@ -478,18 +489,18 @@ def obterlistadeficheiros():
                   extra='?requestedFolderMode=filesList&fileListSortType=Name&fileListAscending=True'
                   conteudo=clean(abrir_url_cookie(url + extra))
                   items1=re.compile('<li class="fileItemContainer">\s+<p class="filename">\s+<a class="downloadAction" href=".+?">    <span class="bold">.+?</span>(.+?)</a>\s+</p>\s+<div class="thumbnail">\s+<div class="thumbnailWrapper expType" rel="Image" style=".+?">\s+<a href="(.+?)" class="thumbImg" rel="highslide" style=".+?" title="(.+?)">\s+<img src=".+?" rel=".+?" alt=".+?" style=".+?"/>\s+</a>\s+</div>\s+</div>\s+<div class="smallTab">\s+<ul>\s+<li>\s+(.+?)</li>\s+<li><span class="date">(.+?)</span></li>').findall(conteudo)         
-                  for extensao,urlficheiro,tituloficheiro,tamanhoficheiro,dataficheiro in items1:
+                  for urlficheiro,tituloficheiro,extensao,tamanhoficheiro,dataficheiro in items1:
                         string.append(tituloficheiro)
                   #contributo mafarricos com alteracoes, ty
-                  items2=re.compile('<ul class="borderRadius tabGradientBg">.+?<li><span>(.+?)</span></li>.+?<li><span class="date">(.+?)</span></li></ul></div>.+?<ul>            <li><a href="/(.+?)" class="downloadAction".+?<li class="fileActionsFacebookSend" data-url=".+?" data-title="(.+?)">.+?<span class="bold">.+?</span>(.+?)</a>').findall(conteudo)
-                  for tamanhoficheiro,dataficheiro,urlficheiro, tituloficheiro,extensao in items2:
+                  items2=re.compile('<a class="downloadAction" href="(.+?)">\s+<span class="bold">(.+?)</span>(.+?)</a>.+?<li>(.+?)</li>.+?<li><span class="date">(.+?)</span></li>').findall(conteudo)
+                  for urlficheiro,tituloficheiro,extensao,tamanhoficheiro,dataficheiro in items2:
                         string.append(tituloficheiro)
                   if not items1:
                         if not items2:
                               conteudo=clean(conteudo)
                               #isto ta feio
-                              items3=re.compile('<div class="thumbnail">.+?<a href="(.+?)".+?title="(.+?)">.+?<div class="smallTab">.+?<li>(.+?)</li>.+?<span class="date">(.+?)</span>').findall(conteudo)
-                              for urlficheiro,tituloficheiro, tamanhoficheiro,dataficheiro in items3:
+                              items3=re.compile('<li class="fileItemContainer">.+?<span class="bold">.+?</span>(.+?)</a>.+?<div class="thumbnail">.+?<a href="(.+?)".+?title="(.+?)">\s+<img.+?<div class="smallTab">.+?<li>(.+?)</li>.+?<span class="date">(.+?)</span>').findall(conteudo)
+                              for extensao,urlficheiro,tituloficheiro,tamanhoficheiro,dataficheiro in items3:
                                     string.append(tituloficheiro)
             print string
 
@@ -557,14 +568,14 @@ def criarplaylist(url,name,formcont={},conteudo=''):
             else: pastas_ref(url)
       else:
             items1=re.compile('<li class="fileItemContainer">\s+<p class="filename">\s+<a class="downloadAction" href=".+?">    <span class="bold">.+?</span>(.+?)</a>\s+</p>\s+<div class="thumbnail">\s+<div class="thumbnailWrapper expType" rel="Image" style=".+?">\s+<a href="(.+?)" class="thumbImg" rel="highslide" style=".+?" title="(.+?)">\s+<img src=".+?" rel=".+?" alt=".+?" style=".+?"/>\s+</a>\s+</div>\s+</div>\s+<div class="smallTab">\s+<ul>\s+<li>\s+(.+?)</li>\s+<li><span class="date">(.+?)</span></li>').findall(conteudo)
-            for extensao,urlficheiro,tituloficheiro,tamanhoficheiro,dataficheiro in items1: analyzer(MainURL + urlficheiro,subtitles='',playterm='playlist',playlistTitle=tituloficheiro)
-            items2=re.compile('<ul class="borderRadius tabGradientBg">.+?<li><span>(.+?)</span></li>.+?<li><span class="date">(.+?)</span></li></ul></div>.+?<ul>            <li><a href="/(.+?)" class="downloadAction".+?<li class="fileActionsFacebookSend" data-url=".+?" data-title="(.+?)">.+?<span class="bold">.+?</span>(.+?)</a>').findall(conteudo)
-            for tamanhoficheiro,dataficheiro,urlficheiro, tituloficheiro,extensao in items2: analyzer(MainURL + urlficheiro,subtitles='',playterm='playlist',playlistTitle=tituloficheiro)				  
+            for urlficheiro,tituloficheiro,extensao,tamanhoficheiro,dataficheiro in items1: analyzer(MainURL + urlficheiro,subtitles='',playterm='playlist',playlistTitle=tituloficheiro)
+            items2=re.compile('<a class="downloadAction" href="(.+?)">\s+<span class="bold">(.+?)</span>(.+?)</a>.+?<li>(.+?)</li>.+?<li><span class="date">(.+?)</span></li>').findall(conteudo)
+            for urlficheiro,tituloficheiro,extensao,tamanhoficheiro,dataficheiro in items2: analyzer(MainURL + urlficheiro,subtitles='',playterm='playlist',playlistTitle=tituloficheiro)
             if not items1:
                   if not items2:
                         conteudo=clean(conteudo)
                         items3=re.compile('<div class="thumbnail">.+?<a href="(.+?)".+?title="(.+?)">.+?<div class="smallTab">.+?<li>(.+?)</li>.+?<span class="date">(.+?)</span>').findall(conteudo)
-                        for urlficheiro,tituloficheiro, tamanhoficheiro,dataficheiro in items3: analyzer(MainURL + urlficheiro,subtitles='',playterm='playlist',playlistTitle=tituloficheiro)
+                        for extensao,urlficheiro,tituloficheiro,tamanhoficheiro,dataficheiro in items3: analyzer(MainURL + urlficheiro,subtitles='',playterm='playlist',playlistTitle=tituloficheiro)
       mensagemprogresso.close()
       xbmcPlayer = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
       xbmcPlayer.play(playlist)
@@ -927,7 +938,7 @@ def get_params():
       return param
 
 def clean(text):
-      command={'\r':'','\n':'','\t':'','&nbsp;':' ','&quot;':'"','&amp;':'&','&ntilde;':'ñ','&#039;':'','&#39;':"'",'&170;':'ª','&#192;':'À','&#193;':'Á','&#194;':'Â','&#195;':'Ã','&#199;':'Ç','&#201;':'É','&#202;':'Ê','&#205;':'Í','&#211;':'Ó','&#212;':'Ó','&#213;':'Õ','&#217;':'Ù','&#218;':'Ú','&#224;':'à','&#225;':'á','&#226;':'â','&#227;':'ã','&#231;':'ç','&#233;':'é','&#234;':'ê','&#237;':'í','&#243;':'ó','&#244;':'ô','&#245;':'õ','&#249;':'ù','&#250;':'ú'}
+      command={'\r':'','\n':'','\t':'','&nbsp;':' ','&quot;':'"','&amp;':'&','&ntilde;':'ñ','&#39;':'\'','&#170;':'ª','&#178;':'²','&#179;':'³','&#192;':'À','&#193;':'Á','&#194;':'Â','&#195;':'Ã','&#199;':'Ç','&#201;':'É','&#202;':'Ê','&#205;':'Í','&#211;':'Ó','&#212;':'Ó','&#213;':'Õ','&#217;':'Ù','&#218;':'Ú','&#224;':'à','&#225;':'á','&#226;':'â','&#227;':'ã','&#231;':'ç','&#232;':'è','&#233;':'é','&#234;':'ê','&#237;':'í','&#243;':'ó','&#244;':'ô','&#245;':'õ','&#249;':'ù','&#250;':'ú'}
       regex = re.compile("|".join(map(re.escape, command.keys())))
       return regex.sub(lambda mo: command[mo.group(0)], text)
 
