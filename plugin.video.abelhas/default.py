@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """ abelhas.pt
-    2013 fightnight"""
+    2015 fightnight"""
 
 import xbmc,xbmcaddon,xbmcgui,xbmcplugin,urllib,urllib2,os,re,sys,datetime,time
 from t0mm0.common.net import Net
@@ -9,9 +9,10 @@ net=Net()
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '0.1.02'
+versao = '1.0.0'
 addon_id = 'plugin.video.abelhas'
 MainURL = 'http://abelhas.pt/'
+MinhaMainURL = 'http://minhateca.com.br/'
 art = '/resources/art/'
 user_agent = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1468.0 Safari/537.36'
 selfAddon = xbmcaddon.Addon(id=addon_id)
@@ -23,8 +24,15 @@ mensagemprogresso = xbmcgui.DialogProgress()
 downloadPath = selfAddon.getSetting('download-folder').decode('utf-8')
 pastaperfil = xbmc.translatePath(selfAddon.getAddonInfo('profile')).decode('utf-8')
 cookies = os.path.join(pastaperfil, "cookies.lwp")
-username = urllib.quote(selfAddon.getSetting('abelhas-username'))
-password = selfAddon.getSetting('abelhas-password')
+username_ab = urllib.quote(selfAddon.getSetting('abelhas-username'))
+username_mt = urllib.quote(selfAddon.getSetting('minhateca-username'))
+
+####
+if selfAddon.getSetting('abelhas-enable') == 'true' and selfAddon.getSetting('abelhas-check') == 'true': status_abelhas=True
+else: status_abelhas=False
+if selfAddon.getSetting('minhateca-enable') == 'true' and selfAddon.getSetting('minhateca-check') == 'true':status_minhateca=True
+else: status_minhateca=False
+####
 
 def traducao(texto):
       return traducaoma(texto).encode('utf-8')
@@ -38,7 +46,7 @@ def login_abelhas(defora=False):
             token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)" />').findall(link)[0]
             
             
-            form_d = {'RedirectUrl':'','Redirect':'True','FileId':0,'Login':username,'Password':password,'RememberMe':'true','__RequestVerificationToken':token}
+            form_d = {'RedirectUrl':'','Redirect':'True','FileId':0,'Login':username_ab,'Password':selfAddon.getSetting('abelhas-password'),'RememberMe':'true','__RequestVerificationToken':token}
             ref_data = {'Accept': '*/*', 'Content-Type': 'application/x-www-form-urlencoded','Origin': 'http://abelhas.pt', 'X-Requested-With': 'XMLHttpRequest', 'Referer': 'http://abelhas.pt/','User-Agent':user_agent}
             endlogin=MainURL + 'action/login/login'
             try:
@@ -48,38 +56,78 @@ def login_abelhas(defora=False):
             link='Erro'
             logintest='Erro'
 
-      if selfAddon.getSetting('abelhas-username')== '':
-            ok = mensagemok('Abelhas.pt',traducao(40000),traducao(40001))
+      if re.search('003eA senha indicada n',logintest):
+            mensagemok('Abelhas.pt',traducao(40002))
             entrarnovamente(1)
-      else:    
-            if re.search('003eA senha indicada n',logintest):
-                  mensagemok('Abelhas.pt',traducao(40002))
-                  entrarnovamente(1)
-            elif re.search('existe. Certifica-te que indicaste o nome correcto.',logintest):
-                  mensagemok('Abelhas.pt',traducao(40003))
-                  entrarnovamente(1)
-            elif re.search(username,logintest):
-                  #xbmc.executebuiltin("XBMC.Notification(abelhas.pt,"+traducao(40004)+",'500000',"+iconpequeno.encode('utf-8')+")")
-                  net.save_cookies(cookies)
-                  if not defora: menu_principal(1)
+            return False
+      elif re.search('existe. Certifica-te que indicaste o nome correcto.',logintest):
+            mensagemok('Abelhas.pt',traducao(40003))
+            entrarnovamente(1)
+            return False
+      elif re.search(username_ab,logintest):
+            #xbmc.executebuiltin("XBMC.Notification(abelhas.pt,"+traducao(40004)+",'500000',"+iconpequeno.encode('utf-8')+")")
+            net.save_cookies(cookies)
+            return True
+            #if not defora: menu_principal(1)
+      
+      elif re.search('Erro',logintest) or link=='Erro':
+            opcao= xbmcgui.Dialog().yesno('abelhas.pt', traducao(40005), "", "",traducao(40006), 'OK')
+            return False
+            #if opcao: menu_principal(0)
+            #else: login_abelhas()
+      else: return False
             
-            elif re.search('Erro',logintest) or link=='Erro':
-                  opcao= xbmcgui.Dialog().yesno('abelhas.pt', traducao(40005), "", "",traducao(40006), 'OK')
-                  if opcao: menu_principal(0)
-                  else: login_abelhas()
-                
+def login_minhateca(defora=False):
+      print "Sem cookie. A iniciar login"
+      try:
+            link=abrir_url(MinhaMainURL)
+            token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)" />').findall(link)[0]
+            
+            
+            form_d = {'RedirectUrl':'','Redirect':'True','FileId':0,'Login':username_mt,'Password':selfAddon.getSetting('minhateca-password'),'RememberMe':'true','__RequestVerificationToken':token}
+            ref_data = {'Accept': '*/*', 'Content-Type': 'application/x-www-form-urlencoded','Origin': 'http://minhateca.com.br', 'X-Requested-With': 'XMLHttpRequest', 'Referer': 'http://minhateca.com.br/','User-Agent':user_agent}
+            endlogin=MinhaMainURL + 'action/login/login'
+            try:
+                  logintest= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
+            except:
+                  logintest='Erro'
+      except:
+            link='Erro'
+            logintest='Erro'
+
+      if re.search('003eA senha indicada n',logintest):
+            mensagemok('Minhateca',traducao(40002))
+            entrarnovamente(1)
+            return False
+      elif re.search('existe. Certifique se que indicou o nome correto.',logintest):
+            mensagemok('Minhateca',traducao(40003))
+            entrarnovamente(1)
+            return False
+      elif re.search(username_ab,logintest):
+            #xbmc.executebuiltin("XBMC.Notification(abelhas.pt,"+traducao(40004)+",'500000',"+iconpequeno.encode('utf-8')+")")
+            net.save_cookies(cookies)
+            #if not defora: menu_principal(1)
+            return True
+      
+      elif re.search('Erro',logintest) or link=='Erro':
+            opcao= xbmcgui.Dialog().yesno('Minhateca', traducao(40005), "", "",traducao(40006), 'OK')
+            return False
+            #if opcao: menu_principal(0)
+            #else: login_minhateca()
+      else: return False
+
+
 ################################################### MENUS PLUGIN ######################################################
 
 def menu_principal(ligacao):
       if ligacao==1:
-            conteudo=clean(abrir_url_cookie('http://abelhas.pt/action/Help'))
-            #pontos=re.compile('href="/Points.aspx" title="Pontos" rel="nofollow".+?</a><strong>(.+?)</strong>').findall(conteudo)[0]
-            #mensagens=re.compile('href="/action/PrivateMessage" id="topbarMessage".+?</a><strong>(.+?)</strong>').findall(conteudo)[0]
-            #transf=re.compile('Transfe.+?ncia.+?<strong>(.+?)</strong>').findall(conteudo)[0]
+            addDir('[B][COLOR red]Addon em actualização/manutenção! Possíveis bugs.[/COLOR][/B]',MainURL,1,wtpath + art + 'pasta.png',1,True)
             addDir(traducao(40007),MainURL,1,wtpath + art + 'pasta.png',1,True)
-            addDir(traducao(40008),MainURL,2,wtpath + art + 'pasta.png',2,True)
-            addDir(traducao(40009),MainURL + username,3,wtpath + art + 'pasta.png',2,True)
-            addDir(traducao(40010),'pastas',5,wtpath + art + 'pasta.png',2,True)
+            addDir('Mais Recentes',MinhaMainURL,2,wtpath + art + 'pasta.png',2,True)
+            if status_abelhas: addDir('A Minha Abelha',MainURL + username_ab,3,wtpath + art + 'pasta.png',2,True)
+            if status_minhateca: addDir('A Minha Minhateca',MinhaMainURL + username_ab,3,wtpath + art + 'pasta.png',2,True)
+            if status_abelhas: addDir('Ir para uma Abelha','pastas',5,wtpath + art + 'pasta.png',2,True)
+            if status_minhateca: addDir('Ir para uma Minhateca','pastas',5,wtpath + art + 'pasta.png',2,True)
             addDir(traducao(40037),MainURL,9,wtpath + art + 'pasta.png',2,True)
             addDir('Atalhos',MainURL,18,wtpath + art + 'pasta.png',2,True)
             addDir(traducao(40011),'pesquisa',7,wtpath + art + 'pasta.png',3,True)
@@ -95,19 +143,31 @@ def entrarnovamente(opcoes):
       addDir(traducao(40021),MainURL,8,wtpath + art + 'defs.png',1,False)
 
 def topcolecionadores():
-      conteudo=clean(abrir_url_cookie('http://abelhas.pt/' + username))
-      users=re.compile('<li><div class="friend avatar"><a href="/(.+?)" title="(.+?)"><img alt=".+?" src="(.+?)" /><span></span></a></div>.+?<i>(.+?)</i></li>').findall(conteudo)
-      for urluser,nomeuser,thumbuser,nruser in users:
-            addDir('[B][COLOR blue]' + nruser + 'º[/B][/COLOR] ' + nomeuser,MainURL + urluser,3,thumbuser,len(users),True)
-      xbmc.executebuiltin("Container.SetViewMode(500)")
+      if status_abelhas:
+            conteudo=clean(abrir_url_cookie('http://abelhas.pt/' + username_ab))
+            users=re.compile('<li><div class="friend avatar"><a href="/(.+?)" title="(.+?)"><img alt=".+?" src="(.+?)" /><span></span></a></div>.+?<i>(.+?)</i></li>').findall(conteudo)
+            for urluser,nomeuser,thumbuser,nruser in users:
+                  addDir('[B][COLOR gold]' + nruser + 'º Abelhas[/B][/COLOR] ' + nomeuser,MainURL + urluser,3,thumbuser,len(users),True)
+      if status_minhateca:
+            conteudo=clean(abrir_url_cookie('http://minhateca.com.br/' + username_ab))
+            users=re.compile('<li><div class="friend avatar"><a href="/(.+?)" title="(.+?)"><img alt=".+?" src="(.+?)" /><span></span></a></div>.+?<i>(.+?)</i></li>').findall(conteudo)
+            for urluser,nomeuser,thumbuser,nruser in users:
+                  addDir('[B][COLOR blue]' + nruser + 'º Minhateca[/B][/COLOR] ' + nomeuser,MinhaMainURL + urluser,3,thumbuser,len(users),True)
+      #xbmc.executebuiltin("Container.SetViewMode(500)")
       xbmcplugin.setContent(int(sys.argv[1]), 'livetv')
 
-def abelhasmaisrecentes():
-      conteudo=clean(abrir_url_cookie('http://abelhas.pt/action/LastAccounts/MoreAccounts'))
-      users=re.compile('<div class="friend avatar"><a href="/(.+?)" title="(.+?)"><img alt=".+?" src="(.+?)" /><span>').findall(conteudo)
-      for urluser,nomeuser,thumbuser in users:
-            addDir(nomeuser,MainURL + urluser,3,thumbuser,len(users),True)
-      xbmc.executebuiltin("Container.SetViewMode(500)")
+def abelhasmaisrecentes(url):
+      if status_abelhas:
+            conteudo=clean(abrir_url_cookie('http://abelhas.pt/action/LastAccounts/MoreAccounts'))
+            users=re.compile('<div class="friend avatar"><a href="/(.+?)" title="(.+?)"><img alt=".+?" src="(.+?)" /><span>').findall(conteudo)
+            for urluser,nomeuser,thumbuser in users:
+                  addDir('[B][COLOR gold]' + nomeuser + '[/B][/COLOR]',MainURL + urluser,3,thumbuser,len(users),True)
+      if status_minhateca:
+            conteudo=clean(abrir_url_cookie('http://minhateca.com.br/action/LastAccounts/MoreAccounts'))
+            users=re.compile('<div class="friend avatar"><a href="/(.+?)" title="(.+?)"><img alt=".+?" src="(.+?)" /><span>').findall(conteudo)
+            for urluser,nomeuser,thumbuser in users:
+                  addDir('[B][COLOR blue]' + nomeuser + '[/B][/COLOR]',MinhaMainURL + urluser,3,thumbuser,len(users),True)
+      #xbmc.executebuiltin("Container.SetViewMode(500)")
       xbmcplugin.setContent(int(sys.argv[1]), 'livetv')
 
 def pesquisa():
@@ -120,7 +180,7 @@ def pesquisa():
       else:sys.exit(0)
 
 def favoritos():
-      conteudo=abrir_url_cookie(MainURL + username)
+      conteudo=abrir_url_cookie(MainURL + username_ab)
       chomikid=re.compile('<input id="FriendsTargetChomikName" name="FriendsTargetChomikName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
       token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)" />').findall(conteudo)[0]
       
@@ -197,21 +257,25 @@ def atalhos(type=False):
             
 
 def pastas(url,name,formcont={},conteudo='',past=False):
+      if re.search('minhateca.com.br',url):
+            sitebase=MinhaMainURL
+            host='minhateca.com.br'
+            color='blue'
+      else:
+            sitebase=MainURL
+            host='abelhas.pt'
+            color='gold'
+            
       if re.search('action/SearchFiles',url):
-            ref_data = {'Host': 'abelhas.pt', 'Connection': 'keep-alive', 'Referer': 'http://abelhas.pt/','Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8','User-Agent':user_agent,'Referer': 'http://abelhas.pt/'}
-            endlogin=MainURL + 'action/SearchFiles'
+            ref_data = {'Host': host, 'Connection': 'keep-alive', 'Referer': 'http://'+host+'/','Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8','User-Agent':user_agent,'Referer': 'http://'+host+'/'}
+            endlogin=sitebase + 'action/SearchFiles'
             conteudo= net.http_POST(endlogin,form_data=formcont,headers=ref_data).content.encode('latin-1','ignore')
             if re.search('O ficheiro n&#227;o foi encontrado',conteudo):
-                  mensagemok('Abelhas.pt','Sem resultados.')
-                  sys.exit(0)
+                  mensagemok(host,'Sem resultados.')
             try:
-                  #filename=re.compile('<input id="FileName" name="FileName" type="text" value="(.+?)" class="valid">').findall(conteudo)[0]
                   filename=re.compile('<input name="FileName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-                  #try:ftype=re.compile('<select class="input-validation-error mySelectBoxClass" id="FileType" name="FileType" style="position: absolute; opacity: 0; font-size: 13px; height: 31px;"><option selected="selected" value="(.+?)">').findall(conteudo)[0]
                   try:ftype=re.compile('<input name="FileType" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-                  
                   except: ftype='All'
-                  #pagina=re.compile('<input name="Page" type="hidden" value="(.+?)" />').findall(conteudo)[0]
 
                   pagina=1
                   token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)"').findall(conteudo)[0]
@@ -220,8 +284,8 @@ def pastas(url,name,formcont={},conteudo='',past=False):
                   from t0mm0.common.addon import Addon
                   addon=Addon(addon_id)
                   addon.save_data('temp.txt',form_d)
-                  ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':'abelhas.pt','Origin':'http://abelhas.pt','Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
-                  endlogin=MainURL + 'action/SearchFiles/Results'
+                  ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':host,'Origin':'http://'+host,'Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
+                  endlogin=sitebase + 'action/SearchFiles/Results'
                   conteudo= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
             except: pass
             
@@ -231,49 +295,38 @@ def pastas(url,name,formcont={},conteudo='',past=False):
                   conteudo=clean(abrir_url_cookie(url + extra))
 
       if re.search('ProtectedFolderChomikLogin',conteudo):
-            #chomikid=re.compile('<input type="hidden" name="ChomikId" value="(.+?)">').findall(conteudo)[0]
             chomikid=re.compile('<input id="ChomikId" name="ChomikId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-            #folderid=re.compile('<input name="folderId" type="hidden" value="(.+?)">').findall(conteudo)[0]
             folderid=re.compile('<input id="FolderId" name="FolderId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
             foldername=re.compile('<input id="FolderName" name="FolderName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
             token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)" />').findall(conteudo)[0]
             passwordfolder=caixadetexto('password')
             
-            
-            
-            #form_d = {'ChomikId':chomikid,'FolderId':folderid,'Password':passwordfolder,'Remember':'true','__RequestVerificationToken':token}
+
             form_d = {'ChomikId':chomikid,'FolderId':folderid,'FolderName':foldername,'Password':passwordfolder,'Remember':'true','__RequestVerificationToken':token}
-            ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':'abelhas.pt','Origin':'http://abelhas.pt','Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
-            endlogin=MainURL + 'action/Files/LoginToFolder'
+            ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':host,'Origin':'http://' + host,'Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
+            endlogin=sitebase + 'action/Files/LoginToFolder'
             teste= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
             teste=urllib.unquote(teste)
             if re.search('IsSuccess":false',teste):
-                  mensagemok('Abelhas.pt',traducao(40002))
+                  mensagemok('Erro',traducao(40002))
                   sys.exit(0)
             else:
                   pastas_ref(url)
       elif re.search('/action/UserAccess/LoginToProtectedWindow',conteudo):
-            #chomikid=re.compile('<input id="TargetChomikId" name="TargetChomikId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
             chomiktype=re.compile('<input id="ChomikType" name="ChomikType" type="hidden" value="(.+?)" />').findall(conteudo)[0]
             sex=re.compile('<input id="Sex" name="Sex" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-            #accname=re.compile('<input id="__accno" name="__accno" type="hidden" value="(.+?)" />').findall(conteudo)[0]
             accname=re.compile('<input id="AccountName" name="AccountName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
             isadult=re.compile('<input id="AdultFilter" name="AdultFilter" type="hidden" value="(.+?)" />').findall(conteudo)[0]
             adultfilter=re.compile('<input id="AdultFilter" name="AdultFilter" type="hidden" value="(.+?)" />').findall(conteudo)[0]
             
             passwordfolder=caixadetexto('password')
-            
-            
-      
-            #form_d = {'Password':passwordfolder,'OK':'OK','RemeberMe':'true','AccountName':accname,'TargetChomikId':chomikid}
             form_d = {'Password':passwordfolder,'OK':'OK','RemeberMe':'true','IsAdult':isadult,'Sex':sex,'AccountName':accname,'AdultFilter':adultfilter,'ChomikType':chomiktype,'TargetChomikId':chomikid}
-            ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':'abelhas.pt','Origin':'http://abelhas.pt','Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
-            endlogin=MainURL + 'action/UserAccess/LoginToProtectedWindow'
+            ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':host,'Origin':'http://'+host,'Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
+            endlogin=sitebase + 'action/UserAccess/LoginToProtectedWindow'
             teste= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
             teste=urllib.unquote(teste)
             if re.search('<span class="field-validation-error">A password introduzida est',teste):
                   mensagemok('Abelhas.pt',traducao(40002))
-                  sys.exit(0)
             else:
                   pastas_ref(url)
       else:
@@ -285,7 +338,7 @@ def pastas(url,name,formcont={},conteudo='',past=False):
 
             try:
                   checker=url.split('/')[:-1]
-                  if len(checker) > 3 and not re.search('action/SearchFiles',url) and not re.search('abelhas.pt/action/nada',url):
+                  if len(checker) > 3 and not re.search('action/SearchFiles',url) and not re.search('/action/nada',url):
                         urlbefore='/'.join(checker)
                         addDir('[COLOR blue][B]Uma pasta atrás[/B][/COLOR]',urlbefore,3,wtpath + art + 'seta.png',1,True)
             except: pass
@@ -297,7 +350,7 @@ def pastas(url,name,formcont={},conteudo='',past=False):
                         
                         if re.search('<span class="pass">',password): displock=' (' + traducao(40024)+')'
                         else:displock=''
-                        addDir('[COLOR white]' + nomepasta + '[/COLOR]' + displock,MainURL + urlpasta,3,wtpath + art + 'pasta.png',len(seleccionados),True)
+                        addDir('[B][COLOR white]' + nomepasta + '[/COLOR][/B]' + displock,sitebase + urlpasta,3,wtpath + art + 'pasta.png',len(seleccionados),True)
             except: pass
             #contributo mafarricos com alteracoes, ty
             items1=re.compile('<a class="expanderHeader downloadAction" href="(.+?)" title="(.+?)">.+?</span>(.+?)</a>.+?<li><span>(.+?)</span></li>.+?<span class="downloadsCounter">.+?<li>(.+?)</li>').findall(conteudo)
@@ -312,7 +365,7 @@ def pastas(url,name,formcont={},conteudo='',past=False):
                   tamanhoparavariavel=' (' + tamanhoficheiro + ')'
                   if past==False: modo=4
                   else: modo=22
-                  addCont('[B][COLOR orange]' + tituloficheiro +'[/COLOR][COLOR white]' + extensao + '[/COLOR][/B]' + '[COLOR darkgreen]' + tamanhoparavariavel + '[/COLOR]',MainURL + urlficheiro,modo,tamanhoparavariavel,thumb,len(items1),past,False)                  
+                  addCont('[B][COLOR '+color+']' + tituloficheiro + extensao + '[/COLOR][/B]' + '[COLOR white]' + tamanhoparavariavel + '[/COLOR]',sitebase + urlficheiro,modo,tamanhoparavariavel,thumb,len(items1),past,False)
             #contributo mafarricos com alteracoes, ty
             items2=re.compile('<a class="downloadAction" href="(.+?)">\s+<span class="bold">(.+?)</span>(.+?)</a>.+?<li>(.+?)</li>.+?<li><span class="date">(.+?)</span></li>').findall(conteudo)
             for urlficheiro,tituloficheiro,extensao,tamanhoficheiro,dataficheiro in items2:
@@ -325,7 +378,7 @@ def pastas(url,name,formcont={},conteudo='',past=False):
                   tamanhoparavariavel=' (' + tamanhoficheiro + ')'
                   if past==False: modo=4
                   else: modo=22
-                  addCont('[B][COLOR orange]' + tituloficheiro +'[/COLOR][COLOR white]' + extensao + '[/COLOR][/B]' + '[COLOR darkgreen]' + tamanhoparavariavel + '[/COLOR]',MainURL + urlficheiro,modo,tamanhoparavariavel,thumb,len(items2),past,False)
+                  addCont('[B][COLOR '+color+']' + tituloficheiro + extensao + '[/COLOR][/B]' + '[COLOR white]' + tamanhoparavariavel + '[/COLOR]',sitebase + urlficheiro,modo,tamanhoparavariavel,thumb,len(items2),past,False)
             if not items1:
                   if not items2:
                         conteudo=clean(conteudo)
@@ -339,7 +392,7 @@ def pastas(url,name,formcont={},conteudo='',past=False):
                               tamanhoparavariavel=' (' + tamanhoficheiro + ')'
                               if past==False: modo=4
                               else: modo=22
-                              addCont('[B][COLOR orange]' + tituloficheiro +'[/COLOR][COLOR white]' + extensao + '[/COLOR][/B]' + '[COLOR darkgreen]' + tamanhoparavariavel + '[/COLOR]',MainURL + urlficheiro,modo,tamanhoparavariavel,thumb,len(items2),past,False)
+                              addCont('[B][COLOR '+color+']' + tituloficheiro + extensao + '[/COLOR][/B]' + '[COLOR white]' + tamanhoparavariavel + '[/COLOR]',sitebase + urlficheiro,modo,tamanhoparavariavel,thumb,len(items2),past,False)
                               
             paginas(conteudo)
             
@@ -584,6 +637,12 @@ def pastas_ref(url):
       pastas(url,name)
 
 def paginas(link):
+      if re.search('minhateca.com.br',link):
+            sitebase=MinhaMainURL
+            nextname='Minhateca'
+      else:
+            sitebase=MainURL
+            nextname='Abelhas'
       try:
             idmode=3
       
@@ -599,10 +658,10 @@ def paginas(link):
                   pagina=re.compile('anterior.+?<a href="/(.+?)" class="right" rel="(.+?)"').findall(conteudo)[0]
                   urlpag=pagina[0]
                   urlpag=urlpag.replace(' ','+')
-                  addDir('[COLOR blue]Página ' + pagina[1] + ' >>>[/COLOR]',MainURL + urlpag,idmode,wtpath + art + 'seta.png',1,True)
+                  addDir('[COLOR blue]Página ' + pagina[1] + ' ' + nextname + ' >>>[/COLOR]',sitebase + urlpag,idmode,wtpath + art + 'seta.png',1,True)
             except:
                   nrpagina=re.compile('type="hidden" value="([^"]+?)" /><input type="submit" value="p.+?gina seguinte.+?" /></form>').findall(link)[0]
-                  addDir('[COLOR blue]Página ' + nrpagina + ' >>>[/COLOR]',MainURL,12,wtpath + art + 'seta.png',1,True)
+                  addDir('[COLOR blue]Página ' + nrpagina + ' ' + nextname + ' >>>[/COLOR]',sitebase,12,wtpath + art + 'seta.png',1,True)
                   #pass
                   
       
@@ -614,6 +673,13 @@ def paginas(link):
 ########################################################### PLAYER ################################################
 
 def analyzer(url,subtitles='',playterm=False,playlistTitle=''):
+      if re.search('minhateca.com.br',url):
+            sitebase=MinhaMainURL
+            host='minhateca.com.br'
+      else:
+            sitebase=MainURL
+            host='abelhas.pt'
+      
       if playlistTitle == '': mensagemprogresso.create('Abelhas.pt', traducao(40025))
       linkfinal=''
       if subtitles=='sim': conteudo=abrir_url_cookie(url)
@@ -625,8 +691,8 @@ def analyzer(url,subtitles='',playterm=False,playlistTitle=''):
             fileid=re.compile('<input type="hidden" name="FileId" value="(.+?)"/>').findall(conteudo)[0]
             token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)" />').findall(conteudo)[0]
             form_d = {'fileId':fileid,'__RequestVerificationToken':token}
-            ref_data = {'Accept': '*/*', 'Content-Type': 'application/x-www-form-urlencoded','Origin': 'http://abelhas.pt', 'X-Requested-With': 'XMLHttpRequest', 'Referer': 'http://abelhas.pt/','User-Agent':user_agent}
-            endlogin=MainURL + 'action/License/Download'
+            ref_data = {'Accept': '*/*', 'Content-Type': 'application/x-www-form-urlencoded','Origin': 'http://' + host, 'X-Requested-With': 'XMLHttpRequest', 'Referer': 'http://'+host+'/','User-Agent':user_agent}
+            endlogin=sitebase + 'action/License/Download'
             final= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
             final=final.replace('\u0026','&').replace('\u003c','<').replace('\u003e','>').replace('\\','')
       except: pass
@@ -636,8 +702,8 @@ def analyzer(url,subtitles='',playterm=False,playlistTitle=''):
                   orgfile=re.compile('<input type="hidden" name="orgFile" value="(.+?)"').findall(final)[0]
                   userselection=re.compile('<input type="hidden" name="userSelection" value="(.+?)"').findall(final)[0]
                   form_d = {'fileId':fileid,'orgFile':orgfile,'userSelection':userselection,'__RequestVerificationToken':token}
-                  ref_data = {'Accept': '*/*', 'Content-Type': 'application/x-www-form-urlencoded','Origin': 'http://abelhas.pt', 'X-Requested-With': 'XMLHttpRequest', 'Referer': 'http://abelhas.pt/','User-Agent':user_agent}
-                  endlogin=MainURL + 'action/License/acceptLargeTransfer'
+                  ref_data = {'Accept': '*/*', 'Content-Type': 'application/x-www-form-urlencoded','Origin': 'http://' + sitebase, 'X-Requested-With': 'XMLHttpRequest', 'Referer': 'http://'+sitebase+'/','User-Agent':user_agent}
+                  endlogin=sitebase + 'action/License/acceptLargeTransfer'
                   final= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
       except: pass
       try:
@@ -839,10 +905,11 @@ class StopDownloading(Exception):
 def caixadetexto(url,ftype=''):
       ultpes=''
       save=False
-      if url=='pastas': title=traducao(40010) + " - Abelhas.pt"
+      if url=='pastas' and re.search('Abelha',name): title="Ir para - Abelhas.pt"
+      elif url=='pastas' and re.search('Minhateca',name): title="Ir para - Minhateca"
       elif url=='password': title="Password - Abelhas.pt"
       elif url=='pesquisa':
-            title=traducao(40031) + " - Abelhas.pt"
+            title=traducao(40031)
             ultpes=selfAddon.getSetting('ultima-pesquisa')
             save=True
       else: title="Abelhas.pt"
@@ -853,11 +920,16 @@ def caixadetexto(url,ftype=''):
             if search=='': sys.exit(0)
             encode=urllib.quote_plus(search)
             if save==True: selfAddon.setSetting('ultima-pesquisa', search)
-            if url=='pastas': pastas(MainURL + search,name)
+            if url=='pastas' and re.search('Abelha',name): pastas(MainURL + search,name)
+            elif url=='pastas' and re.search('Minhateca',name): pastas(MinhaMainURL + search,name) 
             elif url=='password': return search
             elif url=='pesquisa':
-                  form_d = {'FileName':encode,'submitSearchFiles':'Procurar','FileType':ftype,'IsGallery':'False'}
-                  pastas(MainURL + 'action/SearchFiles',name,formcont=form_d,past=True)
+                  if status_abelhas:
+                        form_d = {'FileName':encode,'submitSearchFiles':'Procurar','FileType':ftype,'IsGallery':'False'}
+                        pastas(MainURL + 'action/SearchFiles',name,formcont=form_d,past=True)
+                  if status_minhateca:
+                        form_d = {'FileName':encode,'submitSearchFiles':'Buscar','FileType':ftype,'IsGallery':'False'}
+                        pastas(MinhaMainURL + 'action/SearchFiles',name,formcont=form_d,past=True)
             
       else: sys.exit(0)
             
@@ -1190,9 +1262,30 @@ print "Name: "+str(tamanhoparavariavel)
 
 if mode==None or url==None or len(url)<1:
       print "Versao Instalada: v" + versao
-      login_abelhas()
+      if selfAddon.getSetting('abelhas-enable') == 'false' and selfAddon.getSetting('minhateca-enable') == 'false':
+            ok = mensagemok('Abelhas.pt / Minhateca','Precisa de configurar a(s) conta(s)','para aceder aos conteudos.')
+            entrarnovamente(1)
+      else:
+            
+            if selfAddon.getSetting('abelhas-enable') == 'true' and not selfAddon.getSetting('abelhas-username')== '':
+                  if login_abelhas():
+                        status_abelhas=True
+                        global status_abelhas
+                        status_abelhas=True
+                        selfAddon.setSetting('abelhas-check',"true")
+                  else: selfAddon.setSetting('abelhas-check',"false")
+            if selfAddon.getSetting('minhateca-enable') == 'true' and not selfAddon.getSetting('minhateca-username')== '':
+                  if login_minhateca():
+                        
+                        global status_minhateca
+                        status_minhateca=True
+                        selfAddon.setSetting('minhateca-check',"true")
+                  else: selfAddon.setSetting('minhateca-check',"false")
+            menu_principal(1)
+            
+                  
 elif mode==1: topcolecionadores()
-elif mode==2: abelhasmaisrecentes()
+elif mode==2: abelhasmaisrecentes(url)
 elif mode==3: pastas(url,name)
 elif mode==4: analyzer(url)
 elif mode==5: caixadetexto(url)

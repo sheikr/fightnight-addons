@@ -2,13 +2,17 @@
 <settings>
    <category label="Geral">
       <setting label="Configuracoes Gerais" type="lsep" />
-      <setting id="abelhas-username" type="text" label="Username abelhas.pt" default=""/>
-      <setting id="abelhas-password" type="text" label="Password abelhas.pt" default="" option="hidden" enable="!eq(-1,false)"/>
+      <setting id="abelhas-enable" type="bool" label="Activar abelhas.pt" default="false"/>
+      <setting id="abelhas-username" type="text" label="Username abelhas.pt" default="" visible="!eq(-1,false)"/>
+      <setting id="abelhas-password" type="text" label="Password abelhas.pt" default="" option="hidden" visible="!eq(-2,false)"/>
+      <setting id="abelhas-check" type="bool" label="30000" default="false" visible="false"/>
+      <setting type="sep"/>
+      <setting id="minhateca-enable" type="bool" label="Activar minhateca" default="false"/>
+      <setting id="minhateca-username" type="text" label="Username minhateca" default="" visible="!eq(-1,false)"/>
+      <setting id="minhateca-password" type="text" label="Password minhateca" default="" option="hidden" visible="!eq(-2,false)"/>
+      <setting id="minhateca-check" type="bool" label="30000" default="false" visible="false"/>
+      <setting type="sep"/>
       <setting id="aviso-extensao" type="bool" label="30000" default="true"/>
-      <setting id="mensagemfb2" type="bool" label="Mensagem FB" default="true" visible="false"/>
-      <setting id="debug-mode2" type="bool" label="30015" default="false" visible="false"/>
-      <setting id="marcadorultimaseccao" type="text" label="Ultima Seccao" default="" visible="false"/>
-      <setting id="ga_time2" type="text" label="GA Called" default="2000-01-01 00:00:00" visible="false"/>
       <setting id="ultima-pesquisa" type="text" label="Ultima pesquisa" default="" visible="false"/>
    </category>
 	<category label="30140">
