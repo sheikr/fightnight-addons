@@ -1,25 +1,12 @@
 # -*- coding: utf-8 -*-
 
 """ Autoruns
-    2013 fightnight"""
+    2015 fightnight"""
 
 import xbmc,xbmcaddon,xbmcgui,xbmcplugin,urllib,os,re,sys
 
-versao = '0.1.00'
-addon_id = 'plugin.video.autoruns'
-user_agent = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1468.0 Safari/537.36'
-selfAddon = xbmcaddon.Addon(id=addon_id)
-               
-################################################### MENUS PLUGIN ######################################################
-
-def menu_principal():
-      if selfAddon.getSetting('avisoinicial') == 'true':
-            xbmcgui.Dialog().ok('Autoruns','This addon improves xbmc speed by disabling','addons from startup. Be careful. Some addons','may require the startup service to run.')
-            xbmcgui.Dialog().ok('Autoruns','Click on addon name to turn off/on service.','Restart XBMC to reload changes.')
-            selfAddon.setSetting('avisoinicial', 'false')
-      listaraddons()
-
 def listaraddons():
+      addDir('[COLOR blue][B]%s[/B][/COLOR]' % (traducao(30001)),'no',None,os.path.join(xbmc.translatePath(xbmcaddon.Addon().getAddonInfo('path')).decode('utf-8'),'icon.png'))
       pastadeaddons = os.path.join(xbmc.translatePath('special://home/addons'), '')
       directories = os.listdir(pastadeaddons)
       for nomedeaddon in directories:
@@ -28,9 +15,9 @@ def listaraddons():
             if os.path.exists(addonxmlcaminho):
                   conteudo=openfile(addonxmlcaminho)
                   if re.search('point="xbmc.service"',conteudo):
-                        addDir(nomedeaddon + ' (on)',pastadirecta,1,os.path.join(pastadirecta,'icon.png'),1,False)
+                        addDir('%s (on)' % (nomedeaddon),pastadirecta,1,os.path.join(pastadirecta,'icon.png'))
                   elif re.search('point="xbmc.pass"',conteudo):
-                        addDir('[B][COLOR gold]'+ nomedeaddon + '[/B] (off)[/COLOR]',pastadirecta,1,os.path.join(pastadirecta,'icon.png'),1,False)
+                        addDir('[B][COLOR gold]%s[/B] (off)[/COLOR]' % (nomedeaddon),pastadirecta,1,os.path.join(pastadirecta,'icon.png'))
 
 def mudaestado(name,url):
       directoparaxml=os.path.join(url,'addon.xml')
@@ -58,10 +45,10 @@ def savefile(pastacaminho,conteudo):
         fh.close()
     except: print "Nao gravou o marcador de: %s" % filename
 
-def addDir(name,url,mode,iconimage,total,pasta):
+def addDir(name,url,mode,iconimage):
       u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)
       liz=xbmcgui.ListItem(name,iconImage="DefaultFolder.png", thumbnailImage=iconimage)
-      return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=pasta,totalItems=total)
+      return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=False)
 
 def get_params():
       param=[]
@@ -80,6 +67,9 @@ def get_params():
                         param[splitparams[0]]=splitparams[1]                 
       return param
 
+def traducao(text):
+      return xbmcaddon.Addon().getLocalizedString(text).encode('utf-8')
+
 params=get_params()
 url=None
 name=None
@@ -92,14 +82,7 @@ except: pass
 try: mode=int(params["mode"])
 except: pass
 
-
-print "Mode: "+str(mode)
-print "URL: "+str(url)
-print "Name: "+str(name)
-
-if mode==None:
-      print "Versao Instalada: v" + versao
-      menu_principal()
+if mode==None: listaraddons()
 elif mode==1: mudaestado(name,url)
                        
 xbmcplugin.endOfDirectory(int(sys.argv[1]))

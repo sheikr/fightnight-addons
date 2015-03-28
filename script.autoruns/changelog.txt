@@ -1,3 +1,8 @@
+[B]v1.0.0 (28 de Marco de 2015):[/B]
+- Limpeza de codigo.
+- Novo addon_id.
+- Outras correccoes.
+
 [B]v0.1.00 (13 de Novembro de 2014):[/B]
 - Melhorias de performance.
 - Adicionado logotipo do addon a cada pasta.
