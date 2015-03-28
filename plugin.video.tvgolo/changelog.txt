@@ -1,7 +1,13 @@
-[B]v0.2.02 (11 de Marco de 2015):[/B]
+[B]v1.0.0 (28 de Marco de 2015):[/B]
+- Correccao de titulos, cores e artwork (tks Leinad4Mind).
+- Restruturacao do codigo, limpeza e melhorias internas.
+- Fix no sistema de traducoes.
+- Outras correccoes.
+
+[B]v0.2.02 (23 de Marco de 2015):[/B]
 - Fix no texto da liga portuguesa. (tks Leinad4Mind)
 - Novos logos (Leinad4Mind).
-- Outras optimizações e correccoes.
+- Outras optimizacoes e correccoes.
 
 [B]v0.2.01 (11 de Marco de 2015):[/B]
 - Correccoes nos servidores.
