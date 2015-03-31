@@ -1,3 +1,8 @@
+[B]v1.0.1 (31 March 2015):[/B]
+- Little tweaks.
+- Submittion to Kodi official Kodi repository.
+- Cosmetic changes.
+
 [B]v1.0.0 (28 de Marco de 2015):[/B]
 - Limpeza de codigo.
 - Novo addon_id.
