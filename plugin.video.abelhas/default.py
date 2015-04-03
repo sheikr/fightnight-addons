@@ -9,7 +9,7 @@ net=Net()
 
 ####################################################### CONSTANTES #####################################################
 
-versao = '1.0.0'
+versao = '1.0.1'
 addon_id = 'plugin.video.abelhas'
 MainURL = 'http://abelhas.pt/'
 MinhaMainURL = 'http://minhateca.com.br/'
@@ -387,7 +387,7 @@ def pastas(url,name,formcont={},conteudo='',past=False):
                   extensao=extensao.replace(' ','')
                   tamanhoficheiro=tamanhoficheiro.replace(' ','')
                   if extensao=='.rar' or extensao=='.RAR' or extensao == '.zip' or extensao=='.ZIP' or extensao=='.7z' or extensao=='.7Z': thumb=wtpath + art + 'rar.png'
-                  elif extensao=='.mp3' or extensao=='.MP3' or extensao=='.ogg' or extensao=='.OGG' or extensao=='.aac' or extensao=='.AAC' or extensao == '.wma' or extensao=='.WMA' or extensao=='.m3u' or extensao=='.M3U' or extensao=='.flac' or extensao=='.FLAC': thumb=wtpath + art + 'musica.png'
+                  elif extensao=='.mp3' or extensao=='.MP3' or extensao=='.ogg' or extensao=='.OGG' or extensao=='.aac' or extensao=='.AAC' or extensao=='.m4a' or extensao=='.M4A' or extensao == '.wma' or extensao=='.WMA' or extensao=='.ac3' or extensao=='.AC3' or extensao=='.flac' or extensao=='.FLAC' or extensao=='.m3u' or extensao=='.M3U': thumb=wtpath + art + 'musica.png'
                   elif extensao=='.jpg' or extensao == '.JPG' or extensao == '.bmp' or extensao == '.BMP' or extensao=='.gif' or extensao=='.GIF' or extensao=='.png' or extensao=='.PNG': thumb=wtpath + art + 'foto.png'
                   elif extensao=='.mkv' or extensao == '.MKV' or extensao == '.ogm' or extensao == '.OGM' or extensao == '.avi' or extensao == '.AVI' or extensao=='.mp4' or extensao=='.MP4' or extensao=='.3gp' or extensao=='.3GP' or extensao=='.wmv' or extensao=='.WMV' or extensao=='.mpg' or extensao=='.MPG': thumb=wtpath + art + 'video.png'
                   else:thumb=wtpath + art + 'file.png'
@@ -400,7 +400,7 @@ def pastas(url,name,formcont={},conteudo='',past=False):
             for urlficheiro,tituloficheiro,extensao,tamanhoficheiro,dataficheiro in items2:
                   extensao=extensao.replace(' ','')
                   if extensao=='.rar' or extensao=='.RAR' or extensao == '.zip' or extensao=='.ZIP' or extensao=='.7z' or extensao=='.7Z': thumb=wtpath + art + 'rar.png'
-                  elif extensao=='.mp3' or extensao=='.MP3' or extensao=='.ogg' or extensao=='.OGG' or extensao=='.aac' or extensao=='.AAC' or extensao == '.wma' or extensao=='.WMA' or extensao=='.m3u' or extensao=='.M3U' or extensao=='.flac' or extensao=='.FLAC': thumb=wtpath + art + 'musica.png'
+                  elif extensao=='.mp3' or extensao=='.MP3' or extensao=='.ogg' or extensao=='.OGG' or extensao=='.aac' or extensao=='.AAC' or extensao=='.m4a' or extensao=='.M4A' or extensao == '.wma' or extensao=='.WMA' or extensao=='.ac3' or extensao=='.AC3' or extensao=='.flac' or extensao=='.FLAC' or extensao=='.m3u' or extensao=='.M3U': thumb=wtpath + art + 'musica.png'
                   elif extensao=='.jpg' or extensao == '.JPG' or extensao == '.bmp' or extensao == '.BMP' or extensao=='.gif' or extensao=='.GIF' or extensao=='.png' or extensao=='.PNG': thumb=wtpath + art + 'foto.png'
                   elif extensao=='.mkv' or extensao == '.MKV' or extensao == '.ogm' or extensao == '.OGM' or extensao == '.avi' or extensao == '.AVI' or extensao=='.mp4' or extensao=='.MP4' or extensao=='.3gp' or extensao=='.3GP' or extensao=='.wmv' or extensao=='.WMV' or extensao=='.mpg' or extensao=='.MPG': thumb=wtpath + art + 'video.png'
                   else:thumb=wtpath + art + 'file.png'
@@ -518,7 +518,7 @@ def pastas_de_fora(url,name,formcont={},conteudo='',past=False):
 			extensao=extensao.replace(' ','')
 			tamanhoficheiro=tamanhoficheiro.replace(' ','')
 			if extensao=='.rar' or extensao=='.RAR' or extensao == '.zip' or extensao=='.ZIP' or extensao=='.7z' or extensao=='.7Z': thumb=wtpath + art + 'rar.png'
-			elif extensao=='.mp3' or extensao=='.MP3' or extensao=='.ogg' or extensao=='.OGG' or extensao=='.aac' or extensao=='.AAC' or extensao == '.wma' or extensao=='.WMA' or extensao=='.m3u' or extensao=='.M3U' or extensao=='.flac' or extensao=='.FLAC': thumb=wtpath + art + 'musica.png'
+			elif extensao=='.mp3' or extensao=='.MP3' or extensao=='.ogg' or extensao=='.OGG' or extensao=='.aac' or extensao=='.AAC' or extensao=='.m4a' or extensao=='.M4A' or extensao == '.wma' or extensao=='.WMA' or extensao=='.ac3' or extensao=='.AC3' or extensao=='.flac' or extensao=='.FLAC' or extensao=='.m3u' or extensao=='.M3U': thumb=wtpath + art + 'musica.png'
 			elif extensao=='.jpg' or extensao == '.JPG' or extensao == '.bmp' or extensao == '.BMP' or extensao=='.gif' or extensao=='.GIF' or extensao=='.png' or extensao=='.PNG': thumb=wtpath + art + 'foto.png'
 			elif extensao=='.mkv' or extensao == '.MKV' or extensao == '.ogm' or extensao == '.OGM' or extensao == '.avi' or extensao == '.AVI' or extensao=='.mp4' or extensao=='.MP4' or extensao=='.3gp' or extensao=='.3GP' or extensao=='.wmv' or extensao=='.WMV' or extensao=='.mpg' or extensao=='.MPG': thumb=wtpath + art + 'video.png'
 			else:thumb=wtpath + art + 'file.png'
@@ -531,7 +531,7 @@ def pastas_de_fora(url,name,formcont={},conteudo='',past=False):
 		for urlficheiro,tituloficheiro,extensao,tamanhoficheiro,dataficheiro in items2:
 			extensao=extensao.replace(' ','')
 			if extensao=='.rar' or extensao=='.RAR' or extensao == '.zip' or extensao=='.ZIP' or extensao=='.7z' or extensao=='.7Z': thumb=wtpath + art + 'rar.png'
-			elif extensao=='.mp3' or extensao=='.MP3' or extensao=='.ogg' or extensao=='.OGG' or extensao=='.aac' or extensao=='.AAC' or extensao == '.wma' or extensao=='.WMA' or extensao=='.m3u' or extensao=='.M3U' or extensao=='.flac' or extensao=='.FLAC': thumb=wtpath + art + 'musica.png'
+			elif extensao=='.mp3' or extensao=='.MP3' or extensao=='.ogg' or extensao=='.OGG' or extensao=='.aac' or extensao=='.AAC' or extensao=='.m4a' or extensao=='.M4A' or extensao == '.wma' or extensao=='.WMA' or extensao=='.ac3' or extensao=='.AC3' or extensao=='.flac' or extensao=='.FLAC' or extensao=='.m3u' or extensao=='.M3U': thumb=wtpath + art + 'musica.png'
 			elif extensao=='.jpg' or extensao == '.JPG' or extensao == '.bmp' or extensao == '.BMP' or extensao=='.gif' or extensao=='.GIF' or extensao=='.png' or extensao=='.PNG': thumb=wtpath + art + 'foto.png'
 			elif extensao=='.mkv' or extensao == '.MKV' or extensao == '.ogm' or extensao == '.OGM' or extensao == '.avi' or extensao == '.AVI' or extensao=='.mp4' or extensao=='.MP4' or extensao=='.3gp' or extensao=='.3GP' or extensao=='.wmv' or extensao=='.WMV' or extensao=='.mpg' or extensao=='.MPG': thumb=wtpath + art + 'video.png'
 			else:thumb=wtpath + art + 'file.png'
@@ -633,12 +633,12 @@ def criarplaylist(url,name,formcont={},conteudo=''):
                   sys.exit(0)
             else: pastas_ref(url)
       elif re.search('/action/UserAccess/LoginToProtectedWindow',conteudo):
-            chomikid=re.compile('<input id="TargetChomikId" name="TargetChomikId" type="hidden" value="(.+?)">').findall(conteudo)[0]
-            chomiktype=re.compile('<input id="Mode" name="Mode" type="hidden" value="(.+?)">').findall(conteudo)[0]
-            #sex=re.compile('<input id="Sex" name="Sex" type="hidden" value="(.+?)">').findall(conteudo)[0]
-            accname=re.compile('<input id="__accno" name="__accno" type="hidden" value="(.+?)">').findall(conteudo)[0]
-            #isadult=re.compile('<input id="AdultFilter" name="AdultFilter" type="hidden" value="(.+?)">').findall(conteudo)[0]
-            #adultfilter=re.compile('<input id="AdultFilter" name="AdultFilter" type="hidden" value="(.+?)">').findall(conteudo)[0]
+            chomikid=re.compile('<input id="TargetChomikId" name="TargetChomikId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+            chomiktype=re.compile('<input id="Mode" name="Mode" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+            #sex=re.compile('<input id="Sex" name="Sex" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+            accname=re.compile('<input id="__accno" name="__accno" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+            #isadult=re.compile('<input id="AdultFilter" name="AdultFilter" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+            #adultfilter=re.compile('<input id="AdultFilter" name="AdultFilter" type="hidden" value="(.+?)" />').findall(conteudo)[0]
             passwordfolder=caixadetexto('password')
             form_d = {'Password':passwordfolder,'OK':'OK','RemeberMe':'true','AccountName':accname,'ChomikType':chomiktype,'TargetChomikId':chomikid}
             ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':'minhateca.com.br','Origin':'http://minhateca.com.br','Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
@@ -650,15 +650,18 @@ def criarplaylist(url,name,formcont={},conteudo=''):
                   sys.exit(0)
             else: pastas_ref(url)
       else:
-            items1=re.compile('<li class="fileItemContainer">.+?<span class="bold">.+?</span>(.+?)</a>.+?<div class="thumbnail">.+?<a href="(.+?)".+?title="(.+?)">\s+<img.+?<div class="smallTab">.+?<li>(.+?)</li>.+?<span class="date">(.+?)</span>').findall(conteudo)
-            for extensao,urlficheiro,tituloficheiro,tamanhoficheiro,dataficheiro in items1: analyzer(MinhaMainURL + urlficheiro,subtitles='',playterm='playlist',playlistTitle=tituloficheiro)
-            items2=re.compile('downloadAction" href="(.+?)">\s+<span class="bold">(.+?)</span>(.+?)</a>.+?<li>(.+?)</li>.+?<li><span class="date">(.+?)</span></li>').findall(conteudo)
+            items1=re.compile('<a class="expanderHeader downloadAction" href="(.+?)" title="(.+?)">.+?</span>(.+?)</a>.+?<li><span>(.+?)</span></li>.+?<span class="downloadsCounter">.+?<li>(.+?)</li>').findall(conteudo)
+            for urlficheiro,tituloficheiro,extensao,tamanhoficheiro,dataficheiro in items1: analyzer(MinhaMainURL + urlficheiro,subtitles='',playterm='playlist',playlistTitle=tituloficheiro)
+            items2=re.compile('<a class="downloadAction" href="(.+?)">\s+<span class="bold">(.+?)</span>(.+?)</a>.+?<li>(.+?)</li>.+?<li><span class="date">(.+?)</span></li>').findall(conteudo)
             for urlficheiro,tituloficheiro,extensao,tamanhoficheiro,dataficheiro in items2: analyzer(MinhaMainURL + urlficheiro,subtitles='',playterm='playlist',playlistTitle=tituloficheiro)
             if not items1:
                   if not items2:
                         conteudo=clean(conteudo)
-                        items3=re.compile('fileItemContainer">.+?<div class="thumbnail">.+?<a href="(.+?)".+?title="(.+?)">\s+<img.+?<span class="bold">.+?</span>(.+?)</li>.+?tabGradientBg">\s+<li><span>(.+?)</span></li>.+?</span></li>\s+<li>(.+?)</li>').findall(conteudo)
-                        for extensao,urlficheiro,tituloficheiro,tamanhoficheiro,dataficheiro in items3: analyzer(MinhaMainURL + urlficheiro,subtitles='',playterm='playlist',playlistTitle=tituloficheiro)
+                        #isto ta feio
+                        items3=re.compile('<li class="fileItemContainer">.+?<span class="bold">.+?</span>(.+?)</a>.+?<div class="thumbnail">.+?<a href="(.+?)".+?title="(.+?)">\s+<img.+?<div class="smallTab">.+?<li>(.+?)</li>.+?<span class="date">(.+?)</span>').findall(conteudo)
+                        for extensao,urlficheiro,tituloficheiro,tamanhoficheiro,dataficheiro in items3:
+                              tamanhoficheiro=tamanhoficheiro.replace(' ','')
+                              analyzer(MinhaMainURL + urlficheiro,subtitles='',playterm='playlist',playlistTitle=tituloficheiro)
    else:
       mensagemprogresso.create('Abelhas.pt', traducao(40049))
       playlist = xbmc.PlayList(1)
@@ -671,8 +674,8 @@ def criarplaylist(url,name,formcont={},conteudo=''):
                   mensagemok('Abelhas.pt','Sem resultados.')
                   sys.exit(0)
             try:
-                  filename=re.compile('<input name="FileName" type="hidden" value="(.+?)">').findall(conteudo)[0]
-                  try:ftype=re.compile('<input name="FileType" type="hidden" value="(.+?)">').findall(conteudo)[0]
+                  filename=re.compile('<input name="FileName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+                  try:ftype=re.compile('<input name="FileType" type="hidden" value="(.+?)" />').findall(conteudo)[0]
                   except: ftype='All'
                   pagina=1
                   token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)"').findall(conteudo)[0]
@@ -681,7 +684,7 @@ def criarplaylist(url,name,formcont={},conteudo=''):
                   addon=Addon(addon_id)
                   addon.save_data('temp.txt',form_d)
                   ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':'abelhas.pt','Origin':'http://abelhas.pt','Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
-                  endlogin=	 + 'action/SearchFiles/Results'
+                  endlogin= MainURL+ 'action/SearchFiles/Results'
                   conteudo= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
             except: pass
       else:
@@ -689,10 +692,10 @@ def criarplaylist(url,name,formcont={},conteudo=''):
                   extra='?requestedFolderMode=filesList&fileListSortType=Name&fileListAscending=True'
                   conteudo=clean(abrir_url_cookie(url + extra))
       if re.search('ProtectedFolderChomikLogin',conteudo):
-            chomikid=re.compile('<input id="ChomikId" name="ChomikId" type="hidden" value="(.+?)">').findall(conteudo)[0]
-            folderid=re.compile('<input id="FolderId" name="FolderId" type="hidden" value="(.+?)">').findall(conteudo)[0]
-            foldername=re.compile('<input id="FolderName" name="FolderName" type="hidden" value="(.+?)">').findall(conteudo)[0]
-            token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)">').findall(conteudo)[0]
+            chomikid=re.compile('<input id="ChomikId" name="ChomikId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+            folderid=re.compile('<input id="FolderId" name="FolderId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+            foldername=re.compile('<input id="FolderName" name="FolderName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+            token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)" />').findall(conteudo)[0]
             passwordfolder=caixadetexto('password')
             form_d = {'ChomikId':chomikid,'FolderId':folderid,'FolderName':foldername,'Password':passwordfolder,'Remember':'true','__RequestVerificationToken':token}
             ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':'abelhas.pt','Origin':'http://abelhas.pt','Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
@@ -704,12 +707,12 @@ def criarplaylist(url,name,formcont={},conteudo=''):
                   sys.exit(0)
             else: pastas_ref(url)
       elif re.search('/action/UserAccess/LoginToProtectedWindow',conteudo):
-            chomikid=re.compile('<input id="TargetChomikId" name="TargetChomikId" type="hidden" value="(.+?)">').findall(conteudo)[0]
-            chomiktype=re.compile('<input id="Mode" name="Mode" type="hidden" value="(.+?)">').findall(conteudo)[0]
+            chomikid=re.compile('<input id="TargetChomikId" name="TargetChomikId" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+            chomiktype=re.compile('<input id="Mode" name="Mode" type="hidden" value="(.+?)" />').findall(conteudo)[0]
             #sex=re.compile('<input id="Sex" name="Sex" type="hidden" value="(.+?)" />').findall(conteudo)[0]
-            accname=re.compile('<input id="__accno" name="__accno" type="hidden" value="(.+?)">').findall(conteudo)[0]
-            #isadult=re.compile('<input id="AdultFilter" name="AdultFilter" type="hidden" value="(.+?)">').findall(conteudo)[0]
-            #adultfilter=re.compile('<input id="AdultFilter" name="AdultFilter" type="hidden" value="(.+?)">').findall(conteudo)[0]
+            accname=re.compile('<input id="__accno" name="__accno" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+            #isadult=re.compile('<input id="AdultFilter" name="AdultFilter" type="hidden" value="(.+?)" />').findall(conteudo)[0]
+            #adultfilter=re.compile('<input id="AdultFilter" name="AdultFilter" type="hidden" value="(.+?)" />').findall(conteudo)[0]
             passwordfolder=caixadetexto('password')
             form_d = {'Password':passwordfolder,'OK':'OK','RemeberMe':'true','AccountName':accname,'ChomikType':chomiktype,'TargetChomikId':chomikid}
             ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':'abelhas.pt','Origin':'http://abelhas.pt','Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
@@ -721,16 +724,18 @@ def criarplaylist(url,name,formcont={},conteudo=''):
                   sys.exit(0)
             else: pastas_ref(url)
       else:
-            items1=re.compile('<li class="fileItemContainer">.+?<span class="bold">.+?</span>(.+?)</a>.+?<div class="thumbnail">.+?<a href="(.+?)".+?title="(.+?)">\s+<img.+?<div class="smallTab">.+?<li>(.+?)</li>.+?<span class="date">(.+?)</span>').findall(conteudo)
-            for extensao,urlficheiro,tituloficheiro,tamanhoficheiro,dataficheiro in items1: analyzer(MainURL + urlficheiro,subtitles='',playterm='playlist',playlistTitle=tituloficheiro)
-            items2=re.compile('downloadAction" href="(.+?)">\s+<span class="bold">(.+?)</span>(.+?)</a>.+?<li>(.+?)</li>.+?<li><span class="date">(.+?)</span></li>').findall(conteudo)
+            items1=re.compile('<a class="expanderHeader downloadAction" href="(.+?)" title="(.+?)">.+?</span>(.+?)</a>.+?<li><span>(.+?)</span></li>.+?<span class="downloadsCounter">.+?<li>(.+?)</li>').findall(conteudo)
+            for urlficheiro,tituloficheiro,extensao,tamanhoficheiro,dataficheiro in items1: analyzer(MainURL + urlficheiro,subtitles='',playterm='playlist',playlistTitle=tituloficheiro)
+            items2=re.compile('<a class="downloadAction" href="(.+?)">\s+<span class="bold">(.+?)</span>(.+?)</a>.+?<li>(.+?)</li>.+?<li><span class="date">(.+?)</span></li>').findall(conteudo)
             for urlficheiro,tituloficheiro,extensao,tamanhoficheiro,dataficheiro in items2: analyzer(MainURL + urlficheiro,subtitles='',playterm='playlist',playlistTitle=tituloficheiro)
             if not items1:
                   if not items2:
                         conteudo=clean(conteudo)
-                        items3=re.compile('fileItemContainer">.+?<div class="thumbnail">.+?<a href="(.+?)".+?title="(.+?)">\s+<img.+?<span class="bold">.+?</span>(.+?)</li>.+?tabGradientBg">\s+<li><span>(.+?)</span></li>.+?</span></li>\s+<li>(.+?)</li>').findall(conteudo)
-                        for urlficheiro,tituloficheiro,extensao,tamanhoficheiro,dataficheiro in items3: analyzer(MainURL + urlficheiro,subtitles='',playterm='playlist',playlistTitle=tituloficheiro)
-
+                        #isto ta feio
+                        items3=re.compile('<li class="fileItemContainer">.+?<span class="bold">.+?</span>(.+?)</a>.+?<div class="thumbnail">.+?<a href="(.+?)".+?title="(.+?)">\s+<img.+?<div class="smallTab">.+?<li>(.+?)</li>.+?<span class="date">(.+?)</span>').findall(conteudo)
+                        for extensao,urlficheiro,tituloficheiro,tamanhoficheiro,dataficheiro in items3:
+                              tamanhoficheiro=tamanhoficheiro.replace(' ','')
+                              analyzer(MainURL + urlficheiro,subtitles='',playterm='playlist',playlistTitle=tituloficheiro)
       mensagemprogresso.close()
       xbmcPlayer = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
       xbmcPlayer.play(playlist)
@@ -843,11 +848,11 @@ def analyzer(url,subtitles='',playterm=False,playlistTitle=''):
             if playterm=="download":fazerdownload(extfic,linkfinal)
             else:fazerdownload(extfic,linkfinal,tipo="fotos")
             xbmc.executebuiltin("SlideShow("+pastaperfil+")")
-      elif re.search('.mkv',url) or re.search('.avi',url) or re.search('.wmv',url) or re.search('.mp4',url):
+      elif re.search('.mkv',url) or re.search('.ogm',url) or re.search('.avi',url) or re.search('.wmv',url) or re.search('.mp4',url) or re.search('.mpg',url) or re.search('.mpeg',url):
             endereco=legendas(fileid,url)
             if playlistTitle <> '': comecarvideo(playlistTitle,linkfinal,playterm=playterm,legendas=endereco)
             else: comecarvideo(name,linkfinal,playterm=playterm,legendas=endereco)
-      elif re.search('.mp3',url) or re.search('.wma',url):
+      elif re.search('.mp3',url) or re.search('.aac',url) or re.search('.m4a',url) or re.search('.ac3',url) or re.search('.wma',url):
             if playlistTitle <> '': comecarvideo(playlistTitle,linkfinal,playterm=playterm)
             else: comecarvideo(name,linkfinal,playterm=playterm)
       else:
