@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<settings>
-   <category label="Geral">
-      <setting id="avisoinicial" type="bool" label="Aviso inicial" default="true" visible="false"/>
-      <setting id="inverter" type="bool" label="Inverter log (mais recente primeiro)" default="true"/>
-      <setting id="nrlinhas" type="enum" label="Numero de linhas a mostrar" values="Todas|100|50|20" default="0" enable="!eq(-1,false)"/>
-   </category>
-</settings>
