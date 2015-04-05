@@ -1,5 +1,8 @@
-[B]v1.0.0 (26 de Marco de 2015):[/B]
+[B]v1.0.1 (5 de Abril de 2015):[/B]
 Addon em actualizacao.
+- Fix criar playlist (tks Leinad4Mind).
+
+[B]v1.0.0 (26 de Marco de 2015):[/B]
 - Actualizacao a nova estrutura do site (tks Leinad4Mind).
 - Novas cores (tks Leinad4Mind).
 - Adicionado suporte integrado ao Minhateca.
