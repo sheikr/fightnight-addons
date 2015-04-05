@@ -1,3 +1,6 @@
+[B]v1.0.1 (5 de Abril de 2015):[/B]
+- Pequenas correccoes.
+
 [B]v1.0.0 (28 de Marco de 2015):[/B]
 - Correccao de titulos, cores e artwork (tks Leinad4Mind).
 - Restruturacao do codigo, limpeza e melhorias internas.

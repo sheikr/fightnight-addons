@@ -6,7 +6,7 @@
 
 import xbmc, xbmcgui, xbmcaddon, xbmcplugin,os,re,sys, urllib, urllib2,htmlentitydefs
 
-versao = '1.0.00'
+versao = '1.0.1'
 user_agent = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:10.0a1) Gecko/20111029 Firefox/10.0a1'
 art=os.path.join(xbmcaddon.Addon().getAddonInfo('path'),'resources','art')
 MainURL = 'http://www.okgoals.com/'
