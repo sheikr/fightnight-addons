@@ -71,7 +71,6 @@ def login(defora=False):
 ################################################### MENUS PLUGIN ######################################################
 def menu_principal(ligacao):
 	if ligacao==1:
-		addDir('[B][COLOR red]Addon em actualização/manutenção! Possíveis bugs.[/COLOR][/B]',MainURL,1,wtpath + art + 'pasta.png',1,True)
 		addDir(traducao(40007),MainURL,1,wtpath + art + 'pasta.png',1,True)
 		addDir('Mais Recentes',MainURL,2,wtpath + art + 'pasta.png',2,True)
 		for x in range(0, len(listURL)):
