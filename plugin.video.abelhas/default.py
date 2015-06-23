@@ -573,7 +573,8 @@ def analyzer(url,subtitles='',playterm=False,playlistTitle=''):
 		ref_data = {'Accept': '*/*', 'Content-Type': 'application/x-www-form-urlencoded','Origin': 'http://' + host, 'X-Requested-With': 'XMLHttpRequest', 'Referer': 'http://'+host+'/','User-Agent':user_agent}
 		endlogin=sitebase + 'action/License/Download'
 		while final == '' and countloop <= 3:
-			final= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
+			try: final= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
+			except: pass
 			countloop = countloop + 1
 			print '###loop %s' % countloop
 		final=final.replace('\u0026','&').replace('\u003c','<').replace('\u003e','>').replace('\\','')
