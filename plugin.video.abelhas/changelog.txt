@@ -1,3 +1,7 @@
+[B]v1.1.1 (1 de Julho de 2015):[/B]
+Actualizacao por Mafarricos!
+- Diversas melhorias e correccoes.
+
 [B]v1.1.0 (14 de Junho de 2015):[/B]
 Actualizacao por Mafarricos!
 - Thumbnails do abelhas para filmes e fotos;
