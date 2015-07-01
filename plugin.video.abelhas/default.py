@@ -3,8 +3,12 @@
 """ abelhas.pt
     2015 fightnight"""
 
-import xbmc,xbmcaddon,xbmcgui,xbmcplugin,urllib,urllib2,os,re,sys,datetime,time,xbmcvfs
+import xbmc,xbmcaddon,xbmcgui,xbmcplugin,urllib,urllib2,os,re,sys,datetime,time,xbmcvfs,HTMLParser
 from t0mm0.common.net import Net
+from resources.lib import internalPlayer
+try: import json
+except: import simplejson as json
+h = HTMLParser.HTMLParser()
 net=Net()
 
 ####################################################### CONSTANTES #####################################################
@@ -30,6 +34,7 @@ username_lb = urllib.quote(selfAddon.getSetting('lolabits-username'))
 username_tb = urllib.quote(selfAddon.getSetting('toutbox-username'))
 moviesFolder = xbmc.translatePath(selfAddon.getSetting('libraryfolder'))
 tvshowFolder = xbmc.translatePath(selfAddon.getSetting('tvshowlibraryfolder'))
+musicvideoFolder = xbmc.translatePath(selfAddon.getSetting('musicvideolibraryfolder'))
 foldertype = int(selfAddon.getSetting('folder-type'))
 listURL = [MainURL, MinhaMainURL, lolaMainURL, toutMainURL]
 nameURL = ['Abelhas', 'Minhateca', 'Lolabits', 'Toutbox']
@@ -122,7 +127,7 @@ def favoritos():
 		chomikid=re.compile('<input id="FriendsTargetChomikName" name="FriendsTargetChomikName" type="hidden" value="(.+?)" />').findall(conteudo)[0]
 		token=re.compile('<input name="__RequestVerificationToken" type="hidden" value="(.+?)" />').findall(conteudo)[0]
 		if name==traducao(40037):pagina=1
-		else: pagina=int(name.replace("[COLOR "+color[x]+"]Página ",'').replace(' >>>[/COLOR]',''))
+		else: pagina = re.compile('\[.+?\].+? (\d) .+?').findall(name)[0]
 		form_d = {'page':pagina,'chomikName':chomikid,'__RequestVerificationToken':token}
 		ref_data = {'Accept':'*/*','Content-Type':'application/x-www-form-urlencoded','Host':site[x].replace('http://','').replace('/',''),'Origin':site[x],'Referer':url,'User-Agent':user_agent,'X-Requested-With':'XMLHttpRequest'}
 		endlogin=site[x] + 'action/Friends/ShowAllFriends'
@@ -221,7 +226,8 @@ def atalhos(type=False):
 
 def pastas(url,name,formcont={},conteudo='',past=False,deFora=False):
 	MainPlayList = []
-	if foldertype == 1 and re.search('action/SearchFiles',url) and not deFora:
+	uniqueList = []
+	if foldertype == 1 and re.search('action/SearchFiles',url):
 		source = xbmcgui.Dialog().select
 		selectlist = []
 		urllist = []
@@ -304,17 +310,31 @@ def pastas(url,name,formcont={},conteudo='',past=False,deFora=False):
 		reslist = ReturnConteudo(conteudo,past,color,url,deFora)
 		if reslist:
 			if deFora:
-				reslist = sorted(reslist, key=getKey,reverse=True)
-				analyzer(sitebase + reslist[1][1][4])
+				if foldertype == 1:
+					if selfAddon.getSetting('search-order') == 'true': reslist = sorted(reslist, key=getKey,reverse=True)
+					for part1,part2 in reslist:
+						if not part2[1]+part2[2]+part2[3] in uniqueList:
+							uniqueList.append(part2[1]+part2[2]+part2[3])
+							selectlist.append(part2[1]+part2[2]+part2[3])
+							urllist.append(sitebase + part2[4])
+					choose=source('Link a Abrir',selectlist)
+					if choose > -1:	analyzer(urllist[choose])
+				else:
+					reslist = sorted(reslist, key=getKey,reverse=True)
+					analyzer(sitebase + reslist[1][1][4])
 			else:
 				if re.search('action/SearchFiles',url) and selfAddon.getSetting('search-order') == 'true': reslist = sorted(reslist, key=getKey,reverse=True)
 				for part1,part2 in reslist: 
 					if foldertype == 1 and re.search('action/SearchFiles',url):
-						selectlist.append(part2[0])
-						urllist.append(part2[1])
+						if not part2[0] in uniqueList:
+							uniqueList.append(part2[0])
+							selectlist.append(part2[0])
+							urllist.append(part2[1])
 					else:
-						if '(video)' in part2[4] or '(audio)' in part2[4]: MainPlayList.append([part2[1],sitebase + part2[4]])
-						addCont('[B][COLOR '+part2[0]+']' + part2[1].replace(part2[2],'') + part2[2] + '[/COLOR][/B]' + '[COLOR white]' + part2[3] + '[/COLOR]',sitebase + part2[4],part2[5],part2[3],part2[6],len(reslist))
+						if not (part2[1].replace(part2[2],'') + part2[2] + part2[3]) in uniqueList:
+							if '(video)' in part2[4] or '(audio)' in part2[4]: MainPlayList.append([ReplaceSpecialChar(part2[1]),sitebase + part2[4]])
+							uniqueList.append(part2[1].replace(part2[2],'') + part2[2] + part2[3])
+							addCont('[B][COLOR '+part2[0]+']' + part2[1].replace(part2[2],'') + part2[2] + '[/COLOR][/B]' + '[COLOR white]' + part2[3] + '[/COLOR]',sitebase + part2[4],part2[5],part2[3],part2[6],len(reslist))
 				if foldertype == 1 and re.search('action/SearchFiles',url): 
 					choose=source('Link a Abrir',selectlist)
 					if choose > -1:	analyzer(urllist[choose])
@@ -352,10 +372,10 @@ def ReturnConteudo(conteudo,past,color,url2,deFora):
 	if not section: section = re.compile('<li class="fileItemContainer">(.+?)<li><span class="date">', re.DOTALL).findall(conteudo)
 	for part in section:
 		name = re.compile('title="(.+?)"', re.DOTALL).findall(part)
-		tituloficheiro = name[0][:-4]
+		tituloficheiro = h.unescape(name[0][:-4])
 		extensao = name[0][-4:]
 		if '.' not in extensao:
-			tituloficheiro = name[0]
+			tituloficheiro = h.unescape(name[0])
 			ext = re.compile('<span class="bold">.+?</span>(.+?)\s+</a>', re.DOTALL).findall(part)
 			extensao = ext[0]
 		url = re.compile('href="/(.+?)"', re.DOTALL).findall(part)
@@ -369,7 +389,7 @@ def ReturnConteudo(conteudo,past,color,url2,deFora):
 		tamanhoficheiro=tamanhoficheiro.replace(' ','')
 		tamanhoparavariavel=' (' + tamanhoficheiro + ')'
 		if deFora: reslist = SearchResults(tamanhoficheiro,color,tituloficheiro,extensao,tamanhoparavariavel,urlficheiro,4,thumb,reslist)
-		elif foldertype == 1 and re.search('action/SearchFiles',url2): reslist = SearchResultsFora(tamanhoficheiro,'[B]' + tituloficheiro + '[/B]' + tamanhoparavariavel,MainURL + urlficheiro,color,reslist)
+		elif foldertype == 1 and re.search('action/SearchFiles',url2): reslist = SearchResultsFora(tamanhoficheiro,tituloficheiro+extensao+tamanhoparavariavel,MainURL + urlficheiro,color,reslist)
 		else: reslist = SearchResults(tamanhoficheiro,color,tituloficheiro,extensao,tamanhoparavariavel,urlficheiro,4,thumb,reslist)
 	return reslist
 
@@ -535,6 +555,8 @@ def paginas(link):
 
 ########################################################### PLAYER ################################################
 def analyzer(url,subtitles='',playterm=False,playlistTitle=''):
+	final = ''
+	countloop = 0
 	sitebase,sitename,color,mode = returnValues(url)
 	host = sitebase.replace('http://','').replace('/','')
 	if playlistTitle == '': mensagemprogresso.create(sitename, traducao(40025))
@@ -550,7 +572,10 @@ def analyzer(url,subtitles='',playterm=False,playlistTitle=''):
 		form_d = {'fileId':fileid,'__RequestVerificationToken':token}
 		ref_data = {'Accept': '*/*', 'Content-Type': 'application/x-www-form-urlencoded','Origin': 'http://' + host, 'X-Requested-With': 'XMLHttpRequest', 'Referer': 'http://'+host+'/','User-Agent':user_agent}
 		endlogin=sitebase + 'action/License/Download'
-		final= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
+		while final == '' and countloop <= 3:
+			try: final= net.http_POST(endlogin,form_data=form_d,headers=ref_data).content.encode('latin-1','ignore')
+			except: pass
+			countloop = countloop + 1
 		final=final.replace('\u0026','&').replace('\u003c','<').replace('\u003e','>').replace('\\','')
 	except: pass
 	try:
@@ -605,10 +630,14 @@ def analyzer(url,subtitles='',playterm=False,playlistTitle=''):
 		else: comecarvideo(name,linkfinal,playterm=playterm)
 
 def comecarvideo(name,url,playterm,legendas=None):
-	try: xbmc.Player().stop()
-	except: pass
+	content=''
+	dbid=''
+	if not playterm:
+		try: xbmc.Player().stop()
+		except: pass
 	if re.search('minhateca.com.br',url): sitename='Minhateca - '+name
 	elif re.search('lolabits',url): sitename='Lolabits - '+name	
+	elif re.search('toutbox',url): sitename='Toutbox - '+name		
 	else: sitename='Abelhas - '+name
 	playeractivo = xbmc.getCondVisibility('Player.HasMedia')
 	if playterm=='download':
@@ -618,28 +647,59 @@ def comecarvideo(name,url,playterm,legendas=None):
 	playlist = xbmc.PlayList(1)
 	if not playterm and playeractivo==0: playlist.clear()
 	listitem = xbmcgui.ListItem(path=url)
-	title='%s' % (name.split('[/B]')[0].replace('[B]',''))
-	try:
-		tv = xbmc.getInfoLabel('ListItem.Art(tvshow.poster)')
-		if tv == "": content = 'movie'
-		else: content = 'episode'
-	
-		if content == 'movie':
-			meta = {'title': xbmc.getInfoLabel('ListItem.title'), 'originaltitle': xbmc.getInfoLabel('ListItem.originaltitle'), 'year': xbmc.getInfoLabel('ListItem.year'), 'genre': xbmc.getInfoLabel('ListItem.genre'), 'studio' : xbmc.getInfoLabel('ListItem.studio'), 'country' : xbmc.getInfoLabel('ListItem.country'), 'duration' : xbmc.getInfoLabel('ListItem.duration'), 'rating': xbmc.getInfoLabel('ListItem.rating'), 'votes': xbmc.getInfoLabel('ListItem.votes'), 'mpaa': xbmc.getInfoLabel('ListItem.mpaa'), 'director': xbmc.getInfoLabel('ListItem.director'), 'writer': xbmc.getInfoLabel('ListItem.writer'), 'plot': xbmc.getInfoLabel('ListItem.plot'), 'plotoutline': xbmc.getInfoLabel('ListItem.plotoutline'), 'tagline': xbmc.getInfoLabel('ListItem.tagline')}
-			label, poster, thumb, fanart = xbmc.getInfoLabel('ListItem.label'), xbmc.getInfoLabel('ListItem.icon'), xbmc.getInfoLabel('ListItem.icon'), xbmc.getInfoLabel('ListItem.Property(Fanart_Image)')
-	        
-		elif content == 'episode':
-			meta = {'title': xbmc.getInfoLabel('ListItem.title'), 'season' : xbmc.getInfoLabel('ListItem.season'), 'episode': xbmc.getInfoLabel('ListItem.episode'), 'tvshowtitle': xbmc.getInfoLabel('ListItem.tvshowtitle'), 'studio': xbmc.getInfoLabel('ListItem.studio'), 'premiered' : xbmc.getInfoLabel('ListItem.premiered'), 'duration' : xbmc.getInfoLabel('ListItem.duration'), 'rating': xbmc.getInfoLabel('ListItem.rating'), 'mpaa' : xbmc.getInfoLabel('ListItem.mpaa'), 'director': xbmc.getInfoLabel('ListItem.director'), 'writer': xbmc.getInfoLabel('ListItem.writer'), 'plot': xbmc.getInfoLabel('ListItem.plot')}
-			label, poster, thumb, fanart = xbmc.getInfoLabel('ListItem.label'), xbmc.getInfoLabel('ListItem.Art(tvshow.poster)'), xbmc.getInfoLabel('ListItem.icon'), xbmc.getInfoLabel('ListItem.Property(Fanart_Image)')
-	
-		listitem = xbmcgui.ListItem(label, iconImage="DefaultVideo.png", thumbnailImage=thumb)
-		try: listitem.setArt({'poster': poster, 'tvshow.poster': poster, 'season.poster': poster})
-		except: pass
-	except:
-		listitem.setInfo("Video", {"Title":title})
-		listitem.setInfo("Music", {"Title":title})
-	listitem.setProperty("Fanart_Image", fanart)
- 	listitem.setInfo(type="Video", infoLabels = meta)
+	title = name
+	if not playterm:
+		title='%s' % (name.split('[/B]')[0].replace('[B]',''))	
+
+		try:
+			print "Testing Movie"
+			modtitle = title.replace (" ", "+")+".strm"
+			modtitle = modtitle.replace ("(", "%28")
+			modtitle = modtitle.replace (")", "%29")
+			meta = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter": {"field": "path", "operator": "contains", "value": "%s"}, "properties" : ["title", "originaltitle", "year", "genre", "studio", "country", "runtime", "rating", "votes", "mpaa", "director", "writer", "plot", "plotoutline", "tagline", "thumbnail", "file"]}, "id": 1}' % title)
+			print str(meta)
+
+			meta = unicode(meta, 'utf-8', errors='ignore')
+			meta = json.loads(meta)['result']['movies']
+			selfmeta = [i for i in meta if i['file'].endswith(modtitle)][0]
+			meta = {'title': selfmeta['title'].encode('utf-8'), 'originaltitle': selfmeta['originaltitle'].encode('utf-8'), 'year': selfmeta['year'], 'genre': str(" / ".join(selfmeta['genre']).encode('utf-8')), 'studio' : str(" / ".join(selfmeta['studio']).encode('utf-8')), 'country' : str(" / ".join(selfmeta['country']).encode('utf-8')), 'duration' : selfmeta['runtime'], 'rating': selfmeta['rating'], 'votes': selfmeta['votes'], 'mpaa': selfmeta['mpaa'].encode('utf-8'), 'director': str(" / ".join(selfmeta['director']).encode('utf-8')), 'writer': str(" / ".join(selfmeta['writer']).encode('utf-8')), 'plot': selfmeta['plot'].encode('utf-8'), 'plotoutline': selfmeta['plotoutline'].encode('utf-8'), 'tagline': selfmeta['tagline'].encode('utf-8')}
+				
+			dbid = selfmeta['movieid']
+			thumb = selfmeta['thumbnail']
+			content='Movie'
+	 	except: 
+			try:
+				print "Testing TV"
+				modtitle = title.replace (" ", "+")+".strm"
+				season, episode = re.compile('.+?S(..)E(..)').findall(title)[0]
+				season, episode = '%01d' % int(season), '%01d' % int(episode)
+				meta = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params": {"filter":{"and": [{"field": "season", "operator": "is", "value": "%s"}, {"field": "episode", "operator": "is", "value": "%s"}]}, "properties": ["title", "season", "episode", "showtitle", "firstaired", "runtime", "rating", "director", "writer", "plot", "thumbnail", "file"]}, "id": 1}' % (int(season), int(episode)))
+				print str(meta)
+			
+				meta = unicode(meta, 'utf-8', errors='ignore')
+				meta = json.loads(meta)['result']['episodes']
+				selfmeta = [i for i in meta if i['file'].endswith(modtitle)][0]
+				meta = {'title': selfmeta['title'].encode('utf-8'), 'season' : selfmeta['season'], 'episode': selfmeta['episode'], 'tvshowtitle': selfmeta['showtitle'].encode('utf-8'), 'premiered' : selfmeta['firstaired'], 'duration' : selfmeta['runtime'], 'rating': selfmeta['rating'], 'director': str(" / ".join(selfmeta['director']).encode('utf-8')), 'writer': str(" / ".join(selfmeta['writer']).encode('utf-8')), 'plot': selfmeta['plot'].encode('utf-8')}
+				
+				dbid = selfmeta['episodeid']
+				thumb = selfmeta['thumbnail']
+				poster = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"filter": {"field": "title", "operator": "is", "value": "%s"}, "properties": ["thumbnail"]}, "id": 1}' % selfmeta['showtitle'])
+				poster = unicode(poster, 'utf-8', errors='ignore')
+				poster = json.loads(poster)['result']['tvshows'][0]['thumbnail']
+	#			thumb = poster     # Uncomment to switch to TV Show Poster Instead of Episode Thumb 
+				content='TV'
+			except: 
+				meta=''
+				content=''
+				thumb=''
+				dbid=''
+		listitem = xbmcgui.ListItem(title, iconImage="DefaultVideo.png", thumbnailImage=thumb)
+	 	listitem.setInfo(type="Video", infoLabels = meta)
+
+	else:
+		listitem = xbmcgui.ListItem(title, iconImage="DefaultVideo.png", thumbnailImage="DefaultVideo.png")
+		listitem.setInfo("Video", {"title":title})
+		listitem.setInfo("Music", {"title":title})	
 	listitem.setProperty('mimetype', 'video/x-msvideo')
 	listitem.setProperty('IsPlayable', 'true')
 	xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem)
@@ -649,13 +709,13 @@ def comecarvideo(name,url,playterm,legendas=None):
 	playlist.add(url, listitem)
 	if playterm <> 'playlist':		
 		  dialogWait.close()
-		  del dialogWait
-	xbmcPlayer = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
+		  del dialogWait	  
+	xbmcPlayer = internalPlayer.Player(title=title,dbid=dbid,content=content)
 	if not playterm and playeractivo==0: xbmcPlayer.play(playlist, listitem)
 	if legendas!=None: xbmcPlayer.setSubtitles(legendas)
 	else:
 		if selfAddon.getSetting("subtitles") == 'true': 
-			try: totalTime = xbmc.Player().getTotalTime()
+			try: totalTime = xbmcPlayer.getTotalTime()
 			except: totalTime = 0
 			print '##totaltime',totalTime
 			if totalTime >= int(selfAddon.getSetting("minsize"))*60:
@@ -667,6 +727,10 @@ def comecarvideo(name,url,playterm,legendas=None):
 					legendas = None
 					pass
 				if legendas!=None: xbmcPlayer.setSubtitles(legendas)
+	if selfAddon.getSetting('track-player')=='true' and not playterm:
+		while xbmcPlayer.playing:
+			xbmc.sleep(5000)
+			xbmcPlayer.track_time()
 	if playterm=='playlist': xbmc.executebuiltin("XBMC.Notification("+sitename+","+traducao(40039)+",'500000',"+iconpequeno.encode('utf-8')+")")
 
 def limparplaylist():
@@ -693,23 +757,30 @@ def add_to_library_batch(type,updatelibrary=True):
 	if updatelibrary: xbmc.executebuiltin("XBMC.UpdateLibrary(video)")
 
 def ReplaceSpecialChar(name):
-	return name.replace('ç','c').replace('À','A').replace('Á','A').replace('á','a').replace('à','a').replace('ã','a').replace('É','E').replace('é','e').replace('ê','e').replace('ó','o').replace('ô','o').replace('õ','o').replace('í','i')
+	try: name = name.encode('utf-8')
+	except: pass
+	return name.replace('ç','c').replace('À','A').replace('Á','A').replace('á','a').replace('à','a').replace('ã','a').replace('É','E').replace('é','e').replace('ê','e').replace('ó','o').replace('ô','o').replace('õ','o').replace('í','i').replace('/','-')
 
-def add_to_library(name,url,type,updatelibrary=True): 
+def add_to_library(name,url,type,updatelibrary=True):
 	episode = ''
 	tvshow = ''
 	season = ''
 	title = ''
-	name = ReplaceSpecialChar(name)
+	name2 = re.compile('\[B\]\[COLOR .+?\](.+?)\[/COLOR\]\[/B\]').findall(name)
+	if name2: 
+		name = ReplaceSpecialChar(h.unescape(name2[0]))
+		cleaned_title = re.sub('[^-a-zA-Z0-9_()\\\/ ]+', ' ', name[:-4])
+	else:
+		name = ReplaceSpecialChar(h.unescape(name))
+		cleaned_title = re.sub('[^-a-zA-Z0-9_()\\\/ ]+', ' ', name)
 	if type == 'movie': 
 		if not xbmcvfs.exists(moviesFolder): xbmcvfs.mkdir(moviesFolder)
 	elif type == 'tvshow': 
 		if not xbmcvfs.exists(tvshowFolder): xbmcvfs.mkdir(tvshowFolder)
-	name2 = re.compile('\[B\]\[COLOR .+?\](.+?)\[/COLOR\]\[/B\]').findall(name)
-	if name2: cleaned_title = re.sub('[^-a-zA-Z0-9_()\\\/ ]+', ' ',  name2[0][:-4])
-	else: cleaned_title = re.sub('[^-a-zA-Z0-9_()\\\/ ]+', ' ',  name)
+	elif type == 'musicvideo':
+		if not xbmcvfs.exists(musicvideoFolder): xbmcvfs.mkdir(musicvideoFolder)
 	if type == 'tvshow': tvshow,season,episode = GetTVShowNameResolved(cleaned_title)
-	if (type == 'movie') or (type == 'tvshow' and tvshow == ''):
+	if (type == 'movie') or (type == 'musicvideo') or (type == 'tvshow' and tvshow == ''):
 		keyb = xbmc.Keyboard(cleaned_title, traducao(40053))
 		keyb.doModal()
 		if (keyb.isConfirmed()):
@@ -723,22 +794,35 @@ def add_to_library(name,url,type,updatelibrary=True):
 	elif type == 'tvshow':
 		if tvshow <> '':
 			file_folder1 = os.path.join(tvshowFolder,tvshow)
-			if not xbmcvfs.exists(file_folder1): xbmcvfs.mkdir(file_folder1)
-			file_folder = os.path.join(os.path.join(tvshowFolder,tvshow),'S'+season)
+			if not xbmcvfs.exists(file_folder1): tryFTPfolder(file_folder1)
+			file_folder = os.path.join(tvshowFolder,tvshow+'/','S'+season)
 			title =  tvshow + ' S'+season+'E'+episode
 		else:
 			if title == '': title = cleaned_title
 			tvshow,season,episode = GetTVShowNameResolved(title)
 			if tvshow <> '':
 				file_folder1 = os.path.join(tvshowFolder,tvshow)
-				if not xbmcvfs.exists(file_folder): xbmcvfs.mkdir(file_folder1)
-				file_folder = os.path.join(os.path.join(tvshowFolder,title),'S'+season)
+				if not xbmcvfs.exists(file_folder1): tryFTPfolder(file_folder1)
+				file_folder = os.path.join(tvshowFolder,title+'/','S'+season)
 				title =  tvshow + ' S'+season+'E'+episode
 			else: file_folder = os.path.join(tvshowFolder,title)
-	if not xbmcvfs.exists(file_folder): xbmcvfs.mkdir(file_folder)
+	elif type == 'musicvideo': file_folder = musicvideoFolder
+	if not xbmcvfs.exists(file_folder): tryFTPfolder(file_folder) 
 	strm_contents = 'plugin://plugin.video.abelhas/?url=' + url +'&mode=25&name=' + urllib.quote_plus(title)
 	savefile(urllib.quote_plus(title)+'.strm',strm_contents,file_folder)
 	if updatelibrary: xbmc.executebuiltin("XBMC.UpdateLibrary(video)")
+
+def tryFTPfolder(file_folder):
+	if 'ftp://' in file_folder:
+		try:
+			from ftplib import FTP		
+			ftparg = re.compile('ftp://(.+?):(.+?)@(.+?):?(\d+)?/(.+/?)').findall(file_folder)
+			ftp = FTP(ftparg[0][2],ftparg[0][0],ftparg[0][1])
+			try: ftp.cwd(ftparg[0][4])
+			except: ftp.mkd(ftparg[0][4])
+			ftp.quit()
+		except: print 'Nao conseguiu criar %s' % file_folder
+	else: xbmcvfs.mkdir(file_folder)
 
 def GetTVShowNameResolved(title):
 	episode = ''
@@ -747,7 +831,7 @@ def GetTVShowNameResolved(title):
 	epi = re.compile('(.+?)[ ]?[Ss]?(\d{1,2})[EeXx.](\d{1,2})').findall(title)
 	if epi:
 		for n,s,e in epi:
-			tvshow = n.strip().strip('-')
+			tvshow = n.replace('-','').strip()
 			season = s
 			if len(season) == 1 : season = '0'+season
 			episode = e
@@ -755,7 +839,7 @@ def GetTVShowNameResolved(title):
 	else: 
 		epi = re.compile('(.+?)[ \.]?Ep?(\d{1,3})').findall(title)
 		for n,e in epi:
-			tvshow = n.strip().strip('-')
+			tvshow = n.replace('-','').strip()
 			season = '01'
 			episode = e
 			if len(episode) == 1 : episode = '0'+episode
@@ -787,6 +871,8 @@ def addDir(name,url,mode,iconimage,total,pasta,atalhos=False):
 
 def addCont(name,url,mode,tamanho,iconimage,total,pasta=False,atalhos=False):
 	contexto=[]
+	try: name = name.encode('ascii', 'xmlcharrefreplace')
+	except: pass
 	u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&tamanhof="+urllib.quote_plus(tamanho)
 	liz=xbmcgui.ListItem(name,iconImage="DefaultFolder.png", thumbnailImage=iconimage)
 	contexto.append((traducao(40038), 'XBMC.RunPlugin(%s?mode=10&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
@@ -795,8 +881,10 @@ def addCont(name,url,mode,tamanho,iconimage,total,pasta=False,atalhos=False):
 	contexto.append((traducao(40047), 'XBMC.RunPlugin(%s?mode=14&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),name)))
 	contexto.append((traducao(40051), 'XBMC.RunPlugin(%s?mode=26&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),urllib.quote_plus(name))))
 	contexto.append((traducao(40052), 'XBMC.RunPlugin(%s?mode=29&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),urllib.quote_plus(name))))
+	contexto.append((traducao(40054), 'XBMC.RunPlugin(%s?mode=32&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),urllib.quote_plus(name))))
 	contexto.append((traducao(40051)+' - Batch', 'XBMC.RunPlugin(%s?mode=31&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),urllib.quote_plus(name))))
 	contexto.append((traducao(40052)+' - Batch', 'XBMC.RunPlugin(%s?mode=30&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),urllib.quote_plus(name))))
+	contexto.append((traducao(40054)+' - Batch', 'XBMC.RunPlugin(%s?mode=33&url=%s&name=%s)' % (sys.argv[0], urllib.quote_plus(url),urllib.quote_plus(name))))
 	contexto.append(('Ver Trailer', 'RunPlugin(%s?mode=17&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),name)))
 	if atalhos==False: contexto.append(('Adicionar atalho', 'RunPlugin(%s?mode=19&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),name)))
 	else: contexto.append(('Remover atalho', 'RunPlugin(%s?mode=21&url=%s&name=%s)' % (sys.argv[0],urllib.quote_plus(url),atalhos)))
@@ -910,29 +998,24 @@ def abrir_url(url):
       return link
 
 def savefile(filename, contents,pastafinal=pastaperfil):
-    try:
-        destination = os.path.join(pastafinal,filename)
-        fh = open(destination, 'wb')
-        fh.write(contents)  
-        fh.close()
-    except:
-		try:
-			destination = os.path.join(pastafinal,filename)
-			fh = xbmcvfs.File(destination, 'w')
-			fh.write(str(contents))
-			fh.close()
-		except: print "Nao gravou os temporarios de: %s | %s" % (filename,destination)
+	try:
+		destination = os.path.join(pastafinal,filename)
+		fh = xbmcvfs.File(destination, 'w')
+		fh.write(str(contents))
+		fh.close()
+	except: print "Nao gravou os temporarios de: %s | %s" % (filename,destination)
 
 def openfile(filename,pastafinal=pastaperfil):
     try:
-        destination = os.path.join(pastafinal, filename)
-        fh = open(destination, 'rb')
-        contents=fh.read()
-        fh.close()
-        return contents
+		destination = os.path.join(pastafinal, filename)
+		fh = xbmcvfs.File(destination)
+		contents = fh.read()
+		fh.close()
+		return contents
     except:
-        print "Nao abriu os temporarios de: %s" % filename
-        return None
+		traceback.print_exc()
+		print "Nao abriu conteudos de: %s" % filename
+		return None
 
 def abrir_url_cookie(url,erro=True):
       net.set_cookies(cookies)
@@ -1038,4 +1121,6 @@ elif mode==28: proxpesquisa_tb()
 elif mode==29: add_to_library(name,url,'tvshow')
 elif mode==30: add_to_library_batch('tvshow')
 elif mode==31: add_to_library_batch('movie')
+elif mode==32: add_to_library(name,url,'musicvideo')
+elif mode==33: add_to_library_batch('musicvideo')
 xbmcplugin.endOfDirectory(int(sys.argv[1]))
