@@ -5,18 +5,13 @@
 
 import xbmc, xbmcgui, xbmcaddon, xbmcplugin,re,sys, urllib, urllib2,time,datetime,os,requests,json,htmlentitydefs
 
-versao = '0.5.0'
 user_agent = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'
 tvporpath = xbmc.translatePath(xbmcaddon.Addon().getAddonInfo('path')).decode('utf-8')
 pastaperfil = xbmc.translatePath(xbmcaddon.Addon().getAddonInfo('profile')).decode('utf-8')
 order=['RTP1','RTP2','SIC','TVI','RTPINF','SICN','TVI24','EURON','RTPACO','RTPAFR','RTPINT','RTPMAD','RTPMEM','ARTV','ETV','TPA','FASH','TRACE','DJING','VIRGIN']
-
 RadiosURL = 'http://www.radios.pt/portalradio/'
-PATH = "XBMC_TVPOR"
-UATRACK="UA-39199007-1"
 
 def canais():
-    GA("None","listacanais")
     if xbmcaddon.Addon().getSetting("programacao") == "true": programas=p_todos()
     else: programas=[]
     if xbmcaddon.Addon().getSetting("radios") == "true": addDir("[B][COLOR white]Radios[/COLOR][/B]",'nada',2,os.path.join(tvporpath,'resources','art','thumb_radios.png'),1,'Oiça comodamente radios nacionais.',True)
@@ -24,8 +19,8 @@ def canais():
     lcanais=channellist()
     for idcanal in order:
         addCanal("[B]%s[/B] %s" % (lcanais[idcanal]['name'].encode('utf-8'),p_umcanal(programas,lcanais[idcanal]['epg'],'nomeprog')),'nada',idcanal,os.path.join(tvporpath,'resources','art',lcanais[idcanal]['thumb']),len(order),p_umcanal(programas,lcanais[idcanal]['epg'],'descprog'))
-    xbmcplugin.setContent(int(sys.argv[1]), 'livetv')
-
+    vista_canais()
+    
 def channellist():
     return json.loads(openfile('lib.json',pastafinal=os.path.join(tvporpath,'resources')))
 
@@ -227,10 +222,9 @@ def playvideo(linkfinal,chid=None,name=None):
         thumb=os.path.join(tvporpath,'resources','art','thumb_info.png')
     else:
         listacanais=channellist()
-        name='[B]%s[/B]' % (listacanais[chid]['name'])
+        if name==None: name='[B]%s[/B]' % (listacanais[chid]['name'])
         thumb=os.path.join(tvporpath,'resources','art',listacanais[chid]['thumb'])
 
-    GA("player",chid)
     listitem = xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=thumb)
     playlist = xbmc.PlayList(1)
     playlist.clear()
@@ -286,7 +280,6 @@ def praias():
             nome= '[B]%s[/B] (Beachcam.pt)' % nome
         
         addCanal(nome,end,end,os.path.join(tvporpath,'resources','art','thumb_info.png'),len(beachcams),'',resolve=True)
-        #addDir(nome,end,7,,'',False)
     
 def p_todos():
     if xbmcaddon.Addon().getSetting("programacao") == "false": return ''
@@ -396,12 +389,6 @@ def openfile(filename,pastafinal=pastaperfil):
         print "Nao abriu os temporarios de: %s" % filename
         return None
 
-def checker():
-    if xbmcaddon.Addon().getSetting('ga_visitor')=='':
-        from random import randint
-        xbmcaddon.Addon().setSetting('ga_visitor',str(randint(0, 0x7fffffff)))
-    checkGA()
-
 def clean(text):
     command={'\r':'','\n':'','\t':'','&nbsp;':'','&#231;':'ç','&#201;':'É','&#233;':'é','&#250;':'ú','&#227;':'ã','&#237;':'í','&#243;':'ó','&#193;':'Á','&#205;':'Í','&#244;':'ô','&#224;':'à','&#225;':'á','&#234;':'ê','&#211;':'Ó','&#226;':'â'}
     regex = re.compile("|".join(map(re.escape, command.keys())))
@@ -443,159 +430,6 @@ def descape(content):
       content = re.sub('&([^;]+);', lambda m: unichr(htmlentitydefs.name2codepoint[m.group(1)]), content)
       return content.encode('utf-8')
 
-def parseDate(dateString):
-    try: return datetime.datetime.fromtimestamp(time.mktime(time.strptime(dateString.encode('utf-8', 'replace'), "%Y-%m-%d %H:%M:%S")))
-    except: return datetime.datetime.today() - datetime.timedelta(days = 1) #force update
-
-def checkGA():
-    secsInHour = 60 * 60
-    threshold  = 2 * secsInHour
-    now   = datetime.datetime.today()
-    prev  = parseDate(xbmcaddon.Addon().getSetting('ga_time'))
-    delta = now - prev
-    nDays = delta.days
-    nSecs = delta.seconds
-    doUpdate = (nDays > 0) or (nSecs > threshold)
-    if not doUpdate: return
-    xbmcaddon.Addon().setSetting('ga_time', str(now).split('.')[0])
-    APP_LAUNCH()    
-    
-                    
-def send_request_to_google_analytics(utm_url):
-    try:
-        req = urllib2.Request(utm_url, None,{'User-Agent':user_agent})
-        response = urllib2.urlopen(req).read()
-    except:
-        print ("GA fail: %s" % utm_url)         
-    return response
-       
-def GA(group,name):
-        try:
-            try:
-                from hashlib import md5
-            except:
-                from md5 import md5
-            from random import randint
-            import time
-            from urllib import unquote, quote
-            from os import environ
-            from hashlib import sha1
-            VISITOR = xbmcaddon.Addon().getSetting('ga_visitor')
-            utm_gif_location = "http://www.google-analytics.com/__utm.gif"
-            if not group=="None":
-                    utm_track = utm_gif_location + "?" + \
-                            "utmwv=" + versao + \
-                            "&utmn=" + str(randint(0, 0x7fffffff)) + \
-                            "&utmt=" + "event" + \
-                            "&utme="+ quote("5("+PATH+"*"+group+"*"+name+")")+\
-                            "&utmp=" + quote(PATH) + \
-                            "&utmac=" + UATRACK + \
-                            "&utmcc=__utma=%s" % ".".join(["1", VISITOR, VISITOR, VISITOR,VISITOR,"2"])
-                    try:
-                        print "============================ POSTING TRACK EVENT ============================"
-                        send_request_to_google_analytics(utm_track)
-                    except:
-                        print "============================  CANNOT POST TRACK EVENT ============================" 
-            if name=="None":
-                    utm_url = utm_gif_location + "?" + \
-                            "utmwv=" + versao + \
-                            "&utmn=" + str(randint(0, 0x7fffffff)) + \
-                            "&utmp=" + quote(PATH) + \
-                            "&utmac=" + UATRACK + \
-                            "&utmcc=__utma=%s" % ".".join(["1", VISITOR, VISITOR, VISITOR, VISITOR,"2"])
-            else:
-                if group=="None":
-                       utm_url = utm_gif_location + "?" + \
-                                "utmwv=" + versao + \
-                                "&utmn=" + str(randint(0, 0x7fffffff)) + \
-                                "&utmp=" + quote(PATH+"/"+name) + \
-                                "&utmac=" + UATRACK + \
-                                "&utmcc=__utma=%s" % ".".join(["1", VISITOR, VISITOR, VISITOR, VISITOR,"2"])
-                else:
-                       utm_url = utm_gif_location + "?" + \
-                                "utmwv=" + versao + \
-                                "&utmn=" + str(randint(0, 0x7fffffff)) + \
-                                "&utmp=" + quote(PATH+"/"+group+"/"+name) + \
-                                "&utmac=" + UATRACK + \
-                                "&utmcc=__utma=%s" % ".".join(["1", VISITOR, VISITOR, VISITOR, VISITOR,"2"])
-                                
-            print "============================ POSTING ANALYTICS ============================"
-            send_request_to_google_analytics(utm_url)
-            
-        except:
-            print "================  CANNOT POST TO ANALYTICS  ================" 
-            
-            
-def APP_LAUNCH():
-        versionNumber = int(xbmc.getInfoLabel("System.BuildVersion" )[0:2])
-        print versionNumber
-        if versionNumber < 12:
-            if xbmc.getCondVisibility('system.platform.osx'):
-                if xbmc.getCondVisibility('system.platform.atv2'):
-                    log_path = '/var/mobile/Library/Preferences'
-                else:
-                    log_path = os.path.join(os.path.expanduser('~'), 'Library/Logs')
-            elif xbmc.getCondVisibility('system.platform.ios'):
-                log_path = '/var/mobile/Library/Preferences'
-            elif xbmc.getCondVisibility('system.platform.windows'):
-                log_path = xbmc.translatePath('special://home')
-                log = os.path.join(log_path, 'xbmc.log')
-                logfile = open(log, 'r').read()
-            elif xbmc.getCondVisibility('system.platform.linux'):
-                log_path = xbmc.translatePath('special://home/temp')
-            else:
-                log_path = xbmc.translatePath('special://logpath')
-            log = os.path.join(log_path, 'xbmc.log')
-            logfile = open(log, 'r').read()
-            match=re.compile('Starting XBMC \((.+?) Git:.+?Platform: (.+?)\. Built.+?').findall(logfile)
-        elif versionNumber > 11:
-            print '======================= more than ===================='
-            if versionNumber < 14: filename='xbmc.log'
-            else: filename='kodi.log'
-            log_path = xbmc.translatePath('special://logpath')
-            log = os.path.join(log_path, filename)
-            logfile = open(log, 'r').read()
-            if versionNumber < 14: match=re.compile('Starting XBMC \((.+?) Git:.+?Platform: (.+?)\. Built.+?').findall(logfile)
-            else: match=re.compile('Starting Kodi \((.+?) Git:.+?Platform: (.+?)\. Built.+?').findall(logfile)
-        else:
-            logfile='Starting XBMC (Unknown Git:.+?Platform: Unknown. Built.+?'
-            match=re.compile('Starting XBMC \((.+?) Git:.+?Platform: (.+?)\. Built.+?').findall(logfile)
-        print '==========================   '+PATH+' '+versao+'  =========================='
-        try:
-            from hashlib import md5
-        except:
-            from md5 import md5
-        from random import randint
-        import time
-        from urllib import unquote, quote
-        from os import environ
-        from hashlib import sha1
-        import platform
-        VISITOR = xbmcaddon.Addon().getSetting('ga_visitor')
-        for build, PLATFORM in match:
-            if re.search('12',build[0:2],re.IGNORECASE): 
-                build="Frodo" 
-            if re.search('11',build[0:2],re.IGNORECASE): 
-                build="Eden" 
-            if re.search('13',build[0:2],re.IGNORECASE): 
-                build="Gotham" 
-            print build
-            print PLATFORM
-            utm_gif_location = "http://www.google-analytics.com/__utm.gif"
-            utm_track = utm_gif_location + "?" + \
-                    "utmwv=" + versao + \
-                    "&utmn=" + str(randint(0, 0x7fffffff)) + \
-                    "&utmt=" + "event" + \
-                    "&utme="+ quote("5(APP LAUNCH*"+build+"*"+PLATFORM+")")+\
-                    "&utmp=" + quote(PATH) + \
-                    "&utmac=" + UATRACK + \
-                    "&utmcc=__utma=%s" % ".".join(["1", VISITOR, VISITOR, VISITOR,VISITOR,"2"])
-            try:
-                print "============================ POSTING APP LAUNCH TRACK EVENT ============================"
-                send_request_to_google_analytics(utm_track)
-            except:
-                print "============================  CANNOT POST APP LAUNCH TRACK EVENT ============================" 
-
 def get_params():
     param=[]
     paramstring=sys.argv[2]
@@ -611,14 +445,21 @@ def get_params():
             if (len(splitparams))==2: param[splitparams[0]]=splitparams[1]                         
     return param
 
-
+def vista_canais():
+    xbmcplugin.setContent(int(sys.argv[1]), 'livetv')
+    if "confluence" in xbmc.getSkinDir():
+        moviesview=xbmcaddon.Addon().getSetting('vistacanais')
+        if moviesview == "0": xbmc.executebuiltin("Container.SetViewMode(500)")#miniatura
+        if moviesview == "1": xbmc.executebuiltin("Container.SetViewMode(560)")#livetv
+        if moviesview == "2": xbmc.executebuiltin("Container.SetViewMode(50)")#lista
+        if moviesview == "3": xbmc.executebuiltin("Container.SetViewMode(51)")#lista grande
 
 def addCanal(name,url,chid,iconimage,total,descricao,resolve=False,mode=0):
     cm=[]
     if resolve: u="%sresolve/?name=%s&url=%s" % (sys.argv[0],name,urllib.quote_plus(url))
     else: u="%splay/%s" % (sys.argv[0],chid)
     liz=xbmcgui.ListItem(name, iconImage="DefaultFolder.png", thumbnailImage=iconimage)
-    liz.setInfo( type="Video", infoLabels={ "Title": name,"overlay":6,"playcount":0} )
+    liz.setInfo( type="Video", infoLabels={ "Title": name,"overlay":6,"playcount":0,"plot":descricao} )
     liz.setProperty('fanart_image', "%s/fanart.jpg"%xbmcaddon.Addon().getAddonInfo("path"))
     liz.setProperty('IsPlayable', 'true')
     cm.append(('Ver programação', "XBMC.RunPlugin(%s?mode=%s&name=%s)"%(sys.argv[0],6,chid)))
@@ -630,7 +471,7 @@ def addRadio(name,chid,iconimage,total,descricao,nacional=True,mode=0):
     if nacional: u="%sradio/nacional/%s" % (sys.argv[0],chid)
     else: u="%sradio/local/%s" % (sys.argv[0],chid)
     liz=xbmcgui.ListItem(name, iconImage="DefaultFolder.png", thumbnailImage=iconimage)
-    liz.setInfo( type="Music", infoLabels={ "Title": name,"playcount":0} )
+    liz.setInfo( type="Music", infoLabels={ "Title": name,"playcount":0,"plot":descricao} )
     liz.setProperty('fanart_image', "%s/fanart.jpg"%xbmcaddon.Addon().getAddonInfo("path"))
     liz.setProperty('IsPlayable', 'true')
     liz.addContextMenuItems(cm, replaceItems=False)
@@ -658,8 +499,6 @@ except: pass
 try: mode=int(params["mode"])
 except: pass
 
-checker()
-
 if '/play/' in sys.argv[0]:
     try:status=sys.argv[0].split('&auto=')[1]
     except: status='False'
@@ -677,7 +516,7 @@ elif '/radio/' in sys.argv[0]:
     else: radio_resolver(sys.argv[0].split('/local/')[1],nacional=False)
     
 elif mode==None:
-    print "Versao Instalada: v" + versao
+    print "Versao Instalada: v" + xbmcaddon.Addon().getAddonInfo('version')
     canais()
 
 elif mode==1: menu_principal()

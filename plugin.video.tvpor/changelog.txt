@@ -1,3 +1,7 @@
+[B]v0.5.1 (1 de Julho de 2015):[/B]
+- Correccoes e algumas melhorias.
+- Limpeza de Codigo.
+
 [B]v0.5.0 (14 de Junho de 2015):[/B]
 Dado os recentes bloqueios de sites de streaming, o addon perdeu grande parte do seu conteudo. A partir de agora o addon ira ser dedicado apenas a streams oficiais e legais dos canais (onde provem a lista mais reduzida).
 - Addon re-escrito com algumas melhorias.
