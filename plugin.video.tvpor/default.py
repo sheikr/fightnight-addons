@@ -678,9 +678,6 @@ elif '/radio/' in sys.argv[0]:
     
 elif mode==None:
     print "Versao Instalada: v" + versao
-    if xbmcaddon.Addon().getSetting('termos') == 'true':
-        mensagemaviso()
-        xbmcaddon.Addon().setSetting('termos',value='false')
     canais()
 
 elif mode==1: menu_principal()
