@@ -36,7 +36,8 @@ def request_servidores(chid,auto=False):
                     import base64
                     conteudo=abrir_url(individual['url'])
                     try:
-                        linksmil=re.compile('"smil":"(.+?)"').findall(conteudo)[0]
+                        pre=re.compile('.smil = .+?.(.+?);').findall(conteudo)[0].split('.')[1]
+                        linksmil=re.compile('"%s":"(.+?)"' % pre).findall(conteudo)[0]
                         if not linksmil.startswith('http://'): linksmil=base64.b64decode(linksmil)
                         titulos.append('%s (SMIL)' % (individual['name']))
                         ligacao.append(linksmil)
@@ -53,9 +54,10 @@ def request_servidores(chid,auto=False):
                     except: pass
 
                     try:
+                        pre=re.compile('.file = .+?.(.+?);').findall(conteudo)[0].split('.')[1]
                         streamer=re.compile('"streamer": "(.+?)"').findall(conteudo)[0]
                         app=re.compile('"application": "(.+?)"').findall(conteudo)[0]
-                        filep=re.compile('"file": "(.+?)"').findall(conteudo)[0]
+                        filep=re.compile('"%s": "(.+?)"' % pre).findall(conteudo)[0]
                         link='rtmp://%s/%s playPath=%s swfUrl=http://programas.rtp.pt/play/player.swf?v3 swfVfy=1 live=1 pageUrl=%s' % (streamer,app,filep,individual['url'])
                         titulos.append('%s (RTMP)' % (individual['name']))
                         ligacao.append(link)
@@ -126,7 +128,10 @@ def resolvers(p_end,chid=None,name=None):
             if re.search('stream_live_hls_url',conteudo):
                 temp=re.compile('"stream_live_hls_url":"(.+?)"').findall(conteudo)[0].replace('\\','')
                 m3u8_url=redirect(temp)
-
+            elif re.search('"type":"application/x-mpegURL","url"',conteudo.replace('\\','')):
+		temp=re.compile('"type":"application/x-mpegURL","url":"(.+?)"').findall(conteudo.replace('\\',''))[-1]
+		m3u8_url=redirect(temp)
+		    
         elif '<jwplayer:streamer>' in conteudo:
             rtmp=re.compile('<jwplayer:streamer>(.+?)</jwplayer:streamer>').findall(conteudo)[0]
             try: filelocation=re.compile('<media:content bitrate=".+?" url="(.+?)" width=".+?"').findall(conteudo)[0]

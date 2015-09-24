@@ -1,3 +1,7 @@
+[B]v0.5.2 (24 de Setembro de 2015):[/B]
+- Correccoes nos servidores.
+- Correccoes de rotina.
+
 [B]v0.5.1 (1 de Julho de 2015):[/B]
 - Correccoes e algumas melhorias.
 - Limpeza de Codigo.
