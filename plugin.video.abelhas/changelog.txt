@@ -1,6 +1,27 @@
-[B]v1.1.1 (1 de Julho de 2015):[/B]
-Actualizacao por Mafarricos!
-- Diversas melhorias e correccoes.
+[B]v1.1.2 (13 de Dezembro de 2015):[/B] (ty mafarricos)
+- Cookies fix
+- fix quantity of context menu
+
+[B]v1.1.0-beta010 (20 de Junho de 2015):[/B]
+- add videoclips to library
+
+[B]v1.1.0-beta006 (18 de Junho de 2015):[/B]
+- mark as watched from library list: ty gb160
+- fix favorite next page
+
+[B]v1.1.0-beta005 (18 de Junho de 2015):[/B]
+abelhas improvement: better usage of portuguese chars
+
+[B]v1.1.0-beta003 (15 de Junho de 2015):[/B]
+- Opção de resumir.
+
+[B]v1.1.0-beta002 (15 de Junho de 2015):[/B]
+- Pesquisa apresenta resultados únicos na combinação de nome+tamanho.
+
+[B]v1.1.0-beta001 (14 de Junho de 2015):[/B]
+- Melhoria quando addon chamado de fora:
+- Se opção Pasta no addon abre logo o video (com melhor qualidade dependendo das opções);
+- Se opção Dialogo dá opção de escolher a qualidade.
 
 [B]v1.1.0 (14 de Junho de 2015):[/B]
 Actualizacao por Mafarricos!
