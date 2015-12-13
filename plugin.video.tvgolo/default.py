@@ -6,7 +6,6 @@
 
 import xbmc, xbmcgui, xbmcaddon, xbmcplugin,os,re,sys, urllib, urllib2,htmlentitydefs
 
-versao = '1.0.1'
 user_agent = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:10.0a1) Gecko/20111029 Firefox/10.0a1'
 art=os.path.join(xbmcaddon.Addon().getAddonInfo('path'),'resources','art')
 MainURL = 'http://www.okgoals.com/'
@@ -21,12 +20,12 @@ def menu_principal():
       if "confluence" in xbmc.getSkinDir(): xbmc.executebuiltin("Container.SetViewMode(51)")
 
 def ligaportuguesa(url):
-      conteudos= re.compile("""class='linkgoal sapo' id='(.+?)'><h3.+?><img.+?src='.+?'.+?><span.+?>(.+?)\((.+?):(.+?)\)\s*-\s*(.+?)\s*([0-9]*)\s*vs\s*([0-9]*)\s*(.+?)</span></h3>""").findall(abrir_url(url))
+      conteudos= re.compile("""class='linkgoal sapo' id='(.+?)'><h1.+?><img.+?src='.+?'.+?><span.+?>(.+?)\((.+?):(.+?)\)\s*-\s*(.+?)\s*([0-9]*)\s*vs\s*([0-9]*)\s*(.+?)</span></h1>""").findall(abrir_url(url))
       from random import randint
       for endereco,data,hora1,hora2,equipa1,resultado1,resultado2,equipa2 in conteudos:
             if len(resultado1)==0 : resultado1=str('#')
             if len(resultado2)==0 : resultado2=str('#')
-            addDir('[COLOR orange]%s[/COLOR] [COLOR darkorange](%sh%s)[/COLOR][COLOR blue] - [/COLOR][COLOR white]%s[/COLOR] [COLOR yellow]%s - %s[/COLOR] [COLOR white]%s[/COLOR]' % (data,hora1,hora2,descape(equipa1),resultado1,resultado2,descape(equipa2)),'http://www.goalsoftheworld.tk/getcontent.php?rand=%s&id_results=%s' % (str(randint(1, 100)),endereco),1,os.path.join(art,'pt.png'),len(conteudos),pasta=False)
+            addDir('[COLOR orange]%s[/COLOR] [COLOR darkorange](%sh%s)[/COLOR][COLOR blue] - [/COLOR][COLOR white]%s[/COLOR] [COLOR yellow]%s - %s[/COLOR] [COLOR white]%s[/COLOR]' % (data,hora1,hora2,equipa1,resultado1,resultado2,equipa2),'http://www.goalsoftheworld.tk/getcontent.php?rand=%s&id_results=%s' % (str(randint(1, 100)),endereco),1,os.path.join(art,'pt.png'),len(conteudos),pasta=False)
       if "confluence" in xbmc.getSkinDir(): xbmc.executebuiltin("Container.SetViewMode(51)")
 
 def listadeligas(url):
@@ -46,14 +45,14 @@ def request(url,special=False):
       link=abrir_url(url).replace('&nbsp;','')
       if special:
             #hack para epocas anteriores
-            listagolos=re.compile('<div class="listajogos"><a href="(.+?)"><img.+?src="images/(.+?)\..+?" />\s*(.+?)</a></div>').findall(link)
+            listagolos=re.compile('<div class="matchlisting"><a href="(.+?)"><img.+?src="images/(.+?)\..+?" />\s*(.+?)</a></div>').findall(link)
             for endereco,thumb,multiple in listagolos:
                   data=multiple.split('(')[0]
                   hora=multiple.split('(')[1].split(')')[0]
                   rest=''.join(')'.join('('.join(multiple.split('(')[1:]).split(')')).split('- ')[1:])
                   addDir('[COLOR orange]%s[/COLOR][COLOR darkorange](%s)[/COLOR][COLOR blue] - [/COLOR][COLOR white]%s[/COLOR]' % (data,hora,rest),MainURL + endereco,1,os.path.join(art,'%s.png' % (thumb)),len(listagolos),pasta=False)
       else:
-            listagolos=re.compile('<div class="listajogos"><a href="(.+?)"><img.+?src="images/(.+?)\..+?" />\s+?([0-9]{4}\.[0-9]{2}\.[0-9]{2})\s*(\([0-9]{2}h[0-9]{2}\))\s*-\s*([A-Za-z ]+?)\s*([0-9]*)\s*-\s*([0-9]*)\s*([A-Za-z ]+?)</a></div>').findall(link)
+            listagolos=re.compile('<div class="matchlisting"><a href="(.+?)"><img.+?src="images/(.+?)\..+?" />\s+?([0-9]{4}\.[0-9]{2}\.[0-9]{2})\s*(\([0-9]{2}h[0-9]{2}\))\s*-\s*([A-Za-z ]+?)\s*([0-9]*)\s*-\s*([0-9]*)\s*([A-Za-z ]+?)</a></div>').findall(link)
             for endereco,thumb,data,hora,equipa1,resultado1,resultado2,equipa2 in listagolos:
                   addDir('[COLOR orange]%s[/COLOR] [COLOR darkorange]%s[/COLOR][COLOR blue] - [/COLOR][COLOR white]%s[/COLOR] [COLOR yellow]%s - %s[/COLOR] [COLOR white]%s[/COLOR]' % (data,hora,equipa1,resultado1,resultado2,equipa2),MainURL + endereco,1,os.path.join(art,'%s.png' % (thumb)),len(listagolos),pasta=False)
 
@@ -75,10 +74,13 @@ def captura(name,url):
       linkoriginal = link
       if re.search('okgoals',url):
             goals=True
+            '''
             link=link.replace('<div style="float:left;"><iframe','').replace('"contentjogos">','"contentjogos"></iframe>')
             ij=link.find('"contentjogos">')
             link=link[ij:]
+            '''
       else: goals=False
+      goals=True
       titles=[]; ligacao=[]
       aliezref=int(0)
       aliez=re.compile('<iframe.+?src="http://emb.aliez.tv/(.+?)"').findall(link)
@@ -144,6 +146,8 @@ def captura(name,url):
                   if publisher=='v2': publisher='configopener'
                   golo=findgolo(link,codigo)
                   if golo: golo=' (%s)' % (golo)
+                  if "media only" in golo:golo=''
+                  
                   titles.append('Playwire' + golo)
                   ligacao.append('http://cdn.playwire.com/v2/%s/config/%s.json' % (publisher,codigo))
             
@@ -206,6 +210,7 @@ def captura(name,url):
               if golo: golo=' (%s)' % (golo)
               titles.append('Youtube' + golo)
               ligacao.append(codigo)
+      print ligacao
       if len(ligacao)==0:
             xbmcgui.Dialog().ok(traducao(30000), traducao(30005))
             index=-1
@@ -408,7 +413,7 @@ except: pass
 try: thumb=urllib.unquote_plus(params["thumb"])
 except: pass
 
-if mode==None or url==None or len(url)<1: print "Versao Instalada: v" + versao; menu_principal()
+if mode==None or url==None or len(url)<1: menu_principal()
 elif mode==1: captura(name,url)
 elif mode==2: request(url)
 elif mode==3: listadeligas(url)
