@@ -1,3 +1,8 @@
+[B]v0.5.3 (13 de Dezembro de 2015):[/B]
+- RTP3 corrigida.
+- Praias e radios corrigidos.
+- Outras correccoes.
+
 [B]v0.5.2 (24 de Setembro de 2015):[/B]
 - Correccoes nos servidores.
 - Correccoes de rotina.

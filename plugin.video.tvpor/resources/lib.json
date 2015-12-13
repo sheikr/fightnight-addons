@@ -67,17 +67,17 @@
     "name": "TVI",
     "thumb": "thumb_tvi.png"
   },
-  "RTPINF": {
-    "epg": "RTPIN",
+  "RTP3": {
+    "epg": "RTP3",
     "streams": [
       {
-        "url": "http://www.rtp.pt/play/direto/rtpinformacao",
+        "url": "http://www.rtp.pt/play/direto/rtp3",
         "name": "RTP Play",
         "resolve": true
       }
     ],
-    "name": "RTP Informação",
-    "thumb": "thumb_rtpinf.png"
+    "name": "RTP 3",
+    "thumb": "temp_rtp3.png"
   },
   "SICN": {
     "epg": "SICN",

@@ -8,7 +8,7 @@ import xbmc, xbmcgui, xbmcaddon, xbmcplugin,re,sys, urllib, urllib2,time,datetim
 user_agent = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'
 tvporpath = xbmc.translatePath(xbmcaddon.Addon().getAddonInfo('path')).decode('utf-8')
 pastaperfil = xbmc.translatePath(xbmcaddon.Addon().getAddonInfo('profile')).decode('utf-8')
-order=['RTP1','RTP2','SIC','TVI','RTPINF','SICN','TVI24','EURON','RTPACO','RTPAFR','RTPINT','RTPMAD','RTPMEM','ARTV','ETV','TPA','FASH','TRACE','DJING','VIRGIN']
+order=['RTP1','RTP2','SIC','TVI','RTP3','SICN','TVI24','EURON','RTPACO','RTPAFR','RTPINT','RTPMAD','RTPMEM','ARTV','ETV','TPA','FASH','TRACE','DJING','VIRGIN']
 RadiosURL = 'http://www.radios.pt/portalradio/'
 
 def canais():
@@ -210,13 +210,14 @@ def radio_resolver(chid,nacional=True):
                 except: pass
 
     else:
-        headers = {'User-Agent': user_agent,'Referer':'http://www.radios.pt/portalradio/homepage.htm'}
-        urlrequest='http://www.radios.pt/portalradio/Sintonizador/?radio_id=%s&scope=0' % (chid)
+        headers = {'User-Agent': user_agent,'Referer':'http://www.radios.pt/'}
+        urlrequest='http://www.radios.pt/?page_id=819&id=%s' % (chid)
         r = requests.get(urlrequest, headers=headers)
-        stream_url=re.compile('<param name="url" value="(.+?)"').findall(r.text)[0]
-        thumb='http://www.radio.com.pt/APR.ROLI.WEB/Images/Logos/'+ chid +'.gif'
-        rname=re.compile('<span id="lblNomeRadio">(.+?)</span>').findall(r.text)[0]
-
+        stream_url=re.compile('<audio.+?src="(.+?)"').findall(r.text)[0]
+        rname=re.compile('<h4 class="Rpt-name">(.+?)</h4>').findall(r.text)[0]
+        try:thumb=re.compile('<img src="([^"]+?)" alt="Logotipo">').findall(r.text)[0]
+        except: pass
+        
     if stream_url: playmusic(stream_url,rname=rname,thumb=thumb)
     else: print "Nada disponivel"
         
@@ -259,8 +260,9 @@ def praias():
     SurftotalURL='http://www.surftotal.com'
     beachcams=[]
     try:
-        temp=abrir_url(BeachcamURL + 'pt/livecams/')
-        beachcams=re.compile('<a href="/pt/livecams/(.+?)">(.+?)</a>').findall(temp)    
+        temp=clean(abrir_url(BeachcamURL + 'pt/livecams/'))
+        print temp
+        beachcams=re.compile('<li>.+?<a href="/pt/livecams/(.+?)">(.+?)</a>').findall(temp)    
     except: print "Nao foi possivel obter as BeachCams"
     try:
         temp=abrir_url(SurflineURL + '/surf-report/portugal_2946/map/')
@@ -291,7 +293,7 @@ def p_todos():
     else:
         try:
             dia=horaportuguesa(True)
-            listacanais='RTP1,RTP2,SIC,TVI,RTPIN,SICN,TVI24,FASH,RTPAC,RTPA,RTPM,RTPMD,ETVHD,TPA,ARTV,TRACE,EURN'
+            listacanais='RTP1,RTP2,SIC,TVI,RTP3,SICN,TVI24,FASH,RTPAC,RTPA,RTPM,RTPMD,ETVHD,TPA,ARTV,TRACE,EURN'
             url='http://services.sapo.pt/EPG/GetChannelListByDateInterval?channelSiglas='+listacanais+'&startDate=' + dia +':01&endDate='+ dia + ':02'
             link=clean(abrir_url(url,erro=False))
             
@@ -345,25 +347,18 @@ def radios():
             addRadio(nomeradio.replace('Radio ',''),idradio,imagemradio,len(radiosnacionais),'',nacional=True)
 
 def radioslocais():
-    link=clean(abrir_url(RadiosURL))
-    distritos=re.compile('id="DirectorioPesquisa1_ddlDistritos">(.+?)</select>').findall(link)[0]
-    distritos=distritos.replace('<option value="0"></option>','<option value="0">Todos as rádios locais</option>')
-    lista=re.compile('<option value="(.+?)">(.+?)</option>').findall(distritos)
+    link=clean(requests.get('http://www.radios.pt',headers={'User-Agent':user_agent}).text)
+    distritos=re.compile('<select name="distrito"(.+?)</select>').findall(link)[0]
+    lista=re.compile("<option value='(.+?)' >(.+?)</option>").findall(distritos)
     for iddistrito,nomedistrito in lista:
-        addDir(nomedistrito,RadiosURL + '?distrito=' + iddistrito + '&concelho=0&tipo=0',4,os.path.join(tvporpath,'resources','art','thumb_radios.png'),len(lista),'',True)
+        addDir(nomedistrito[1:].encode('utf-8'),'http://www.radios.pt/?livre=&distrito='+iddistrito + '&tipo=tipo&concelho=concelho&pesquisar=pesquisarmapa',4,os.path.join(tvporpath,'resources','art','thumb_radios.png'),len(lista),'',True)
     xbmc.executebuiltin("Container.SetViewMode(501)")
 
 def listar_radios(name,url):
-    link=clean(abrir_url(url))
-    radios=re.compile('<td><a href="/portalradio/conteudos/ficha/.+?radio_id=(.+?)">(.+?)</a></td><td>(.+?)</td>.+?<td align="center">').findall(link)
-    for idradio,nomeradio,concelho in radios:
-        addRadio('[B]'+nomeradio+'[/B] ('+concelho+')',idradio,'http://www.radio.com.pt/APR.ROLI.WEB/Images/Logos/'+ idradio +'.gif',len(radios),'',nacional=False)
-    try:
-        pagina=re.compile('<div id="DirectorioPesquisa1_divPageSelector">.+?<b> (.+?)</b>  <a href=/portalradio/(.+?)>').findall(link)[0]
-        nrpag=int(pagina[0])+1
-        nrpag=str(nrpag)
-        addDir('[COLOR blue]Próxima página (' + nrpag + ') >>>[/COLOR]',RadiosURL + pagina[1],4,os.path.join(tvporpath,'resources','art','thumb_radios.png'),1,'',True)
-    except: pass
+    link=clean(requests.get(url,headers={'User-Agent':user_agent}).text)
+    radios=re.compile("""&id=(.+?)'.+?<span class="Rpt-title"> (.+?)</span>""").findall(link)
+    for idradio,nome in radios:
+        addRadio('[B]'+nome+'[/B]',idradio,'http://www.radio.com.pt/APR.ROLI.WEB/Images/Logos/'+ idradio +'.gif',len(radios),'',nacional=False)
     xbmc.executebuiltin("Container.SetViewMode(501)")
 
 def abrir_url(url,erro=True):
