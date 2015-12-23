@@ -911,8 +911,8 @@ def addCont(name,url,mode,tamanho,iconimage,total,pasta=False,atalhos=False):
 ######################################################## DOWNLOAD ###############################################
 ### THANKS ELDORADO (ICEFILMS) ###
 def fazerdownload(name,url,tipo="outros"):
-      vidname=name.replace('[B]','').replace('[/B]','').replace('\\','').replace(str(tamanhoparavariavel),'')
-      vidname = re.sub('[^-a-zA-Z0-9_.()\\\/ ]+', '',  vidname)
+      vidname=name.replace('[B]','').replace('[/B]','').replace('\\','').replace(str(tamanhoparavariavel),'').replace('[/COLOR]','')
+      vidname=re.sub('[COLOR .+?]', '', vidname)
       dialog = xbmcgui.Dialog()
       if tipo=="fotos": mypath=os.path.join(pastaperfil, vidname)
       else:
