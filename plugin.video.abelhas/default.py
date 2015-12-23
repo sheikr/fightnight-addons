@@ -6,6 +6,7 @@
 import xbmc,xbmcaddon,xbmcgui,xbmcplugin,urllib,urllib2,os,re,sys,datetime,time,xbmcvfs,HTMLParser
 from t0mm0.common.net import Net
 from resources.lib import internalPlayer
+
 try: import json
 except: import simplejson as json
 h = HTMLParser.HTMLParser()
@@ -911,8 +912,9 @@ def addCont(name,url,mode,tamanho,iconimage,total,pasta=False,atalhos=False):
 ######################################################## DOWNLOAD ###############################################
 ### THANKS ELDORADO (ICEFILMS) ###
 def fazerdownload(name,url,tipo="outros"):
-      vidname=name.replace('[B]','').replace('[/B]','').replace('\\','').replace(str(tamanhoparavariavel),'').replace('[/COLOR]','')
-      vidname=re.sub('[COLOR .+?]', '', vidname)
+      vidname=name.replace('[B]','').replace('[/B]','').replace('\\','').replace(str(tamanhoparavariavel),'')#.replace('[/COLOR]','')
+      vidname=vidname.split(']')[1].split('[')[0]
+      vidname = re.sub('[^-a-zA-Z0-9_.()\\\/ ]+', '',  vidname)
       dialog = xbmcgui.Dialog()
       if tipo=="fotos": mypath=os.path.join(pastaperfil, vidname)
       else:
@@ -922,21 +924,9 @@ def fazerdownload(name,url,tipo="outros"):
       if os.path.isfile(mypath) is True:
             ok = mensagemok('Abelhas.pt',traducao(40042),'','')
             return False
-      else:              
-            try:
-                  dp = xbmcgui.DialogProgress()
-                  dp.create('Abelhas.pt - ' + traducao(40043), '', name)
-                  start_time = time.time()
-                  try: urllib.urlretrieve(url, mypath, lambda nb, bs, fs: dialogdown(nb, bs, fs, dp, start_time))
-                  except:
-                        while os.path.exists(mypath): 
-                              try: os.remove(mypath); break 
-                              except: pass 
-                        if sys.exc_info()[0] in (urllib.ContentTooShortError, StopDownloading, OSError): return False 
-                        else: raise 
-                        return False
-                  return True
-            except: ok=mensagemok('Abelhas.pt',traducao(40044)); print 'download failed'; return False
+      else:
+            from resources.lib import downloader
+            downloader.download(url, mypath, 'Abelhas.pt')
 
 def dialogdown(numblocks, blocksize, filesize, dp, start_time):
       try:
