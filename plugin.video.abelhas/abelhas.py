@@ -225,7 +225,7 @@ def atalhos(type=False):
                   elif ftype=='folder': addDir('%s (%s)' % (fname,path),furl,3,wtpath + art + 'pasta.png',len(lista),True,atalhos=atal)
                   xbmc.executebuiltin("Container.SetViewMode(51)")
 
-def pastas(url,name,formcont={},conteudo='',past=False,deFora=False):
+def pastas(url,name,formcont={},conteudo='',past=False,deFora=False,listagem=False):
 	MainPlayList = []
 	uniqueList = []
 	if foldertype == 1 and re.search('action/SearchFiles',url):
@@ -319,10 +319,15 @@ def pastas(url,name,formcont={},conteudo='',past=False,deFora=False):
 							selectlist.append(part2[1]+part2[2]+part2[3])
 							urllist.append(sitebase + part2[4])
 					choose=source('Link a Abrir',selectlist)
-					if choose > -1:	analyzer(urllist[choose])
+					if listagem==True: return urllist
+					else:
+                                                if choose > -1:	analyzer(urllist[choose])
 				else:
 					reslist = sorted(reslist, key=getKey,reverse=True)
-					analyzer(sitebase + reslist[1][1][4])
+					if listagem==True: return reslist
+					else:
+                                                if choose > -1:
+                                                        analyzer(sitebase + reslist[1][1][4])
 			else:
 				if re.search('action/SearchFiles',url) and selfAddon.getSetting('search-order') == 'true': reslist = sorted(reslist, key=getKey,reverse=True)
 				for part1,part2 in reslist: 
@@ -556,7 +561,7 @@ def paginas(link):
 	except: pass
 
 ########################################################### PLAYER ################################################
-def analyzer(url,subtitles='',playterm=False,playlistTitle=''):
+def analyzer(url,subtitles='',playterm=False,playlistTitle='',returning=False):
 	final = ''
 	countloop = 0
 	sitebase,sitename,color,mode = returnValues(url)
@@ -607,7 +612,8 @@ def analyzer(url,subtitles='',playterm=False,playlistTitle=''):
 		else: return
 	if playlistTitle == '': mensagemprogresso.close()
 	linkfinal=linkfinal.replace('\u0026','&').replace('\u003c','<').replace('\u003e','>').replace('\\','')
-	print linkfinal
+	if returning==True:
+                return linkfinal
 	if re.search('.jpg',url) or re.search('.png',url) or re.search('.gif',url) or re.search('.bmp',url):
 		if re.search('.jpg',url): extfic='temp.jpg'
 		elif re.search('.png',url): extfic='temp.png'
@@ -1067,6 +1073,12 @@ def clean(text):
 def traducao(texto):
       return traducaoma(texto).encode('utf-8')
 
+def test(pesquisa):
+        login(True)
+        encode=urllib.quote_plus(pesquisa)
+        form_d = {'FileName':encode,'submitSearchFiles':'Procurar','FileType':'video','IsGallery':'False'}
+	return pastas(MainURL + 'action/SearchFiles',name,formcont=form_d,past=True,deFora=True,listagem=True)
+        #return 
 params=get_params()
 url=None
 name=None
@@ -1123,4 +1135,5 @@ elif mode==26: add_to_library_opt(name,url)
 elif mode==27: proxpesquisa_lb()
 elif mode==28: proxpesquisa_tb()
 elif mode==30: add_to_library_batch()
-xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
+if 'Abelhas.pt' in xbmcaddon.Addon().getAddonInfo('name'): xbmcplugin.endOfDirectory(int(sys.argv[1]))
