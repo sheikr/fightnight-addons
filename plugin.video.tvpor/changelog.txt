@@ -1,3 +1,6 @@
+[B]v0.5.4 (17 de Janeiro de 2016):[/B]
+- Varias correccoes nos servidores.
+
 [B]v0.5.3 (13 de Dezembro de 2015):[/B]
 - RTP3 corrigida.
 - Praias e radios corrigidos.

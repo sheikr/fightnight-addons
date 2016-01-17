@@ -35,21 +35,23 @@ def request_servidores(chid,auto=False):
                 if 'www.rtp.pt' in individual['url']:
                     import base64
                     conteudo=abrir_url(individual['url'])
+                    print conteudo
                     try:
                         pre=re.compile('.smil = .+?.(.+?);').findall(conteudo)[0].split('.')[1]
                         linksmil=re.compile('"%s":"(.+?)"' % pre).findall(conteudo)[0]
                         if not linksmil.startswith('http://'): linksmil=base64.b64decode(linksmil)
                         titulos.append('%s (SMIL)' % (individual['name']))
-                        ligacao.append(linksmil)
+                        ligacao.append(linksmil + '|User-Agent=' + urllib.quote('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36'))
                         resolve.append(False)
                     except: pass
                     
                     try:
-                        link=re.compile('"d":"(.+?)"').findall(conteudo)[0]
+                        pre=re.compile('.d = .+?.(.+?);').findall(conteudo)[0].split('.')[1]
+                        link=re.compile('"%s":"(.+?)"' % (pre)).findall(conteudo)[0]
                         if link!=linksmil:
                             if not link.startswith('http://'): link=base64.b64decode(link)
                             titulos.append('%s (M3U8)' % (individual['name']))
-                            ligacao.append(link)
+                            ligacao.append(link + '|User-Agent=' + urllib.quote('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36'))
                             resolve.append(False)
                     except: pass
 
@@ -150,7 +152,7 @@ def resolvers(p_end,chid=None,name=None):
 
         elif 'tviplayer.iol.pt' in conteudo:
             m3u8_url=re.compile("videoUrl: '(.+?)'").findall(conteudo)[0]
-
+            
         elif 'surftotal' in conteudo:
             try:
                 try:m3u8_url=re.compile("""<source src="([^"]+?)" type='rtmp/mp4'>""").findall(conteudo)[0]

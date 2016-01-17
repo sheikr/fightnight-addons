@@ -7,9 +7,14 @@
         "name": "RTP Play",
         "resolve": true
       },
+	  {
+        "url": "http://noscdn1.connectedviews.com:1935/live/rtp1.stream/livestream.m3u8",
+        "name": "Alternativa #1",
+        "resolve": false
+      },
       {
         "url": "http://88.157.194.246/live/ramdisk/zrtp1/HLS/zrtp1.m3u8",
-        "name": "Alternativa",
+        "name": "Alternativa #2",
         "resolve": false
       }
     ],
@@ -24,9 +29,14 @@
         "name": "RTP Play",
         "resolve": true
       },
+	  {
+        "url": "http://noscdn1.connectedviews.com:1935/live/rtp2.stream/livestream.m3u8",
+        "name": "Alternativa #1",
+        "resolve": false
+      },
       {
         "url": "http://88.157.194.246/live/ramdisk/zrtp2/HLS/zrtp2.m3u8",
-        "name": "Alternativa",
+        "name": "Alternativa #2",
         "resolve": false
       }
     ],
@@ -41,9 +51,14 @@
         "name": "SIC Oficial",
         "resolve": false
       },
+	  {
+        "url": "http://noscdn1.connectedviews.com:1935/live/sic.stream/livestream.m3u8",
+        "name": "Alternativa #1",
+        "resolve": false
+      },
       {
         "url": "http://88.157.194.246/live/ramdisk/zsic/HLS/zsic.m3u8",
-        "name": "Alternativa",
+        "name": "Alternativa #2",
         "resolve": false
       }
     ],
@@ -58,9 +73,14 @@
         "name": "TVI Oficial",
         "resolve": true
       },
+	  {
+        "url": "http://noscdn1.connectedviews.com:1935/live/tvi.stream/livestream.m3u8",
+        "name": "Alternativa #1",
+        "resolve": false
+      },
       {
         "url": "http://88.157.194.246/live/ramdisk/ztvi/HLS/ztvi.m3u8",
-        "name": "Alternativa",
+        "name": "Alternativa #2",
         "resolve": false
       }
     ],
