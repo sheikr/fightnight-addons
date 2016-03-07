@@ -7,8 +7,13 @@ from functions import *
 from variables import *
 
 def first_menu():
+        if setting('warning') == "true":
+                warning_dialog(title="CopiaPop.com",text="Os sites abelhas.pt, toutbox e lolabits vão encerrar dia 31 de Março.\n\nO addon foi migrado para o novo site do grupo Abelhas, o CopiaPop.com. O site é espanhol e é bastante semelhante ao abelhas.\n\nCom a alteração do site, o addon foi re-escrito e as restantes funcionalidades vão sendo adicionadas nos próximos dias.\n\nFaçam upload dos vossos conteúdos para este novo site (CopiaPop.com) para aceder via este addon.")
+                setSetting('warning',value="false")
+        
         myuser=setting('copiapop-username')
         addDirectoryItem("[COLOR red][B]Addon em actualização[/B][/COLOR]", 'user', 'movies.png', 'DefaultMovies.png')
+        addDirectoryItem("Colecções mais recentes", 'recents', 'movies.png', 'DefaultMovies.png')
         addDirectoryItem("Ir para um utilizador", 'user', 'movies.png', 'DefaultMovies.png')
         if myuser != "": addDirectoryItem("Ir para o meu utilizador (%s)" % myuser, 'user&query=%s' % myuser, 'movies.png', 'DefaultMovies.png')
         addDirectoryItem("Pesquisar", 'search', 'movies.png', 'DefaultMovies.png')

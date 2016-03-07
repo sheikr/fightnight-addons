@@ -22,6 +22,11 @@ elif action=='user':
     except: query=None
     main.go_to_user(query)
 
+elif action=='recents':
+    from resources.lib import main
+    from resources.lib.variables import *
+    main.open_folder(CopiaPopURL)
+
 elif action=='folder':
     from resources.lib import main
     main.open_folder(params['url'])

@@ -18,3 +18,12 @@ def endDirectory(cacheToDisc=True):
 
 def Debug(content):
         xbmc.log(str(content), level=xbmc.LOGNOTICE)
+
+def warning_dialog(title="CopiaPop.com",text=""):
+        try:
+                xbmc.executebuiltin("ActivateWindow(10147)")
+                window = xbmcgui.Window(10147)
+                xbmc.sleep(100)
+                window.getControl(1).setLabel(title)
+                window.getControl(5).setText(text)
+        except: pass
