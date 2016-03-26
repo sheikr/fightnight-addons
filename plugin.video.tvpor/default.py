@@ -3,12 +3,12 @@
 """ TV Portuguesa
     2014 fightnight"""
 
-import xbmc, xbmcgui, xbmcaddon, xbmcplugin,re,sys, urllib, urllib2,time,datetime,os,requests,json,htmlentitydefs
+import xbmc, xbmcgui, xbmcaddon, xbmcplugin,re,sys, urllib, urllib2,time,datetime,os,requests,json,htmlentitydefs,urlparse
 
 user_agent = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'
 tvporpath = xbmc.translatePath(xbmcaddon.Addon().getAddonInfo('path')).decode('utf-8')
 pastaperfil = xbmc.translatePath(xbmcaddon.Addon().getAddonInfo('profile')).decode('utf-8')
-order=['RTP1','RTP2','SIC','TVI','RTP3','SICN','TVI24','EURON','RTPACO','RTPAFR','RTPINT','RTPMAD','RTPMEM','ARTV','ETV','TPA','FASH','TRACE','DJING','VIRGIN']
+order=['RTP1','RTP2','SIC','TVI','RTP3','SICN','TVI24','EURON','RTPACO','RTPAFR','RTPINT','RTPMAD','RTPMEM','ARTV','CNOVA','ETV','TVL','TPA','TCV','FASH','TRACE','DJING','VIRGIN']
 RadiosURL = 'http://www.radios.pt/portalradio/'
 
 def canais():
@@ -35,14 +35,14 @@ def request_servidores(chid,auto=False):
                 if 'www.rtp.pt' in individual['url']:
                     import base64
                     conteudo=abrir_url(individual['url'])
-                    print conteudo
                     try:
                         pre=re.compile('.smil = .+?.(.+?);').findall(conteudo)[0].split('.')[1]
                         linksmil=re.compile('"%s":"(.+?)"' % pre).findall(conteudo)[0]
                         if not linksmil.startswith('http://'): linksmil=base64.b64decode(linksmil)
-                        titulos.append('%s (SMIL)' % (individual['name']))
-                        ligacao.append(linksmil + '|User-Agent=' + urllib.quote('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36'))
-                        resolve.append(False)
+                        if individual['visible']:
+                            titulos.append('%s (SMIL)' % (individual['name']))
+                            ligacao.append(linksmil + '|User-Agent=' + urllib.quote('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36'))
+                            resolve.append(False)
                     except: pass
                     
                     try:
@@ -50,9 +50,10 @@ def request_servidores(chid,auto=False):
                         link=re.compile('"%s":"(.+?)"' % (pre)).findall(conteudo)[0]
                         if link!=linksmil:
                             if not link.startswith('http://'): link=base64.b64decode(link)
-                            titulos.append('%s (M3U8)' % (individual['name']))
-                            ligacao.append(link + '|User-Agent=' + urllib.quote('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36'))
-                            resolve.append(False)
+                            if individual['visible']:
+                                titulos.append('%s (M3U8)' % (individual['name']))
+                                ligacao.append(link + '|User-Agent=' + urllib.quote('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36'))
+                                resolve.append(False)
                     except: pass
 
                     try:
@@ -61,9 +62,10 @@ def request_servidores(chid,auto=False):
                         app=re.compile('"application": "(.+?)"').findall(conteudo)[0]
                         filep=re.compile('"%s": "(.+?)"' % pre).findall(conteudo)[0]
                         link='rtmp://%s/%s playPath=%s swfUrl=http://programas.rtp.pt/play/player.swf?v3 swfVfy=1 live=1 pageUrl=%s' % (streamer,app,filep,individual['url'])
-                        titulos.append('%s (RTMP)' % (individual['name']))
-                        ligacao.append(link)
-                        resolve.append(False)
+                        if individual['visible']:
+                            titulos.append('%s (RTMP)' % (individual['name']))
+                            ligacao.append(link)
+                            resolve.append(False)
                     except: pass
 
                 elif 'videos.sapo.pt' in individual['url']:
@@ -77,34 +79,47 @@ def request_servidores(chid,auto=False):
                     if flag==True:
                         try:
                             link=re.compile('"hls":"(.+?)"').findall(conteudo.text)[0].replace('\\','')
-                            titulos.append('%s (M3U8)' % (individual['name']))
-                            ligacao.append(link)
-                            resolve.append(False)
+                            if individual['visible']:
+                                titulos.append('%s (M3U8)' % (individual['name']))
+                                ligacao.append(link)
+                                resolve.append(False)
                         except: pass
 
                         try:
                             link=re.compile('"rtmp":"(.+?)"').findall(conteudo.text)[0].replace('\\','')
-                            titulos.append('%s (RTMP)' % (individual['name']))
-                            ligacao.append('%s swfUrl=http://js.sapo.pt/Projects/Video/150129_PATCHED_R2/flash/videojs.swf swfVfy=1 live=1 pageUrl=%s' % (link,individual['url']))
-                            resolve.append(False)
+                            if individual['visible']:
+                                titulos.append('%s (RTMP)' % (individual['name']))
+                                ligacao.append('%s swfUrl=http://js.sapo.pt/Projects/Video/150129_PATCHED_R2/flash/videojs.swf swfVfy=1 live=1 pageUrl=%s' % (link,individual['url']))
+                                resolve.append(False)
                         except: pass
 
                         try:
                             link=re.compile('"rtsp":"(.+?)"').findall(conteudo.text)[0].replace('\\','')
-                            titulos.append('%s (RTSP)' % (individual['name']))
-                            ligacao.append(link)
-                            resolve.append(False)
+                            if individual['visible']:
+                                titulos.append('%s (RTSP)' % (individual['name']))
+                                ligacao.append(link)
+                                resolve.append(False)
                         except: pass
                 
-                else:    
-                    titulos.append(individual['name'])
-                    ligacao.append(individual['url'])
-                    resolve.append(individual['resolve'])
+                else:
+                    if individual['visible']:
+                        titulos.append(individual['name'])
+                        ligacao.append(individual['url'])
+                        resolve.append(individual['resolve'])
             if len(ligacao)==1: index=0
             else:
                 if auto==True or xbmcaddon.Addon().getSetting("automatico") == "true":
-                    from random import randint
-                    index =randint(0, len(ligacao)-1)
+                    j=-1
+                    ref=False
+                    for i in titulos:
+                        j=j+1
+                        if 'M3U8' in i:
+                            index=j
+                            ref=True
+                            break
+                    if ref==False:
+                        from random import randint
+                        index =randint(0, len(ligacao)-1)
                 else: index = xbmcgui.Dialog().select('Escolha o servidor', titulos)
 
             if index > -1:
@@ -118,7 +133,7 @@ def request_servidores(chid,auto=False):
     except Exception:
         xbmcgui.Dialog().ok("TV Portuguesa","Erro a obter servidores.")
         (etype, value, traceback) = sys.exc_info()
-        print "%s\n%s\n%s" % (etype,value,traceback)
+        Debug("%s\n%s\n%s" % (etype,value,traceback))
 
 
 def resolvers(p_end,chid=None,name=None):
@@ -133,7 +148,13 @@ def resolvers(p_end,chid=None,name=None):
             elif re.search('"type":"application/x-mpegURL","url"',conteudo.replace('\\','')):
 		temp=re.compile('"type":"application/x-mpegURL","url":"(.+?)"').findall(conteudo.replace('\\',''))[-1]
 		m3u8_url=redirect(temp)
-		    
+
+        elif 'cancaonova.pt' in p_end:
+            m3u8_url=re.compile('file: "(.+?)"').findall(conteudo)[0]
+
+	elif 'arfrontend' in p_end:
+            m3u8_url=re.compile('"channel_name":"ARTV_EMISSAO_FINAL".+?"ipad_url":"(.+?)"').findall(conteudo)[0]
+
         elif '<jwplayer:streamer>' in conteudo:
             rtmp=re.compile('<jwplayer:streamer>(.+?)</jwplayer:streamer>').findall(conteudo)[0]
             try: filelocation=re.compile('<media:content bitrate=".+?" url="(.+?)" width=".+?"').findall(conteudo)[0]
@@ -155,8 +176,8 @@ def resolvers(p_end,chid=None,name=None):
             
         elif 'surftotal' in conteudo:
             try:
-                try:m3u8_url=re.compile("""<source src="([^"]+?)" type='rtmp/mp4'>""").findall(conteudo)[0]
-                except:m3u8_url=re.compile('<source src="([^"]+?)" type="application/x-mpegURL">').findall(conteudo)[0]
+                try:m3u8_url=re.compile('<source src="([^"]+?)" type="application/x-mpegURL">').findall(conteudo)[0]
+                except:m3u8_url=re.compile("""<source src="([^"]+?)" type='rtmp/mp4'>""").findall(conteudo)[0]
             except:                
                 pass
 
@@ -176,12 +197,12 @@ def resolvers(p_end,chid=None,name=None):
             m3u8_url=re.compile('"hls":"(.+?)"').findall(streamlist)[0].replace('\\','')
 
         if m3u8_url: playvideo(m3u8_url,chid=chid,name=name)
-        else: print "Nada disponivel"
+        else: Debug("Nada disponivel")
 
     except Exception:
         xbmcgui.Dialog().ok("TV Portuguesa","Servidor não suportado.")
         (etype, value, traceback) = sys.exc_info()
-        print "%s\n%s\n%s" % (etype,value,traceback)
+        Debug("%s\n%s\n%s" % (etype,value,traceback))
 
 def radio_resolver(chid,nacional=True):
     stream_url=None
@@ -196,7 +217,6 @@ def radio_resolver(chid,nacional=True):
         try: player=re.compile('soundManager.createSound\({(.+?)autoLoad').findall(link)[0]
         except: player=False
         try:
-            print player
             endereco=re.compile('url: "(.+?)"').findall(player)[0].replace(';','')
             if re.search('serverURL',player):
                 rtmp=re.compile('serverURL: "(.+?)"').findall(player)[0]
@@ -221,7 +241,7 @@ def radio_resolver(chid,nacional=True):
         except: pass
         
     if stream_url: playmusic(stream_url,rname=rname,thumb=thumb)
-    else: print "Nada disponivel"
+    else: Debug("Nada disponivel")
         
 
 def playvideo(linkfinal,chid=None,name=None):
@@ -233,10 +253,10 @@ def playvideo(linkfinal,chid=None,name=None):
         if name==None: name='[B]%s[/B]' % (listacanais[chid]['name'])
         thumb=os.path.join(tvporpath,'resources','art',listacanais[chid]['thumb'])
 
-    listitem = xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=thumb)
+    listitem = xbmcgui.ListItem(iconImage="DefaultVideo.png", thumbnailImage=thumb)
     playlist = xbmc.PlayList(1)
     playlist.clear()
-    listitem.setInfo("Video", {"Title":name,"overlay":6,"playcount":0})
+    #listitem.setInfo("Video", {"Title":name,"overlay":6,"playcount":0})
     listitem.setProperty('IsPlayable', 'true')
     playlist.add(linkfinal, listitem)
     xbmcplugin.setResolvedUrl(int(sys.argv[1]),True,listitem)
@@ -263,17 +283,16 @@ def praias():
     beachcams=[]
     try:
         temp=clean(abrir_url(BeachcamURL + 'pt/livecams/'))
-        print temp
         beachcams=re.compile('<li>.+?<a href="/pt/livecams/(.+?)">(.+?)</a>').findall(temp)    
-    except: print "Nao foi possivel obter as BeachCams"
+    except: Debug("Nao foi possivel obter as BeachCams")
     try:
         temp=abrir_url(SurflineURL + '/surf-report/portugal_2946/map/')
         beachcams+=re.compile('\tbackground-image:url./surfdata/images/icon_hdcam_blue.gif.\n\t\t\t\t\n                ;background-repeat:no-repeat;background-position:bottom left"\n                href="(.+?)">(.+?)</a>').findall(temp)
-    except: print "Nao foi possivel obter as Surfline"
+    except: Debug("Nao foi possivel obter as Surfline")
     try:
         temp=re.compile('Report<b class="caret">(.+?)</li></ul></li>').findall(abrir_url(SurftotalURL))[0]
         beachcams+=re.compile('<a href="(.+?)" >(.+?)</a>').findall(temp)
-    except: print "Nao foi possivel obter as Surftotal"
+    except: Debug("Nao foi possivel obter as Surftotal")
     beachcams.sort(key=lambda t: t[1])
     import base64
     for end,nome in beachcams:
@@ -295,7 +314,7 @@ def p_todos():
     else:
         try:
             dia=horaportuguesa(True)
-            listacanais='RTP1,RTP2,SIC,TVI,RTP3,SICN,TVI24,FASH,RTPAC,RTPA,RTPM,RTPMD,ETVHD,TPA,ARTV,TRACE,EURN'
+            listacanais='RTP1,RTP2,SIC,TVI,RTP3,SICN,TVI24,FASH,RTPAC,RTPA,RTPM,RTPMD,ETVHD,TPA,ARTV,TRACE,EURN,CNOVA,TCV'
             url='http://services.sapo.pt/EPG/GetChannelListByDateInterval?channelSiglas='+listacanais+'&startDate=' + dia +':01&endDate='+ dia + ':02'
             link=clean(abrir_url(url,erro=False))
             
@@ -365,7 +384,7 @@ def listar_radios(name,url):
 
 def abrir_url(url,erro=True):
     try:
-        print "A fazer request normal de: " + url
+        Debug("A fazer request normal de: " + url)
         req = urllib2.Request(url)
         req.add_header('User-Agent', user_agent)
         response = urllib2.urlopen(req)
@@ -388,7 +407,7 @@ def openfile(filename,pastafinal=pastaperfil):
         fh.close()
         return contents
     except:
-        print "Nao abriu os temporarios de: %s" % filename
+        Debug("Nao abriu os temporarios de: %s" % filename)
         return None
 
 def clean(text):
@@ -448,8 +467,8 @@ def get_params():
     return param
 
 def vista_canais():
-    xbmcplugin.setContent(int(sys.argv[1]), 'livetv')
     if "confluence" in xbmc.getSkinDir():
+        xbmcplugin.setContent(int(sys.argv[1]), 'livetv')
         moviesview=xbmcaddon.Addon().getSetting('vistacanais')
         if moviesview == "0": xbmc.executebuiltin("Container.SetViewMode(500)")#miniatura
         if moviesview == "1": xbmc.executebuiltin("Container.SetViewMode(560)")#livetv
@@ -486,6 +505,9 @@ def addDir(name,url,mode,iconimage,total,descricao,pasta):
     liz.setProperty('fanart_image', "%s/fanart.jpg"%xbmcaddon.Addon().getAddonInfo("path"))
     return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=pasta,totalItems=total)
 
+def Debug(content):
+        xbmc.log(str(content), level=xbmc.LOGNOTICE)
+
 params=get_params()
 url=None
 thumb=None
@@ -502,9 +524,9 @@ try: mode=int(params["mode"])
 except: pass
 
 if '/play/' in sys.argv[0]:
-    try:status=sys.argv[0].split('&auto=')[1]
+    try:status=sys.argv[0].split('?auto=')[1]
     except: status='False'
-    if status=='True': request_servidores(sys.argv[0].split('/play/')[1].split('&auto=')[0],auto=True)
+    if status=='1': request_servidores(sys.argv[0].split('/play/')[1].split('?auto=')[0],auto=True)
     else: request_servidores(sys.argv[0].split('/play/')[1])
 
 elif '/external/' in sys.argv[0]:
@@ -518,7 +540,7 @@ elif '/radio/' in sys.argv[0]:
     else: radio_resolver(sys.argv[0].split('/local/')[1],nacional=False)
     
 elif mode==None:
-    print "Versao Instalada: v" + xbmcaddon.Addon().getAddonInfo('version')
+    Debug("Versao Instalada: v" + xbmcaddon.Addon().getAddonInfo('version'))
     canais()
 
 elif mode==1: menu_principal()

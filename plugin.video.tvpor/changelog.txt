@@ -1,3 +1,15 @@
+[B]v0.5.5 (26 de Marco de 2016):[/B]
+(apenas streams oficiais e legais)
+- Fix skin Estuary.
+- Novos canais oficiais (TV Lisboa, Cancao Nova, TCV).
+- Fix ARTV, TPA e Fashion TV.
+- Algumas melhorias internas.
+- Correccoes nos servidores.
+- Melhorias na escolha automatica de server (activar nas definicoes).
+- URL para uso em livestream passa a ser (ex:)
+ plugin://plugin.video.tvpor/play/RTP1
+ plugin://plugin.video.tvpor/play/RTP1?auto=1 (escolha automatica de server)
+
 [B]v0.5.4 (17 de Janeiro de 2016):[/B]
 - Varias correccoes nos servidores.
 
