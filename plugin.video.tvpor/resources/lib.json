@@ -54,7 +54,19 @@
     "streams": [
       {
         "url": "http://213.13.26.11:1935/live/sic/playlist.m3u8",
-        "name": "SIC Oficial",
+        "name": "SIC Oficial (M3U8)",
+        "resolve": false,
+		"visible": true
+      },
+	  {
+        "url": "rtmp://213.13.26.11:1935/live/sic swfUrl=http://js.sapo.pt/Projects/Video/150129_PATCHED_R2/flash/videojs.swf swfVfy=1 live=1 pageUrl=http://videos.sapo.pt/syqqba8JjeKyS8WFMA1H",
+        "name": "SIC Oficial (RTMP)",
+        "resolve": false,
+		"visible": true
+      },
+	  {
+        "url": "http://213.13.26.11:1935/live/sic/playlist.m3u8",
+        "name": "SIC Oficial (RTSP)",
         "resolve": false,
 		"visible": true
       },
@@ -79,7 +91,7 @@
     "streams": [
       {
         "url": "http://tviplayer.iol.pt/direto/TVI",
-        "name": "TVI Oficial",
+        "name": "TVI Oficial (M3U8)",
         "resolve": true,
 		"visible": true
       },
@@ -255,7 +267,7 @@
     "thumb": "temp2_cancaonova.png"
   },
   "TVL": {
-    "epg": "TVL",
+    "epg": null,
     "streams": [
       {
         "url": "http://videos.sapo.pt/y7CW0D0aVqUNyVjIAfpd",
@@ -306,8 +318,8 @@
     "name": "TCV Internacional",
     "thumb": "temp2_tcv.png"
   },
-  "FASH": {
-    "epg": "FASH",
+  "FTV": {
+    "epg": "FTV",
     "streams": [
       {
         "url": "http://www.dailymotion.com/embed/video/x3m6nld",
@@ -317,7 +329,7 @@
       }
     ],
     "name": "Fashion TV",
-    "thumb": "thumb_fash.png"
+    "thumb": "thumb_ftv.png"
   },
   "TRACE": {
     "epg": "TRACE",

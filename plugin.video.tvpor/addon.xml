@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon id="plugin.video.tvpor"
        name="TV Portuguesa"
-       version="0.5.5"
+       version="0.5.6"
        provider-name="fightnight">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>

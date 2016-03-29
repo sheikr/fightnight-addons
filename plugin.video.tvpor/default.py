@@ -8,7 +8,7 @@ import xbmc, xbmcgui, xbmcaddon, xbmcplugin,re,sys, urllib, urllib2,time,datetim
 user_agent = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'
 tvporpath = xbmc.translatePath(xbmcaddon.Addon().getAddonInfo('path')).decode('utf-8')
 pastaperfil = xbmc.translatePath(xbmcaddon.Addon().getAddonInfo('profile')).decode('utf-8')
-order=['RTP1','RTP2','SIC','TVI','RTP3','SICN','TVI24','EURON','RTPACO','RTPAFR','RTPINT','RTPMAD','RTPMEM','ARTV','CNOVA','ETV','TVL','TPA','TCV','FASH','TRACE','DJING','VIRGIN']
+order=['RTP1','RTP2','SIC','TVI','RTP3','SICN','TVI24','EURON','RTPACO','RTPAFR','RTPINT','RTPMAD','RTPMEM','ARTV','CNOVA','ETV','TVL','TPA','TCV','FTV','TRACE','DJING','VIRGIN']
 RadiosURL = 'http://www.radios.pt/portalradio/'
 
 def canais():
@@ -68,7 +68,7 @@ def request_servidores(chid,auto=False):
                             resolve.append(False)
                     except: pass
 
-                elif 'videos.sapo.pt' in individual['url']:
+                elif 'videos.sapo.pt' in individual['url'] and not ('pageUrl=' in individual['url']):
                     conteudo=requests.get('%s/mov/24?all=1' % (individual['url']), headers=headers)
                     flag=False
                     if conteudo.status_code == 200: flag=True
@@ -314,7 +314,7 @@ def p_todos():
     else:
         try:
             dia=horaportuguesa(True)
-            listacanais='RTP1,RTP2,SIC,TVI,RTP3,SICN,TVI24,FASH,RTPAC,RTPA,RTPM,RTPMD,ETVHD,TPA,ARTV,TRACE,EURN,CNOVA,TCV'
+            listacanais='RTP1,RTP2,SIC,TVI,RTP3,SICN,TVI24,FTV,RTPAC,RTPA,RTPM,RTPMD,ETVHD,TPA,ARTV,TRACE,EURN,CNOVA,TCV'
             url='http://services.sapo.pt/EPG/GetChannelListByDateInterval?channelSiglas='+listacanais+'&startDate=' + dia +':01&endDate='+ dia + ':02'
             link=clean(abrir_url(url,erro=False))
             
