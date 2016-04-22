@@ -1,3 +1,9 @@
+[B]v2.0.2 (22 de Abril de 2016):[/B]
+- Novo logo (tks sheikr)
+- Pastas adicionadas.
+- Legendas disponiveis caso tenham o mesmo nome que o filme (reportar caso nao esteja a funcionar).
+- Outras correccoes de codigo.
+
 [B]v2.0.1 (7 de Marco de 2016):[/B]
 - Adicionado aviso.
 - Coleccoes mais recentes.

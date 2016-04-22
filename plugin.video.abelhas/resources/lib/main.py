@@ -19,15 +19,26 @@ def first_menu():
         addDirectoryItem("Pesquisar", 'search', 'movies.png', 'DefaultMovies.png')
         endDirectory()
 
-def open_folder(url):
+def open_folder(url,page="1"):
+        formating=''
         headers={'Accept':'*/*','Accept-Encoding':'gzip,deflate','Connection':'keep-alive','X-Requested-With':'XMLHttpRequest'}
-        if len(url.split('/')) > 4: url = url + '/list,1,1'
-        result = requester.request(url,headers=urllib.urlencode(headers))
+        if len(url.split('/')) > 4:
+                final_url = url + '/list,1,%s?ref=pager' % page
+        else: final_url = url
+        result = requester.request(final_url,headers=urllib.urlencode(headers))
         
         if checkvalid(result):
-                list=list_folders(url,result=result)
-                list.extend(list_items(url,result=result))
+                list=list_folders(final_url,result=result)
+                list.extend(list_items(final_url,result=result))
                 show_items(list)
+                page_check(result=result, baseurl=url)
+                endDirectory()
+
+def page_check(result,baseurl):
+        if 'data-nextpage-number=' in result:
+                page=re.compile('data-nextpage-number="(.+?)"').findall(result)[0]
+                addDirectoryItem('Página %s >>' % (page), 'folder&url=%s&page=%s' % (urllib.quote_plus(baseurl),page), '', '')
+                #endDirectory()
 
 def go_to_user(query=None):
         if query == None:
@@ -56,6 +67,7 @@ def search(query=None):
 
                 window.setProperty('%s.search' % addonInfo('id'), query)
                 show_items(list_items('%s%s' % (CopiaPopURL, SearchParam),query=query,content_type=params[index]))
+                endDirectory()
 
 def list_folders(url,query=None,result=None):
         try:
@@ -98,11 +110,8 @@ def list_items(url,query=None,result=None,content_type=None):
                 name = requester.replaceHTMLCodes(requester.parseDOM(requester.parseDOM(indiv, 'div', attrs = {'class': 'name'}), 'a')[0].encode('utf-8'))
                 size = requester.parseDOM(requester.parseDOM(indiv, 'div', attrs = {'class': 'size'}), 'p')[0].encode('utf-8')
                 pageurl = CopiaPopURL + requester.parseDOM(requester.parseDOM(indiv, 'div', attrs = {'class': 'name'}), 'a', ret = 'href')[0]
-
                 temp = requester.parseDOM(requester.parseDOM(indiv, 'div', attrs = {'class': 'date'})[0], 'div')[0]
-                
                 fileid = requester.parseDOM(temp, 'input', ret='value', attrs = {'name': 'fileId'})[0]
-                
                 list.append({'type':'content','name': name, 'size': size, 'fileid':fileid, 'thumb':thumb, 'pageurl':pageurl})
         return list
 
@@ -119,13 +128,13 @@ def show_items(list):
 
                         item_ind.setProperty('Fanart_Image', items['thumb'])
                         item_ind.setProperty('Video', 'true')
-                        #item_ind.setProperty('IsPlayable', 'true')
+                        item_ind.setProperty('IsPlayable', 'true')
                         item_ind.addContextMenuItems(cm, replaceItems=True)
                         addItem(handle=int(sys.argv[1]), url=url, listitem=item_ind, isFolder=False)
                 elif items['type']=='folder':
                         url = 'folder&url=%s' % (urllib.quote_plus(items['pageurl']))
                         addDirectoryItem('[B]%s[/B] (%s ficheiros)' % (items['name'],items['length']), url, items['thumb'], items['thumb'])
-        endDirectory()
+        #endDirectory()
 
 def checkvalid(content):
         try:
@@ -145,19 +154,45 @@ def resolve_url(url,play=False):
         post={'fileId':fileid,'__RequestVerificationToken':token}
         result = json.loads(requester.request(formurl,post=urllib.urlencode(post),headers=urllib.urlencode(headers)))
         if result['DownloadUrl'].startswith('http'):
-                if play==True: play_url(result['DownloadUrl'],name)
+                if play==True: play_url(result['DownloadUrl'],name,original_url=url,original_filename=name)
                 else: return result['DownloadUrl']
+
+def check_subtitle(original_url,original_name):
+        subtitle_url=None
+        try:
+                base_url = '/'.join(original_url.split('/')[:-1])
+                page=original_url.split('/')[-1].split(',')[4].split('.')[0]
+                for content in list_items(base_url + '/list,1,%s?ref=pager' % page):
+                        if content['name'].encode('utf-8') == '%s.srt' % (original_name):
+                                subtitle_url=resolve_url(content['pageurl'])
+                                break
+                if subtitle_url == None:
+                        for content in list_items(base_url + '/list,1,%s?ref=pager' % str(int(page+1))):
+                                if content['name'].encode('utf-8') == '%s.srt' % (original_name):
+                                        subtitle_url=resolve_url(content['pageurl'])
+                                        break
+        except Exception:
+                (etype, value, traceback) = sys.exc_info()
+                Debug("%s\n%s\n%s" % (etype,value,traceback))
+        return subtitle_url
                         
-def play_url(url,name='CopiaPop File',thumb=None):
+def play_url(url,name='CopiaPop File',thumb=None,original_url='http://www.example.com/foobar.mp4',original_filename='foobar.mp4'):
         if not addonInfo('id').lower() == infoLabel('Container.PluginName').lower():
                 progress = True if setting('progress.dialog') == '1' else False
         else:
                 resolve(int(sys.argv[1]), True, item(path=''))
                 execute('Dialog.Close(okdialog)')
                 progress = True
+        
         item_ind = item(label=name,path=url, iconImage='DefaultVideo.png', thumbnailImage=thumb)
         item_ind.setInfo(type='Video', infoLabels = {})
         item_ind.setProperty('Video', 'true')
         item_ind.setProperty('IsPlayable', 'true')
+                        
         player.play(url, item_ind)
         resolve(int(sys.argv[1]), True, item_ind)
+
+        if setting('file-subtitles') == 'true':
+                result=check_subtitle(original_url,original_filename)
+                if result!=None:
+                        player.setSubtitles(result)

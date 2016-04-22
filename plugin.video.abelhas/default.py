@@ -29,7 +29,9 @@ elif action=='recents':
 
 elif action=='folder':
     from resources.lib import main
-    main.open_folder(params['url'])
+    try: page=params['page']
+    except: page="1"
+    main.open_folder(params['url'],page=page)
 
 elif action=='play':
     from resources.lib import main
