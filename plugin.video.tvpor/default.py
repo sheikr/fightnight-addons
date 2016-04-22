@@ -271,7 +271,7 @@ def playmusic(linkfinal,rname=None,thumb=None):
     listitem.setProperty('IsPlayable', 'true')
     playlist = xbmc.PlayList(1)
     playlist.clear()
-    playlist.add(linkfinal, listitem)
+    playlist.add(linkfinal.replace('_SC','AAC_SC'), listitem)
     xbmcplugin.setResolvedUrl(int(sys.argv[1]),True,listitem)
     if int(sys.argv[1]) < 0:
         xbmc.Player().play(playlist,listitem)

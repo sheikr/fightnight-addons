@@ -1,3 +1,10 @@
+[B]v0.5.7 (22 de Abril de 2016):[/B]
+- Vertentes internacionais para SIC e SIC Noticias.
+- Novos links TPA.
+- Trace alterado para emissao internacional (portuguesa).
+- Qualidade maxima para algumas radios.
+- Outras correccoes.
+
 [B]v0.5.6 (29 de Marco de 2016):[/B]
 - Fix EPG Fashion TV.
 - Alternativas SIC.
