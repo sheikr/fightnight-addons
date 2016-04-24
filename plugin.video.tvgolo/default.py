@@ -4,7 +4,7 @@
     2015 fightnight
 """
 
-import xbmc, xbmcgui, xbmcaddon, xbmcplugin,os,re,sys, urllib, urllib2,htmlentitydefs
+import xbmc, xbmcgui, xbmcaddon, xbmcplugin,os,re,sys, urllib, urllib2,htmlentitydefs,requests
 
 user_agent = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.71 Safari/537.36'
 art=os.path.join(xbmcaddon.Addon().getAddonInfo('path'),'resources','art')
@@ -25,7 +25,7 @@ def ligaportuguesa(url):
       for endereco,data,hora1,hora2,equipa1,resultado1,resultado2,equipa2 in conteudos:
             if len(resultado1)==0 : resultado1=str('#')
             if len(resultado2)==0 : resultado2=str('#')
-            addDir('[COLOR orange]%s[/COLOR] [COLOR darkorange](%sh%s)[/COLOR][COLOR blue] - [/COLOR][COLOR white]%s[/COLOR] [COLOR yellow]%s - %s[/COLOR] [COLOR white]%s[/COLOR]' % (data,hora1,hora2,equipa1,resultado1,resultado2,equipa2),'http://www.goalsoftheworld.tk/getcontent.php?rand=%s&id_results=%s' % (str(randint(1, 100)),endereco),1,os.path.join(art,'pt.png'),len(conteudos),pasta=False)
+            addDir('[COLOR orange]%s[/COLOR] [COLOR darkorange](%sh%s)[/COLOR][COLOR blue] - [/COLOR][COLOR white]%s[/COLOR] [COLOR yellow]%s - %s[/COLOR] [COLOR white]%s[/COLOR]' % (data,hora1,hora2,equipa1.encode('ascii','ignore'),resultado1,resultado2,equipa2.encode('ascii','ignore')),'http://www.goalsoftheworld.tk/getcontent.php?rand=%s&id_results=%s' % (str(randint(1, 100)),endereco),1,os.path.join(art,'pt.png'),len(conteudos),pasta=False)
       if "confluence" in xbmc.getSkinDir(): xbmc.executebuiltin("Container.SetViewMode(51)")
 
 def listadeligas(url):
@@ -334,7 +334,7 @@ def comecarvideo(titulo,url):
       listitem.setProperty('IsPlayable', 'true')
       playlist.add(url, listitem)
       xbmcplugin.setResolvedUrl(int(sys.argv[1]),True,listitem)
-      xbmcPlayer = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
+      xbmcPlayer = xbmc.Player()
       xbmcPlayer.play(playlist)
 
 def addDir(name,url,mode,iconimage,total,pasta=True):
@@ -357,11 +357,7 @@ def pesquisa():
       else: sys.exit(0)
                         
 def abrir_url(url):
-      req = urllib2.Request(url)
-      req.add_header('User-Agent', user_agent)
-      response = urllib2.urlopen(req)
-      link=response.read()
-      response.close()
+      link=requests.get(url, headers={'User-Agent':user_agent},verify=False).text
       return link
 
 def redirect(url):
